@@ -1,0 +1,25 @@
+<!-- Regisztráció oldal: új user létrehozás vagy bejelentkezett állapot. -->
+<div class="login-container">
+  <ng-container *ngIf="auth.user$ | async as user; else registerForm">
+    <h2>Bejelentkezve</h2>
+    <p class="status-text">Aktuális felhasználó: <strong>{{ user.email }}</strong></p>
+    <button (click)="logout()">Kijelentkezés</button>
+  </ng-container>
+
+  <ng-template #registerForm>
+    <h2>Regisztráció</h2>
+
+    <input type="email" placeholder="Email" [(ngModel)]="email">
+    <input type="password" placeholder="Jelszó" [(ngModel)]="password">
+    <input type="password" placeholder="Jelszó újra" [(ngModel)]="confirmPassword">
+
+    <button (click)="submit()" [disabled]="loading">
+      {{ loading ? 'Folyamatban...' : 'Regisztráció' }}
+    </button>
+
+    <a class="toggle-text register-link" routerLink="/login">Van fiókod? Jelentkezz be</a>
+  </ng-template>
+
+  <p class="success-message" *ngIf="successMessage">{{ successMessage }}</p>
+  <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+</div>

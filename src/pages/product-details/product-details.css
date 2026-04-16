@@ -1,0 +1,131 @@
+/* Termek adatlap oldal layout. */
+.product-details-page {
+  display: grid;
+  gap: 14px;
+}
+
+.back-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.loading-card,
+.error-card {
+  padding: 18px;
+}
+
+.error-card {
+  color: #c0392b;
+}
+
+/* Galeria + tartalom ket oszlopban. */
+.details-shell {
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 24px;
+}
+
+.gallery {
+  display: grid;
+  gap: 12px;
+}
+
+.main-image {
+  width: 100%;
+  border-radius: 16px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.thumb-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.thumb-btn {
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+}
+
+.thumb-btn.active {
+  border-color: var(--primary);
+}
+
+.thumb-btn img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+}
+
+.content {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.content h1,
+.content p {
+  margin: 0;
+}
+
+.category {
+  color: var(--secondary);
+  font-weight: 700;
+}
+
+.price {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.desc {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.stock-note {
+  margin: 0;
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.content .btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.spec-item {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--background-soft);
+  display: grid;
+  gap: 5px;
+}
+
+.spec-item span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 920px) {
+  .details-shell {
+    grid-template-columns: 1fr;
+  }
+}

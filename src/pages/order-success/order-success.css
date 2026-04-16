@@ -1,0 +1,183 @@
+/* Sikeres rendeles oldal alap stilus. */
+.order-success-page {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* Felső visszaigazoló blokk. */
+.success-card {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.success-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.success-header h1 {
+  margin: 0.85rem 0 0.5rem;
+}
+
+.success-header p {
+  margin: 0;
+  opacity: 0.82;
+}
+
+.success-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(31, 111, 60, 0.14);
+  color: var(--accent-green);
+  font-weight: 700;
+}
+
+.success-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.meta-box,
+.customer-summary,
+.fallback-box {
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: var(--surface-color);
+}
+
+.meta-box {
+  padding: 1rem 1.2rem;
+}
+
+.meta-box span {
+  display: block;
+  margin-bottom: 0.35rem;
+  opacity: 0.75;
+}
+
+.customer-summary {
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.customer-summary h2,
+.items-summary h2,
+.email-preview h2 {
+  margin-top: 0;
+}
+
+.items-summary {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+}
+
+.item-row img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 14px;
+  background: var(--panel-soft);
+}
+
+.item-content h3 {
+  margin: 0 0 0.35rem;
+}
+
+.item-content p {
+  margin: 0;
+  opacity: 0.78;
+}
+
+.fallback-box {
+  padding: 1rem 1.2rem;
+}
+
+.error-line {
+  margin-top: 0;
+  color: #c0392b;
+}
+
+.email-preview {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: var(--surface-color);
+}
+
+.email-preview-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.email-preview-head p {
+  margin: 0.35rem 0 0;
+  opacity: 0.78;
+}
+
+.email-preview-box {
+  padding: 1rem;
+  border-radius: 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border-color);
+}
+
+.email-preview-box p {
+  margin-top: 0;
+}
+
+.email-preview-box pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  line-height: 1.55;
+}
+
+.success-actions {
+  display: flex;
+  gap: 0.85rem;
+  justify-content: center;
+  margin-top: 1.75rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .success-card {
+    padding: 1.2rem;
+  }
+
+  .success-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .item-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .email-preview-head {
+    flex-direction: column;
+  }
+
+  .item-row img {
+    margin: 0 auto;
+  }
+}

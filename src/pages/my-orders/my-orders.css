@@ -1,0 +1,175 @@
+/* Saját rendelések oldal alap layout. */
+.my-orders-page {
+  display: grid;
+  gap: 18px;
+}
+
+.page-header {
+  padding: 20px;
+}
+
+.page-header h1,
+.page-header p {
+  margin: 0;
+}
+
+.page-header p {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.empty-state {
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.error-state {
+  color: #c0392b;
+}
+
+/* Rendeléskártyák rácsa és státusz badge-ek. */
+.orders-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.order-card {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.order-card p {
+  margin: 0;
+}
+
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-new {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0ea5e9;
+}
+
+.status-progress {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.status-done {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.status-cancel {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.details-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: rgba(15, 23, 20, 0.62);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.details-modal {
+  position: relative;
+  width: min(600px, 100%);
+  padding: 22px;
+  display: grid;
+  gap: 10px;
+}
+
+.details-modal h3,
+.details-modal h4,
+.details-modal p {
+  margin: 0;
+}
+
+.items-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--background-soft);
+  border: 1px solid var(--border);
+}
+
+.order-timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.timeline-step {
+  text-align: center;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--background-soft);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.timeline-step.done {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #16a34a;
+}
+
+.order-timeline.cancelled .timeline-step {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.22);
+  color: #b91c1c;
+}
+
+.timeline-cancelled {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.modal-timeline {
+  margin-top: 4px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 800;
+}

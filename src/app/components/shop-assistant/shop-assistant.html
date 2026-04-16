@@ -1,0 +1,61 @@
+<button class="assistant-fab" type="button" (click)="toggle()" aria-label="Vásárlói asszisztens">
+  AI Segítő
+</button>
+
+<div class="assistant-backdrop" *ngIf="open" (click)="close()"></div>
+
+<section class="assistant-panel" *ngIf="open">
+  <header class="assistant-header">
+    <h3>Vásárlói asszisztens</h3>
+    <div class="header-actions">
+      <button type="button" class="close-btn settings-btn" (click)="settingsOpen = !settingsOpen">AI</button>
+      <button type="button" class="close-btn" (click)="close()">X</button>
+    </div>
+  </header>
+
+  <p class="assistant-subtitle">Írd le röviden az igényed, és ajánlok hozzá terméket.</p>
+
+  <section class="settings-panel" *ngIf="settingsOpen">
+    <label>AI modell</label>
+    <input type="text" [(ngModel)]="llmModel" placeholder="gpt-4.1-mini">
+
+    <button type="button" class="save-settings-btn" (click)="saveLlmSettings()">AI beállítás mentése</button>
+    <small>A kapcsolat szerver oldali proxyval fut, kulcs nem kerül a böngészőbe.</small>
+  </section>
+
+  <div class="quick-row">
+    <button type="button" class="quick-btn" *ngFor="let question of quickQuestions" (click)="useQuickQuestion(question)">
+      {{ question }}
+    </button>
+  </div>
+
+  <div class="messages">
+    <article *ngFor="let message of messages" class="message" [class.user]="message.role === 'user'">
+      <p>{{ message.text }}</p>
+
+      <div class="recommended-products" *ngIf="message.products && message.products.length > 0">
+        <button
+          type="button"
+          class="product-pill"
+          *ngFor="let product of message.products"
+          (click)="openProduct(product)"
+        >
+          <span>{{ product.name }}</span>
+          <strong>{{ product.price }} Ft</strong>
+        </button>
+      </div>
+    </article>
+  </div>
+
+  <footer class="assistant-input-row">
+    <input
+      type="text"
+      [(ngModel)]="userInput"
+      placeholder="pl. vízszerelés 10000 Ft alatt"
+      (keyup.enter)="send()"
+    />
+    <button type="button" class="send-btn" [disabled]="sending" (click)="send()">
+      {{ sending ? '...' : 'Küldés' }}
+    </button>
+  </footer>
+</section>

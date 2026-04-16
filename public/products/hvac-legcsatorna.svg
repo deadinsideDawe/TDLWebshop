@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1323"/>
+      <stop offset="100%" stop-color="#0f1d36"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e5e7eb"/>
+      <stop offset="100%" stop-color="#9ca3af"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg3)"/>
+  <circle cx="190" cy="160" r="180" fill="#9be000" opacity="0.16"/>
+  <circle cx="1000" cy="620" r="230" fill="#38bdf8" opacity="0.14"/>
+  <rect x="170" y="210" width="860" height="380" rx="36" fill="#111827" stroke="#334155" stroke-width="8"/>
+  <rect x="260" y="320" width="580" height="160" rx="30" fill="url(#steel)"/>
+  <circle cx="890" cy="400" r="86" fill="#1f2937" stroke="#94a3b8" stroke-width="10"/>
+  <circle cx="890" cy="400" r="42" fill="#38bdf8"/>
+  <text x="600" y="700" text-anchor="middle" fill="#f8fafc" font-family="Arial, sans-serif" font-size="64" font-weight="700">HVAC legcsatorna idom</text>
+</svg>

@@ -1,0 +1,309 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function adminEmailList() {
+      return [
+        'admin@tdlwebshop.hu',
+        'teszt@tdlwebshop.hu'
+      ];
+    }
+
+    function isAdminEmail(email) {
+      return email is string && email in adminEmailList();
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && (
+          (
+            request.auth.token.email != null
+            && request.auth.token.email in adminEmailList()
+          )
+          || (
+            exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+          )
+        );
+    }
+
+    function validProductPayload() {
+      return request.resource.data.keys().hasAll([
+        'name',
+        'price',
+        'category',
+        'image',
+        'stock',
+        'stockQuantity',
+        'createdAt'
+      ])
+      && request.resource.data.name is string
+      && request.resource.data.category is string
+      && request.resource.data.image is string
+      && request.resource.data.stock is string
+      && request.resource.data.price is number
+      && request.resource.data.stockQuantity is number
+      && request.resource.data.createdAt is number;
+    }
+
+    function validOrderPayload() {
+      return request.resource.data.keys().hasAll([
+        'customerName',
+        'customerEmail',
+        'customerPhone',
+        'shipping',
+        'billing',
+        'items',
+        'total',
+        'status',
+        'couponCode',
+        'comment',
+        'createdAt'
+      ])
+      && request.resource.data.customerName is string
+      && request.resource.data.customerEmail is string
+      && request.resource.data.customerPhone is string
+      && request.resource.data.shipping is map
+      && request.resource.data.billing is map
+      && request.resource.data.items is list
+      && request.resource.data.items.size() > 0
+      && request.resource.data.total is number
+      && request.resource.data.status is string
+      && request.resource.data.couponCode is string
+      && request.resource.data.comment is string
+      && request.resource.data.createdAt is number;
+    }
+
+    function validOrderStatus(status) {
+      return status in ['uj', 'feldolgozas alatt', 'teljesitve', 'lemondva'];
+    }
+
+    function validNewsPayload() {
+      return request.resource.data.keys().hasAll([
+        'title',
+        'content',
+        'label',
+        'targetType',
+        'targetValue',
+        'isActive',
+        'createdAt',
+        'updatedAt'
+      ])
+      && request.resource.data.title is string
+      && request.resource.data.content is string
+      && request.resource.data.label is string
+      && request.resource.data.targetType is string
+      && request.resource.data.targetValue is string
+      && request.resource.data.isActive is bool
+      && request.resource.data.createdAt is number
+      && request.resource.data.updatedAt is number;
+    }
+
+    function validOrderStatusAuditPayload() {
+      return request.resource.data.keys().hasAll([
+        'orderId',
+        'fromStatus',
+        'toStatus',
+        'changedAt',
+        'changedByUid',
+        'changedByEmail',
+        'note',
+        'source'
+      ])
+      && request.resource.data.orderId is string
+      && request.resource.data.fromStatus is string
+      && request.resource.data.toStatus is string
+      && request.resource.data.changedAt is number
+      && request.resource.data.changedByUid is string
+      && request.resource.data.changedByEmail is string
+      && request.resource.data.note is string
+      && request.resource.data.source is string
+      && validOrderStatus(request.resource.data.fromStatus)
+      && validOrderStatus(request.resource.data.toStatus);
+    }
+
+    function validClientLogPayload() {
+      return request.resource.data.keys().hasAll([
+        'event',
+        'message',
+        'context',
+        'createdAt',
+        'userId',
+        'userEmail',
+        'source'
+      ])
+      && request.resource.data.event is string
+      && request.resource.data.message is string
+      && request.resource.data.context is map
+      && request.resource.data.createdAt is number
+      && request.resource.data.userId is string
+      && request.resource.data.userEmail is string
+      && request.resource.data.source is string;
+    }
+
+    function validOrderCreate() {
+      return validOrderPayload()
+      && validOrderStatus(request.resource.data.status)
+      && request.resource.data.total >= 0
+      && (
+        isAdmin()
+        || (
+          request.resource.data.status == 'uj'
+          && request.resource.data.salesChannel == 'web'
+          && (
+            !('userId' in request.resource.data)
+            || (
+              isSignedIn()
+              && request.resource.data.userId == request.auth.uid
+            )
+          )
+        )
+      );
+    }
+
+    function isOrderOwner() {
+      return isSignedIn()
+      && resource.data.userId is string
+      && resource.data.userId == request.auth.uid;
+    }
+
+    function validMailPayload() {
+      return request.resource.data.keys().hasAll(['to', 'message', 'createdAt', 'source'])
+      && request.resource.data.to is list
+      && request.resource.data.to.size() > 0
+      && request.resource.data.message is map
+      && request.resource.data.message.subject is string
+      && request.resource.data.message.text is string
+      && request.resource.data.message.html is string
+      && request.resource.data.createdAt is number
+      && request.resource.data.source is string;
+    }
+
+    function validUserCreate(userId) {
+      return isSignedIn()
+      && request.auth.uid == userId
+      && request.resource.data.keys().hasAll([
+        'email',
+        'role',
+        'disabled',
+        'createdAt',
+        'lastLoginAt'
+      ])
+      && request.resource.data.email is string
+      && request.resource.data.role is string
+      && request.resource.data.disabled is bool
+      && request.resource.data.createdAt is number
+      && request.resource.data.lastLoginAt is number
+      && request.resource.data.disabled == false
+      && request.resource.data.role == (
+        isAdminEmail(request.resource.data.email) ? 'admin' : 'customer'
+      );
+    }
+
+    function validSelfUserUpdate(userId) {
+      return isSignedIn()
+      && request.auth.uid == userId
+      && request.resource.data.role == resource.data.role
+      && request.resource.data.disabled == resource.data.disabled
+      && request.resource.data.email is string
+      && (
+        request.resource.data.email == resource.data.email
+        || request.resource.data.email == request.auth.token.email
+      );
+    }
+
+    function validCustomerProfilePayload() {
+      return request.resource.data.keys().hasAll([
+        'type',
+        'name',
+        'email',
+        'phone',
+        'createdAt',
+        'lastUsedAt'
+      ])
+      && request.resource.data.type is string
+      && request.resource.data.name is string
+      && request.resource.data.email is string
+      && request.resource.data.phone is string
+      && request.resource.data.createdAt is number
+      && request.resource.data.lastUsedAt is number
+      && (!('companyName' in request.resource.data) || request.resource.data.companyName is string)
+      && (!('taxNumber' in request.resource.data) || request.resource.data.taxNumber is string)
+      && (!('source' in request.resource.data) || request.resource.data.source is string)
+      && (!('isGuest' in request.resource.data) || request.resource.data.isGuest is bool);
+    }
+
+    function isGuestProfileWrite(profileId) {
+      return !isSignedIn()
+      && profileId.matches('^guest_[a-z0-9._-]{3,80}$')
+      && validCustomerProfilePayload()
+      && request.resource.data.isGuest == true
+      && request.resource.data.source == 'web-guest';
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validProductPayload();
+      allow delete: if isAdmin();
+    }
+
+    match /news/{newsId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validNewsPayload();
+      allow delete: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow create: if validOrderCreate();
+      allow read: if isAdmin() || isOrderOwner();
+      allow update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow create: if validUserCreate(userId);
+      allow update: if isAdmin() || validSelfUserUpdate(userId);
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow delete: if isAdmin();
+    }
+
+    match /customerProfiles/{profileId} {
+      allow read, delete: if isAdmin();
+      allow create, update: if (
+        isAdmin()
+        || (
+          isSignedIn()
+          && request.auth.uid == profileId
+          && request.auth.token.email != null
+          && request.resource.data.email == request.auth.token.email
+          && validCustomerProfilePayload()
+        )
+        || isGuestProfileWrite(profileId)
+      );
+    }
+
+    match /mail/{mailId} {
+      allow create: if isSignedIn() && validMailPayload();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /invoiceCounters/{counterId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /orderStatusAudit/{auditId} {
+      allow create: if isAdmin() && validOrderStatusAuditPayload();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /clientLogs/{logId} {
+      allow create: if isSignedIn() && validClientLogPayload();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}

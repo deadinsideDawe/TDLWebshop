@@ -1,0 +1,32 @@
+flowchart TD
+  %% VÁSÁRLÓI FLOW
+  S01["▶ S01 - Főoldal"] -->|"Fejléc keresés vagy Termékek"| S02["S02 - Terméklista"]
+  S01 -->|"Kategória kártya"| S02
+  S01 -->|"Akció / TOP / Újdonság blokk"| S02
+  S01 -->|"Belépés"| S08["🔒 S08 - Login"]
+  S01 -->|"Regisztráció"| S09["🔒 S09 - Register"]
+  S01 -->|"Kosár"| S05["S05 - Kosár"]
+  S01 -->|"Profilom"| S10["🔒 S10 - Profilom + rendeléseim"]
+
+  S02 -->|"Részletek"| S03["S03 - Termék részletek"]
+  S02 -->|"Kosárba"| S16["♦ S16 - Kosárba visszajelző modál"]
+  S03 -->|"Kosárba"| S16
+  S16 -->|"Vásárlás folytatása"| S02
+  S16 -->|"Ugrás a kosárra"| S05
+
+  S05 -->|"Rendelés véglegesítése"| S06["🔒 S06 - Checkout"]
+  S06 -->|"Sikeres rendelés"| S07["S07 - Rendelés sikeres"]
+  S07 -->|"Vissza a főoldalra"| S01
+  S08 -->|"Sikeres login"| S01
+  S09 -->|"Sikeres regisztráció"| S01
+
+  %% ADMIN FLOW
+  S08 -->|"Admin jogosultság"| S11["🔒 S11 - Admin áttekintés"]
+  S11 -->|"Termékek fül"| S12["🔒 S12 - Admin termékkezelés"]
+  S11 -->|"Készlet fül"| S13["🔒 S13 - Admin készletkezelés"]
+  S11 -->|"Rendelések fül"| S14["🔒 S14 - Admin rendeléskezelés"]
+  S11 -->|"Felhasználók fül"| S15["🔒 S15 - Admin felhasználókezelés"]
+  S14 -->|"Státuszváltás"| S17["♦ S17 - Státusz megerősítő modál"]
+  S17 -->|"Megerősítés"| S14
+  S15 -->|"Részletek"| S18["♦ S18 - Felhasználó részletek modál"]
+  S18 -->|"Mentés / Bezárás"| S15

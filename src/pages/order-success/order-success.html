@@ -1,0 +1,77 @@
+<!-- Sikeres rendelés visszaigazoló oldal. -->
+<div class="page-container order-success-page">
+  <section class="card success-card">
+    <div class="success-header">
+      <span class="success-badge">Sikeres rendelés</span>
+      <h1>Köszönjük a vásárlást!</h1>
+      <p>A rendelést rögzítettük, hamarosan feldolgozzuk.</p>
+    </div>
+
+    <div class="success-meta">
+      <div class="meta-box">
+        <span>Rendelés azonosító</span>
+        <strong>{{ orderId || 'Folyamatban' }}</strong>
+      </div>
+      <div class="meta-box" *ngIf="summary">
+        <span>Végösszeg</span>
+        <strong>{{ summary.total }} Ft</strong>
+      </div>
+    </div>
+
+    <div class="customer-summary card" *ngIf="summary">
+      <h2>Kapcsolati adatok</h2>
+      <p><strong>Név:</strong> {{ summary.customerName }}</p>
+      <p><strong>Email:</strong> {{ summary.customerEmail }}</p>
+      <p><strong>Telefon:</strong> {{ summary.customerPhone }}</p>
+      <p><strong>Szállítási mód:</strong> {{ summary.shippingMethodLabel }}</p>
+      <p><strong>Fizetési mód:</strong> {{ summary.paymentMethodLabel }}</p>
+      <p *ngIf="summary.pickupAt"><strong>Átvétel időpontja:</strong> {{ summary.pickupAt | date:'yyyy.MM.dd HH:mm' }}</p>
+      <p><strong>Részösszeg:</strong> {{ summary.subtotal }} Ft</p>
+      <p><strong>Szállítás:</strong> {{ summary.shippingFee }} Ft</p>
+      <p><strong>Fizetési díj:</strong> {{ summary.paymentFee }} Ft</p>
+      <p *ngIf="summary.discount > 0"><strong>Kedvezmény:</strong> -{{ summary.discount }} Ft</p>
+      <p *ngIf="summary.couponCode"><strong>Kupon:</strong> {{ summary.couponCode }}</p>
+    </div>
+
+    <div class="items-summary" *ngIf="summary?.items?.length; else fallbackInfo">
+      <h2>Rendelt termékek</h2>
+
+      <div class="item-row card" *ngFor="let item of summary?.items">
+        <img [src]="item.image" [alt]="item.name">
+        <div class="item-content">
+          <h3>{{ item.name }}</h3>
+          <p>Mennyiség: {{ item.quantity }}</p>
+        </div>
+        <strong>{{ item.price * item.quantity }} Ft</strong>
+      </div>
+    </div>
+
+    <div class="email-preview card" *ngIf="summary">
+      <div class="email-preview-head">
+        <div>
+          <h2>Email visszaigazolás előnézet</h2>
+          <p>Ezzel a sablonnal később automatikus email küldés is könnyen beköthető.</p>
+        </div>
+        <a class="btn btn-secondary" [href]="getEmailHref()">Email megnyitása</a>
+      </div>
+
+      <div class="email-preview-box">
+        <p><strong>Tárgy:</strong> {{ emailSubject }}</p>
+        <pre>{{ emailBody }}</pre>
+      </div>
+    </div>
+
+    <ng-template #fallbackInfo>
+      <div class="card fallback-box">
+        <p *ngIf="loading">Rendelésadatok betöltése folyamatban...</p>
+        <p class="error-line" *ngIf="loadError">{{ loadError }}</p>
+        <p>A rendelés elmentve. A részletes összegzés ehhez a munkamenethez tartozott.</p>
+      </div>
+    </ng-template>
+
+    <div class="success-actions">
+      <a class="btn btn-secondary" routerLink="/products">Vásárlás folytatása</a>
+      <a class="btn" routerLink="/cart">Ugrás a kosárra</a>
+    </div>
+  </section>
+</div>

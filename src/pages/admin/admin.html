@@ -1,0 +1,1065 @@
+﻿<!-- Admin oldal: tabos felület (áttekintés, készlet, termékek, rendelések, felhasználók). -->
+<div class="page-container">
+  <div class="admin-tabs card">
+    <a routerLink="/admin" [queryParams]="{ section: 'overview' }" [class.active]="isSection('overview')">Áttekintés</a>
+    <a routerLink="/admin" [queryParams]="{ section: 'inventory' }" [class.active]="isSection('inventory')">Készlet</a>
+    <a routerLink="/admin" [queryParams]="{ section: 'products' }" [class.active]="isSection('products')">Termékek</a>
+    <a routerLink="/admin" [queryParams]="{ section: 'orders' }" [class.active]="isSection('orders')">Rendelések</a>
+    <a routerLink="/admin" [queryParams]="{ section: 'users' }" [class.active]="isSection('users')">Felhasználók</a>
+  </div>
+
+  <!-- Fő admin layout (bal: tartalom, jobb: oldalsáv/segéd panelek). -->
+  <div class="admin-layout" [class.single-column]="isSection('products') || isSection('inventory') || isSection('orders') || isSection('users')">
+    <section class="card admin-form" *ngIf="isSection('products'); else sectionIntro">
+      <h1>Termékkezelés</h1>
+      <p class="info-text" *ngIf="editingProductId">Termék szerkesztési mód aktív.</p>
+
+      <p class="auth-note" *ngIf="auth.user$ | async as user; else loginWarning">
+        Bejelentkezve: <strong>{{ user.email }}</strong>
+      </p>
+
+      <ng-template #loginWarning>
+        <p class="error-box">Ehhez a felülethez admin jogosultság és bejelentkezés kell.</p>
+      </ng-template>
+
+      <label>Termék neve</label>
+      <input [(ngModel)]="productName">
+
+      <label>Ár</label>
+      <input type="number" [(ngModel)]="productPrice">
+
+      <label>Kategória</label>
+      <input [(ngModel)]="productCategory" placeholder="pl. Szelepek">
+
+      <label>Kép URL</label>
+      <input [(ngModel)]="productImage" placeholder="https://...">
+
+      <label>Márka</label>
+      <input [(ngModel)]="productBrand" placeholder="pl. FlowTech">
+
+      <label>Cikkszám</label>
+      <input [(ngModel)]="productSku" placeholder="pl. TDL-SZL-001">
+
+      <label>Rövid leírás</label>
+      <input [(ngModel)]="productShortDescription" placeholder="Rövid összefoglaló a termékről">
+
+      <label>Hosszú leírás</label>
+      <input [(ngModel)]="productDescription" placeholder="Bővebb termékleírás">
+
+      <label>Készlet státusz</label>
+      <select [(ngModel)]="productStock">
+        <option value="Keszleten">Készleten</option>
+        <option value="Szallithato">Szállítható</option>
+        <option value="Rendelesre">Rendelésre</option>
+      </select>
+
+      <label>Raktárkészlet (db)</label>
+      <input type="number" [(ngModel)]="productStockQuantity" min="0">
+
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="productIsWeeklyDeal">
+        Heti ajánlat (admin akciós címke)
+      </label>
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="productIsTopProduct">
+        TOP termék (kiemelt címke)
+      </label>
+
+      <label>Akciós kedvezmény (%)</label>
+      <input type="number" [(ngModel)]="productSalePercent" min="1" max="95" placeholder="pl. 15">
+
+      <label>Akció kezdete</label>
+      <input type="datetime-local" [(ngModel)]="productSaleStartsAt">
+
+      <label>Akció vége</label>
+      <input type="datetime-local" [(ngModel)]="productSaleEndsAt">
+
+      <button class="btn btn-secondary" (click)="saveProduct()" [disabled]="loading">
+        {{ loading ? 'Mentés folyamatban...' : (editingProductId ? 'Termék frissítése' : 'Termék mentése') }}
+      </button>
+
+      <button class="btn cancel-btn" *ngIf="editingProductId" (click)="cancelEdit()">
+        Szerkesztés megszakítása
+      </button>
+
+      <p class="success-box" *ngIf="successMessage">{{ successMessage }}</p>
+      <p class="error-box" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="seed-actions">
+        <button
+          class="btn seed-btn"
+          (click)="seedStarterProducts()"
+          [disabled]="seedingProducts || seedingCatalogProducts || productsLoading"
+        >
+          {{ seedingProducts ? 'Feltöltés folyamatban...' : 'Kezdő termékek feltöltése Firestore-ba' }}
+        </button>
+
+        <button
+          class="btn seed-btn"
+          (click)="seedProjectCatalogProducts()"
+          [disabled]="seedingCatalogProducts || seedingProducts || productsLoading"
+        >
+          {{ seedingCatalogProducts ? 'Katalógus feltöltése...' : 'Teljes katalógus hiányzó termékeinek feltöltése' }}
+        </button>
+
+        <button
+          class="btn seed-btn"
+          (click)="normalizeProductTexts()"
+          [disabled]="normalizingProductTexts || seedingCatalogProducts || seedingProducts || productsLoading"
+        >
+          {{ normalizingProductTexts ? 'Ékezetjavítás folyamatban...' : 'Termékszövegek ékezetes javítása' }}
+        </button>
+
+        <button
+          class="btn delete-btn"
+          (click)="requestDeleteAllProducts()"
+          [disabled]="purgingProducts || productsLoading || products.length === 0"
+        >
+          {{ purgingProducts ? 'Törlés folyamatban...' : 'Összes termék törlése' }}
+        </button>
+      </div>
+
+      <section class="local-sale-card csv-import-card">
+        <h4>CSV csoportos termékfeltöltés</h4>
+        <p class="info-text">Tömeges importhoz tölts fel CSV fájlt, majd mentsd a validált sorokat.</p>
+
+        <div class="local-sale-grid">
+          <div class="field-group">
+            <label>Import mód</label>
+            <select [(ngModel)]="csvImportMode">
+              <option value="upsertBySku">SKU alapján frissítés + új termékek</option>
+              <option value="insert">Csak új felvétel (duplikáció lehetséges)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>CSV fájl</label>
+            <input type="file" accept=".csv,text/csv" (change)="onCsvFileSelected($event)">
+          </div>
+        </div>
+
+        <div class="product-admin-actions">
+          <button class="btn edit-btn" type="button" (click)="downloadCsvTemplate()">CSV minta letöltése</button>
+          <button
+            class="btn btn-secondary"
+            type="button"
+            (click)="importCsvProducts()"
+            [disabled]="importingCsvProducts || csvImportPreview.length === 0 || csvImportErrors.length > 0"
+          >
+            {{ importingCsvProducts ? 'Import folyamatban...' : 'CSV import mentése' }}
+          </button>
+          <button class="btn cancel-btn" type="button" (click)="resetCsvImport()">CSV előnézet törlése</button>
+        </div>
+
+        <p class="info-text" *ngIf="csvImportFileName">Fájl: {{ csvImportFileName }}</p>
+        <p class="info-text" *ngIf="csvImportSummary">{{ csvImportSummary }}</p>
+
+        <div class="empty-orders" *ngIf="csvImportErrors.length > 0">
+          <strong>CSV hibák:</strong>
+          <ul class="csv-error-list">
+            <li *ngFor="let err of csvImportErrors">{{ err }}</li>
+          </ul>
+        </div>
+
+        <div class="mini-list" *ngIf="csvImportPreview.length > 0">
+          <div class="mini-row" *ngFor="let item of csvImportPreview.slice(0, 6)">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.sku }} - {{ item.category }} - {{ item.price }} Ft</span>
+          </div>
+          <p class="muted-line" *ngIf="csvImportPreview.length > 6">
+            ...és még {{ csvImportPreview.length - 6 }} termék az import csomagban.
+          </p>
+        </div>
+      </section>
+
+      <div class="products-toolbar">
+        <label>Termék keresés</label>
+        <input [(ngModel)]="productSearchTerm" placeholder="Keresés név, cikkszám, kategória vagy márka alapján">
+      </div>
+
+      <div class="products-admin-list compact-products" *ngIf="!productsLoading && adminFilteredProducts.length > 0">
+        <h4>Termékek szerkesztése</h4>
+
+        <article class="product-admin-card" *ngFor="let product of adminFilteredProducts">
+          <div>
+            <strong>{{ product.name }}</strong>
+            <p>{{ product.sku || 'Nincs cikkszám' }} - {{ product.category }}</p>
+            <p>Készlet: {{ product.stockQuantity || 0 }} db</p>
+            <p *ngIf="product.isWeeklyDeal">Címke: Heti ajánlat</p>
+            <p *ngIf="product.isTopProduct">Címke: TOP termék</p>
+            <p *ngIf="product.salePercent">Akció: -{{ product.salePercent }}%</p>
+            <p class="sale-status-line" [ngClass]="getSaleStatusClass(product)">{{ getSaleStatusLabel(product) }}</p>
+            <p *ngIf="product.salePercent">{{ getSaleWindowText(product) }}</p>
+          </div>
+
+          <div class="product-admin-actions">
+            <button class="btn edit-btn" (click)="startEditProduct(product)">Szerkesztés</button>
+            <button
+              class="btn delete-btn"
+              (click)="requestDeleteProduct(product)"
+              [disabled]="deletingProductId === product.id"
+            >
+              {{ deletingProductId === product.id ? 'Törlés...' : 'Törlés' }}
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <div class="empty-orders" *ngIf="!productsLoading && products.length > 0 && adminFilteredProducts.length === 0">
+        Nincs találat a keresési feltételre.
+      </div>
+
+      <div class="empty-orders" *ngIf="productsLoading">
+        Termékek betöltése...
+      </div>
+
+      <div class="empty-orders" *ngIf="!productsLoading && products.length === 0">
+        Még nincs szerkeszthető termék a rendszerben.
+      </div>
+    </section>
+
+    <ng-template #sectionIntro>
+      <section class="card admin-form admin-section-intro">
+        <h1 *ngIf="isSection('overview')">Admin áttekintés</h1>
+        <h1 *ngIf="isSection('inventory')">Készletkezelés</h1>
+        <h1 *ngIf="isSection('orders')">Rendeléskezelés</h1>
+        <h1 *ngIf="isSection('users')">Felhasználók kezelése</h1>
+
+        <p class="auth-note" *ngIf="auth.user$ | async as user; else introLoginWarning">
+          Bejelentkezve: <strong>{{ user.email }}</strong>
+        </p>
+
+        <ng-template #introLoginWarning>
+          <p class="error-box">Ehhez a felülethez admin jogosultság és bejelentkezés kell.</p>
+        </ng-template>
+
+        <div class="intro-block" *ngIf="isSection('overview')">
+          <p>Innen gyorsan átlátod a webshop jelenlegi állapotát.</p>
+          <div class="intro-stat-list">
+            <div><strong>{{ products.length }}</strong><span>termék</span></div>
+            <div><strong>{{ orders.length }}</strong><span>rendelés</span></div>
+            <div><strong>{{ users.length }}</strong><span>felhasználó</span></div>
+          </div>
+
+          <div class="overview-hero card">
+            <div>
+              <p class="section-kicker">Admin áttekintés</p>
+              <h4>Gyors áttekintés a webshop állapotáról</h4>
+              <p>Láthatod a készletet, a rendeléseket, a felhasználókat és az esetleges alacsony készletszinteket.</p>
+            </div>
+          </div>
+
+          <div class="overview-grid">
+            <div class="overview-card">
+              <span>Termékek</span>
+              <strong>{{ products.length }}</strong>
+            </div>
+            <div class="overview-card">
+              <span>Rendelések</span>
+              <strong>{{ orders.length }}</strong>
+            </div>
+            <div class="overview-card">
+              <span>Alacsony készlet</span>
+              <strong>{{ lowStockAlerts.length }}</strong>
+            </div>
+            <div class="overview-card">
+              <span>Felhasználók</span>
+              <strong>{{ users.length }}</strong>
+            </div>
+          </div>
+
+          <div class="admin-highlights">
+            <div class="highlight-card">
+              <h4>Legutóbbi rendelések</h4>
+              <div class="mini-list" *ngIf="orders.length > 0; else noOverviewOrdersLeft">
+                <div class="mini-row" *ngFor="let order of orders.slice(0, 3)">
+                  <strong>{{ order.customerName }}</strong>
+                  <span>{{ order.total }} Ft</span>
+                </div>
+              </div>
+              <ng-template #noOverviewOrdersLeft>
+                <p class="muted-line">Még nincs rendelés a rendszerben.</p>
+              </ng-template>
+            </div>
+
+            <div class="highlight-card">
+              <h4>Alacsony készlet</h4>
+              <div class="mini-list" *ngIf="lowStockAlerts.length > 0; else noLowStockLeft">
+                <div class="mini-row" *ngFor="let item of lowStockAlerts.slice(0, 3)">
+                  <strong>{{ item.name }}</strong>
+                  <span>{{ item.availableStock }} db</span>
+                </div>
+              </div>
+              <ng-template #noLowStockLeft>
+                <p class="muted-line">Jelenleg nincs küszöb alatti készlet.</p>
+              </ng-template>
+            </div>
+          </div>
+
+          <section class="local-sale-card news-manage-card">
+            <h4>Főoldali hírek kezelése</h4>
+            <p class="info-text">Az itt mentett aktív hírek automatikusan, váltakozva jelennek meg a főoldali hírblokkban.</p>
+
+            <div class="local-sale-grid">
+              <div class="field-group">
+                <label>Hír címe</label>
+                <input [(ngModel)]="newsTitle" placeholder="pl. Heti HVAC akció">
+              </div>
+              <div class="field-group">
+                <label>Rövid címke</label>
+                <input [(ngModel)]="newsLabel" placeholder="pl. Akció / Újdonság">
+              </div>
+              <div class="field-group">
+                <label>Kattintás célja</label>
+                <select [(ngModel)]="newsTargetType">
+                  <option value="none">Nincs átlépés</option>
+                  <option value="products">Összes termék</option>
+                  <option value="category">Kategória oldal</option>
+                  <option value="promo">Promó szűrt lista</option>
+                </select>
+              </div>
+              <label class="checkbox-line">
+                <input type="checkbox" [(ngModel)]="newsIsActive">
+                Aktív hír (megjelenik a főoldalon)
+              </label>
+            </div>
+
+            <div class="field-group" *ngIf="newsTargetType === 'category'">
+              <label>Kategória neve</label>
+              <input [(ngModel)]="newsTargetValue" placeholder="pl. Fűtés vagy Szerelvények">
+            </div>
+
+            <div class="field-group" *ngIf="newsTargetType === 'promo'">
+              <label>Promó kód</label>
+              <select [(ngModel)]="newsTargetValue">
+                <option value="discount15">Heti ajánlatok (discount15)</option>
+                <option value="top">TOP termékek (top)</option>
+                <option value="new">Újdonságok (new)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label>Hír szövege</label>
+              <textarea
+                class="local-sale-note"
+                [(ngModel)]="newsContent"
+                placeholder="A hír részletesebb szövege..."></textarea>
+            </div>
+
+            <div class="product-admin-actions">
+              <button class="btn btn-secondary" type="button" (click)="saveNews()" [disabled]="newsSaving">
+                {{ newsSaving ? 'Mentés...' : (editingNewsId ? 'Hír frissítése' : 'Hír mentése') }}
+              </button>
+              <button class="btn cancel-btn" type="button" *ngIf="editingNewsId" (click)="cancelNewsEdit()">
+                Szerkesztés megszakítása
+              </button>
+            </div>
+
+            <p class="error-box" *ngIf="newsError">{{ newsError }}</p>
+            <p class="info-text" *ngIf="newsLoading">Hírek betöltése...</p>
+
+            <div class="mini-list" *ngIf="!newsLoading && newsItems.length > 0">
+              <div class="mini-row news-row" *ngFor="let item of newsItems">
+                <div>
+                  <strong>{{ item.title }}</strong>
+                  <p class="muted-line">{{ item.content }}</p>
+                  <p class="muted-line">{{ getNewsTargetLabel(item) }}</p>
+                  <span class="news-label" *ngIf="item.label">{{ item.label }}</span>
+                  <span class="guest-badge" *ngIf="!item.isActive">Inaktív</span>
+                </div>
+                <div class="product-admin-actions">
+                  <button class="btn edit-btn" type="button" (click)="startEditNews(item)">Szerkesztés</button>
+                  <button class="btn delete-btn" type="button" (click)="deleteNews(item)" [disabled]="deletingNewsId === item.id">
+                    {{ deletingNewsId === item.id ? 'Törlés...' : 'Törlés' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-orders" *ngIf="!newsLoading && newsItems.length === 0">
+              Még nincs felvett hír a főoldalhoz.
+            </div>
+          </section>
+        </div>
+
+        <div class="intro-block" *ngIf="isSection('inventory')">
+          <p>A készlet nézetben látod, miből mennyi van szabadon, és mi van már rendelés alatt.</p>
+          <ul class="intro-list">
+            <li>Szabad készlet</li>
+            <li>Foglalt készlet</li>
+            <li>Alacsony készlet figyelmeztetés</li>
+          </ul>
+
+          <div class="section-summary-strip compact-summary" *ngIf="!productsLoading && hasStockData()">
+            <div class="summary-pill">
+              <span>Termékek</span>
+              <strong>{{ stockItemCount }}</strong>
+            </div>
+            <div class="summary-pill">
+              <span>Összes készlet</span>
+              <strong>{{ stockTotalUnits }} db</strong>
+            </div>
+            <div class="summary-pill">
+              <span>Szabad készlet</span>
+              <strong>{{ stockAvailableUnits }} db</strong>
+            </div>
+            <div class="summary-pill">
+              <span>Alacsony készlet</span>
+              <strong>{{ lowStockAlerts.length }}</strong>
+            </div>
+          </div>
+
+          <p class="info-text" *ngIf="productsLoading">Készletadatok betöltése...</p>
+          <p class="error-box" *ngIf="productsError">{{ productsError }}</p>
+
+          <div class="inventory-quick-list" *ngIf="!productsLoading && hasStockData()">
+            <article class="inventory-quick-row" *ngFor="let item of stockChart">
+              <div>
+                <strong>{{ item.name }}</strong>
+                <p>{{ item.sku }} - {{ item.category }}</p>
+              </div>
+              <div class="inventory-qty">
+                <span>Összes: {{ item.totalStock }} db</span>
+                <span [class.stock-low]="item.availableStock <= getLowStockThreshold()">
+                  Szabad: {{ item.availableStock }} db
+                </span>
+                <span>Foglalt: {{ item.reservedStock }} db</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="empty-orders" *ngIf="!productsLoading && !hasStockData() && !productsError">
+            Még nincs olyan feltöltött termék, amihez készletadatot lehet mutatni.
+          </div>
+        </div>
+
+        <div class="intro-block" *ngIf="isSection('orders')">
+          <p>A rendeléseknél tudod követni az új megrendeléseket és az állapotukat.</p>
+          <ul class="intro-list">
+            <li>Státusz módosítás</li>
+            <li>Vásárló adatok</li>
+            <li>Szállítási információk</li>
+          </ul>
+        </div>
+
+        <div class="intro-block" *ngIf="isSection('users')">
+          <p>A felhasználók nézetben látod a regisztrált vásárlókat és a rendelési előzményeiket.</p>
+          <ul class="intro-list">
+            <li>Regisztráció ideje</li>
+            <li>Utolsó belépés</li>
+            <li>Rendelések és költés</li>
+          </ul>
+        </div>
+      </section>
+    </ng-template>
+
+    <section class="card admin-info">
+      <h3 *ngIf="isSection('overview')">Rendszer áttekintés</h3>
+      <h3 *ngIf="isSection('inventory')">Készlet chart</h3>
+      <h3 *ngIf="isSection('products')">Terméklista</h3>
+      <h3 *ngIf="isSection('orders')">Rendelések listája</h3>
+      <h3 *ngIf="isSection('users')">Felhasználók listája</h3>
+      <p class="info-text">Az admin panel csak a megadott admin e-mail címekkel érhető el.</p>
+
+      <div *ngIf="isSection('overview')" class="sidebar-low-stock">
+        <h4>Alacsony készlet figyelő</h4>
+        <p class="info-text">Oldalsávban csak a figyelmeztető készletszintek jelennek meg.</p>
+        <div class="mini-list" *ngIf="lowStockAlerts.length > 0; else noLowStockSidebar">
+          <div class="mini-row" *ngFor="let item of lowStockAlerts.slice(0, 6)">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.availableStock }} db</span>
+          </div>
+        </div>
+        <ng-template #noLowStockSidebar>
+          <p class="muted-line">Jelenleg nincs küszöb alatti készlet.</p>
+        </ng-template>
+
+        <h4>Kliens hibalogok</h4>
+        <p class="info-text">Az utóbbi kliens oldali hibák gyors diagnosztikához.</p>
+        <p class="info-text" *ngIf="logsLoading">Hibalogok betöltése...</p>
+        <p class="error-box" *ngIf="logsError">{{ logsError }}</p>
+
+        <div class="mini-list" *ngIf="!logsLoading && recentClientLogs.length > 0">
+          <div class="mini-row" *ngFor="let log of recentClientLogs">
+            <strong>{{ log.event }}</strong>
+            <span>{{ formatDate(log.createdAt) }}</span>
+            <span>{{ log.userEmail }}</span>
+          </div>
+        </div>
+        <p class="muted-line" *ngIf="!logsLoading && recentClientLogs.length === 0">Nincs friss kliens hiba.</p>
+      </div>
+
+      <div *ngIf="isSection('inventory')">
+        <p class="info-text">A teljes készletlista az oldali összefoglaló alatt, kompakt nézetben jelenik meg.</p>
+      </div>
+
+      <div *ngIf="isSection('products')">
+        <p class="info-text">A terméklista és a kereső közvetlenül a Termékkezelés részen érhető el.</p>
+      </div>
+
+      <div *ngIf="isSection('orders')">
+        <section class="local-sale-card">
+          <h4>Helyszíni vásárlás rögzítése</h4>
+          <p class="info-text">Admin itt tud gyorsan vásárlást rögzíteni, majd PDF bizonylatot letölteni.</p>
+
+          <div class="local-sale-grid profile-preset-grid">
+            <div class="field-group">
+              <label>Mentett vásárló/cég profil</label>
+              <select [(ngModel)]="selectedLocalSaleProfileId" (ngModelChange)="applySelectedLocalSaleProfile()">
+                <option value="">Új vásárló/cég adatok</option>
+                <option *ngFor="let profile of localSaleProfiles" [value]="profile.id">
+                  {{ profile.type === 'company' ? 'Cég' : 'Vásárló' }} - {{ profile.name }}
+                  <span *ngIf="profile.taxNumber"> ({{ profile.taxNumber }})</span>
+                  <span *ngIf="profile.isGuest"> [Webes vendég]</span>
+                </option>
+              </select>
+            </div>
+            <button class="btn edit-btn" type="button" (click)="saveLocalSaleProfile()" [disabled]="localSaleProfileActionLoading">
+              {{ localSaleProfileActionLoading ? 'Mentés...' : 'Vásárló/Cég mentése' }}
+            </button>
+          </div>
+          <p class="info-text" *ngIf="selectedLocalSaleProfileId && localSaleProfiles.length > 0">
+            Kiválasztva:
+            <strong>
+              {{ (localSaleProfiles.find(p => p.id === selectedLocalSaleProfileId)?.name) || 'Ismeretlen profil' }}
+            </strong>
+            <span class="guest-badge" *ngIf="localSaleProfiles.find(p => p.id === selectedLocalSaleProfileId)?.isGuest">WEBES VENDÉG</span>
+          </p>
+          <p class="info-text" *ngIf="localSaleProfilesLoading">Mentett vásárló/cég lista betöltése...</p>
+          <p class="error-box" *ngIf="localSaleProfilesError">{{ localSaleProfilesError }}</p>
+
+          <div class="local-sale-grid">
+            <div class="field-group">
+              <label>Vásárló neve</label>
+              <input [(ngModel)]="localSaleCustomerName" placeholder="Vásárló neve">
+            </div>
+            <div class="field-group">
+              <label>Email</label>
+              <input [(ngModel)]="localSaleCustomerEmail" placeholder="Email (opcionális)">
+            </div>
+            <div class="field-group">
+              <label>Telefonszám</label>
+              <input [(ngModel)]="localSaleCustomerPhone" placeholder="Telefonszám (opcionális)">
+            </div>
+            <div class="field-group">
+              <label>Fizetési mód</label>
+              <select [(ngModel)]="localSalePaymentMethod">
+                <option value="cash">Készpénz</option>
+                <option value="card">Bankkártya</option>
+              </select>
+            </div>
+          </div>
+          <label class="checkbox-line">
+            <input type="checkbox" [(ngModel)]="localSaleIsBusinessBuyer">
+            Céges vagy szerelői vásárlás (adószámmal)
+          </label>
+          <div class="local-sale-grid" *ngIf="localSaleIsBusinessBuyer">
+            <div class="field-group">
+              <label>Cég neve</label>
+              <input [(ngModel)]="localSaleCompanyName" placeholder="Cég neve (opcionális)">
+            </div>
+            <div class="field-group">
+              <label>Adószám</label>
+              <input [(ngModel)]="localSaleTaxNumber" placeholder="Adószám (pl. 12345678-1-42)">
+            </div>
+          </div>
+
+          <div class="local-sale-grid add-line-grid">
+            <div class="field-group">
+              <label>Termék</label>
+              <select [(ngModel)]="localSaleSelectedProductId">
+                <option value="">Termék kiválasztása</option>
+                <option *ngFor="let product of products" [value]="product.id">
+                  {{ product.name }} - {{ product.price }} Ft (szabad: {{ getAvailableStockForProduct(product.id || '') }} db)
+                </option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Mennyiség</label>
+              <input type="number" min="1" [(ngModel)]="localSaleQuantity" placeholder="Mennyiség">
+            </div>
+            <button class="btn edit-btn" type="button" (click)="addLocalSaleLine()">Tétel hozzáadása</button>
+          </div>
+
+          <div class="local-sale-lines" *ngIf="localSaleLines.length > 0">
+            <div class="local-sale-line" *ngFor="let line of localSaleLines">
+              <span>{{ line.name }} ({{ line.sku }})</span>
+              <span>{{ line.quantity }} db</span>
+              <span>{{ line.price * line.quantity }} Ft</span>
+              <button class="btn delete-btn" type="button" (click)="removeLocalSaleLine(line.productId)">Törlés</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Megjegyzés</label>
+            <textarea
+              class="local-sale-note"
+              [(ngModel)]="localSaleComment"
+              placeholder="Megjegyzés a helyszíni vásárláshoz"></textarea>
+          </div>
+
+          <div class="local-sale-footer">
+            <strong>Végösszeg: {{ localSaleSubtotal }} Ft</strong>
+            <button class="btn btn-secondary" type="button" (click)="submitLocalSale()" [disabled]="localSaleLoading">
+              {{ localSaleLoading ? 'Mentés folyamatban...' : 'Helyszíni vásárlás mentése + PDF' }}
+            </button>
+          </div>
+
+          <p class="error-box" *ngIf="localSaleError">{{ localSaleError }}</p>
+          <p class="success-box" *ngIf="localSaleSuccess">{{ localSaleSuccess }}</p>
+        </section>
+
+        <div class="orders-view-tabs card">
+          <button
+            class="btn"
+            type="button"
+            [class.active]="orderListView === 'active'"
+            (click)="setOrderListView('active')"
+          >
+            Aktív rendelések ({{ activeOrderCount }})
+          </button>
+          <button
+            class="btn"
+            type="button"
+            [class.active]="orderListView === 'completed'"
+            (click)="setOrderListView('completed')"
+          >
+            Teljesített ({{ completedOrderCount }})
+          </button>
+          <button
+            class="btn"
+            type="button"
+            [class.active]="orderListView === 'local'"
+            (click)="setOrderListView('local')"
+          >
+            Helyszíni ({{ localOrderCount }})
+          </button>
+        </div>
+
+        <div class="section-summary-strip" *ngIf="!ordersLoading && orders.length > 0">
+          <div class="summary-pill">
+            <span>Összes rendelés</span>
+            <strong>{{ orders.length }}</strong>
+          </div>
+          <div class="summary-pill">
+            <span>Aktív webes</span>
+            <strong>{{ activeOrderCount }}</strong>
+          </div>
+          <div class="summary-pill">
+            <span>Teljesített webes</span>
+            <strong>{{ completedOrderCount }}</strong>
+          </div>
+          <div class="summary-pill">
+            <span>Helyszíni rendelés</span>
+            <strong>{{ localOrderCount }}</strong>
+          </div>
+        </div>
+
+        <p class="info-text" *ngIf="ordersLoading">Rendelések betöltése...</p>
+        <p class="error-box" *ngIf="ordersError">{{ ordersError }}</p>
+
+        <div class="orders-list expanded-view" *ngIf="!ordersLoading && filteredOrdersForView.length > 0">
+          <article class="order-card" *ngFor="let order of filteredOrdersForView">
+            <div class="order-head">
+              <strong>{{ order.customerName }}</strong>
+              <span>{{ formatDate(order.createdAt) }}</span>
+            </div>
+
+            <p>{{ order.customerEmail }}</p>
+            <p>{{ order.customerPhone }}</p>
+            <p>Termékek: {{ getOrderItemCount(order) }} db</p>
+            <p *ngIf="order.shippingMethod">Szállítási mód: {{ order.shippingMethod.label }}</p>
+            <p *ngIf="order.pickupAt">Átvétel időpontja: {{ formatDate(order.pickupAt) }}</p>
+            <p *ngIf="order.paymentMethod">Fizetési mód: {{ order.paymentMethod.label }}</p>
+            <p *ngIf="order.business?.isBusinessBuyer">Cég: {{ order.business?.companyName || order.customerName }}</p>
+            <p *ngIf="order.business?.isBusinessBuyer">Adószám: {{ order.business?.taxNumber }}</p>
+            <p *ngIf="order.salesChannel">Értékesítési csatorna: {{ order.salesChannel === 'local-admin' ? 'Helyszíni' : 'Webes' }}</p>
+            <p *ngIf="order.invoiceNumber">Számlaszám: {{ order.invoiceNumber }}</p>
+            <p *ngIf="order.pricing">Részösszeg: {{ order.pricing.subtotal }} Ft</p>
+            <p *ngIf="order.pricing">Szállítás: {{ order.pricing.shippingFee }} Ft</p>
+            <p *ngIf="order.pricing">Fizetési díj: {{ order.pricing.paymentFee }} Ft</p>
+            <p *ngIf="order.pricing && order.pricing.discount > 0">Kedvezmény: -{{ order.pricing.discount }} Ft</p>
+            <p>Végösszeg: {{ order.total }} Ft</p>
+            <button
+              class="btn details-btn"
+              type="button"
+              (click)="downloadOrderInvoice(order)"
+              [disabled]="invoiceLoadingId === order.id"
+            >
+              {{ invoiceLoadingId === order.id ? 'Számla generálása...' : 'Számla letöltése' }}
+            </button>
+            <div class="status-editor">
+              <span>Állapot: <strong>{{ order.status }}</strong></span>
+              <button
+                class="btn edit-btn"
+                type="button"
+                (click)="requestOrderStatusChange(order)"
+                [disabled]="orderStatusLoadingId === order.id"
+              >
+                {{ orderStatusLoadingId === order.id ? 'Mentés...' : 'Állapot módosítása' }}
+              </button>
+            </div>
+            <p>Szállítási cím: {{ order.shipping.zip }}, {{ order.shipping.city }}, {{ order.shipping.address }}</p>
+            <p *ngIf="order.appliedCoupon">Kupon: {{ order.appliedCoupon.code }} - {{ order.appliedCoupon.description }}</p>
+            <p *ngIf="!order.appliedCoupon && order.couponCode">Kupon: {{ order.couponCode }}</p>
+            <button class="btn details-btn" type="button" (click)="openOrderDetails(order)">
+              Rendelés részletei
+            </button>
+          </article>
+        </div>
+
+        <div class="empty-orders" *ngIf="!ordersLoading && filteredOrdersForView.length === 0">
+          Nincs rendelés ebben a nézetben.
+        </div>
+      </div>
+
+      <div *ngIf="isSection('users')">
+        <section class="local-sale-card">
+          <h4>Új felhasználó / cég hozzáadása</h4>
+          <div class="local-sale-grid">
+            <div class="field-group">
+              <label>Email</label>
+              <input [(ngModel)]="createUserEmail" placeholder="email@példa.hu">
+            </div>
+            <div class="field-group">
+              <label>Megjelenített név</label>
+              <input [(ngModel)]="createUserDisplayName" placeholder="Név / Cégnév">
+            </div>
+            <div class="field-group">
+              <label>Szerepkör</label>
+              <select [(ngModel)]="createUserRole">
+                <option value="customer">Vásárló</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Típus</label>
+              <select [(ngModel)]="createUserAccountType">
+                <option value="private">Magánszemély</option>
+                <option value="company">Cég</option>
+              </select>
+            </div>
+          </div>
+          <div class="local-sale-grid">
+            <div class="field-group">
+              <label>Telefon</label>
+              <input [(ngModel)]="createUserPhone" placeholder="+36...">
+            </div>
+            <div class="field-group">
+              <label>Cégnév</label>
+              <input [(ngModel)]="createUserCompanyName" placeholder="Cég neve">
+            </div>
+            <div class="field-group">
+              <label>Adószám</label>
+              <input [(ngModel)]="createUserTaxNumber" placeholder="12345678-1-42">
+            </div>
+            <div class="field-group">
+              <label>Megjegyzés</label>
+              <input [(ngModel)]="createUserNote" placeholder="Belső megjegyzés">
+            </div>
+          </div>
+          <button class="btn btn-secondary" type="button" (click)="createAdminManagedUser()" [disabled]="creatingUser">
+            {{ creatingUser ? 'Létrehozás...' : 'Felhasználó/Cég létrehozása' }}
+          </button>
+        </section>
+
+        <div class="section-summary-strip" *ngIf="!usersLoading && userSummaries.length > 0">
+          <div class="summary-pill">
+            <span>Regisztrált felhasználók</span>
+            <strong>{{ userSummaries.length }}</strong>
+          </div>
+          <div class="summary-pill">
+            <span>Adminok</span>
+            <strong>{{ userSummaries.filter(user => user.role === 'admin').length }}</strong>
+          </div>
+          <div class="summary-pill">
+            <span>Aktív vásárlók</span>
+            <strong>{{ userSummaries.filter(user => user.orderCount > 0).length }}</strong>
+          </div>
+        </div>
+
+        <p class="info-text" *ngIf="usersLoading">Felhasználók betöltése...</p>
+        <p class="error-box" *ngIf="usersError">{{ usersError }}</p>
+
+        <div class="users-list expanded-view" *ngIf="!usersLoading && userSummaries.length > 0">
+          <article class="user-card" *ngFor="let user of userSummaries">
+            <div class="user-head">
+              <div>
+                <strong>{{ user.email }}</strong>
+                <p>
+                  Szerepkör: {{ user.role === 'admin' ? 'Admin' : 'Vásárló' }}
+                  <span *ngIf="user.disabled">- Letiltva</span>
+                </p>
+              </div>
+              <span class="user-order-count">{{ user.orderCount }} rendelés</span>
+            </div>
+
+            <div class="user-stats">
+              <span>Regisztráció: {{ formatDate(user.createdAt) }}</span>
+              <span *ngIf="user.lastLoginAt">Utolsó belépés: {{ formatDate(user.lastLoginAt) }}</span>
+              <span *ngIf="user.latestOrderAt">Utolsó rendelés: {{ formatDate(user.latestOrderAt) }}</span>
+              <span>Összes költés: {{ user.totalSpent }} Ft</span>
+            </div>
+
+            <div class="user-actions">
+              <label class="status-editor user-role-editor">
+                <span>Szerepkör</span>
+                <select
+                  [ngModel]="user.role"
+                  (ngModelChange)="updateUserRole(user, $event)"
+                  [disabled]="userActionLoadingId === user.id"
+                >
+                  <option value="customer">Vásárló</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+
+              <button
+                class="btn"
+                [class.delete-btn]="!user.disabled"
+                [class.reactivate-btn]="user.disabled"
+                (click)="toggleUserDisabled(user)"
+                [disabled]="userActionLoadingId === user.id"
+              >
+                {{
+                  userActionLoadingId === user.id
+                    ? 'Mentés...'
+                    : (user.disabled ? 'Fiók visszaállítása' : 'Fiók letiltása')
+                }}
+              </button>
+              <button class="btn details-btn" type="button" (click)="openUserDetails(user)">
+                Részletek
+              </button>
+            </div>
+
+            <div class="user-orders" *ngIf="user.orders.length > 0; else noUserOrders">
+              <h4>Felhasználó rendelései</h4>
+
+              <div class="user-order-row" *ngFor="let order of user.orders">
+                <div>
+                  <strong>{{ order.id }}</strong>
+                  <p>{{ formatDate(order.createdAt) }}</p>
+                </div>
+                <span>{{ getOrderItemCount(order) }} termék</span>
+                <span>{{ order.total }} Ft</span>
+                <span class="order-status-pill">{{ order.status }}</span>
+              </div>
+            </div>
+
+            <ng-template #noUserOrders>
+              <div class="empty-orders compact-empty">
+                Ennek a felhasználónak még nincs rendelése.
+              </div>
+            </ng-template>
+          </article>
+        </div>
+
+        <div class="empty-orders" *ngIf="!usersLoading && userSummaries.length === 0">
+          Még nincs regisztrált felhasználó a rendszerben.
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="lowStockModalOpen" (click)="closeLowStockModal()">
+  <section class="low-stock-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeLowStockModal()">X</button>
+    <h3>Alacsony készlet figyelmeztetés</h3>
+    <p class="info-text">Az alábbi termékeknél a szabad készlet elérte vagy aláesett a {{ getLowStockThreshold() }} db-os küszöbnek.</p>
+
+    <div class="low-stock-list">
+      <div class="low-stock-item" *ngFor="let item of lowStockAlerts">
+        <strong>{{ item.name }}</strong>
+        <span>{{ item.availableStock }} db szabad - {{ item.reservedStock }} db foglalt</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="orderStatusConfirmOpen" (click)="cancelOrderStatusChange()">
+  <section class="low-stock-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="cancelOrderStatusChange()">X</button>
+    <h3>Rendelés státusz megerősítése</h3>
+    <label class="status-editor">
+      <span>Új állapot</span>
+      <select [(ngModel)]="pendingOrderStatusChoice">
+        <option value="uj">Új</option>
+        <option value="feldolgozas alatt">Feldolgozás alatt</option>
+        <option value="teljesitve">Teljesítve</option>
+        <option value="lemondva">Lemondva</option>
+      </select>
+    </label>
+    <p class="info-text confirm-text">{{ getPendingOrderStatusText() }}</p>
+    <div class="product-admin-actions">
+      <button class="btn cancel-btn" type="button" (click)="cancelOrderStatusChange()">Mégsem</button>
+      <button class="btn btn-secondary" type="button" (click)="confirmOrderStatusChange()">Mentés</button>
+    </div>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="deleteProductConfirmOpen" (click)="cancelDeleteProduct()">
+  <section class="low-stock-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="cancelDeleteProduct()">X</button>
+    <h3>Termék törlése</h3>
+    <p class="info-text">
+      Biztosan törölni szeretnéd ezt a terméket:
+      <strong>{{ pendingProductDelete?.name }}</strong>?
+    </p>
+    <div class="product-admin-actions">
+      <button class="btn cancel-btn" type="button" (click)="cancelDeleteProduct()">Mégsem</button>
+      <button class="btn delete-btn" type="button" (click)="confirmDeleteProduct()">Törlés</button>
+    </div>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="deleteAllProductsConfirmOpen" (click)="cancelDeleteAllProducts()">
+  <section class="low-stock-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="cancelDeleteAllProducts()">X</button>
+    <h3>Összes termék törlése</h3>
+    <p class="info-text">
+      Biztosan törölni szeretnéd az összes jelenlegi terméket? Ez a művelet nem visszavonható.
+    </p>
+    <div class="product-admin-actions">
+      <button class="btn cancel-btn" type="button" (click)="cancelDeleteAllProducts()">Mégsem</button>
+      <button class="btn delete-btn" type="button" (click)="confirmDeleteAllProducts()">Igen, törlés</button>
+    </div>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="orderDetailsOpen && selectedOrderDetails" (click)="closeOrderDetails()">
+  <section class="low-stock-modal card order-details-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeOrderDetails()">X</button>
+    <h3>Rendelés részletei</h3>
+
+    <div class="order-details-grid">
+      <div class="order-details-block">
+        <h4>Alap adatok</h4>
+        <p><strong>Azonosító:</strong> {{ selectedOrderDetails.id }}</p>
+        <p><strong>Státusz:</strong> {{ getOrderStatusLabel(selectedOrderDetails.status) }}</p>
+        <p><strong>Dátum:</strong> {{ formatDate(selectedOrderDetails.createdAt) }}</p>
+        <p><strong>Csatorna:</strong> {{ getSalesChannelLabel(selectedOrderDetails.salesChannel) }}</p>
+        <p><strong>Számlaszám:</strong> {{ selectedOrderDetails.invoiceNumber || '-' }}</p>
+        <p><strong>Átvétel időpontja:</strong> {{ selectedOrderDetails.pickupAt ? formatDate(selectedOrderDetails.pickupAt) : '-' }}</p>
+      </div>
+
+      <div class="order-details-block">
+        <h4>Vásárló</h4>
+        <p><strong>Név:</strong> {{ selectedOrderDetails.customerName }}</p>
+        <p><strong>Email:</strong> {{ selectedOrderDetails.customerEmail }}</p>
+        <p><strong>Telefon:</strong> {{ selectedOrderDetails.customerPhone }}</p>
+        <p><strong>Cég:</strong> {{ selectedOrderDetails.business?.companyName || '-' }}</p>
+        <p><strong>Adószám:</strong> {{ selectedOrderDetails.business?.taxNumber || '-' }}</p>
+      </div>
+    </div>
+
+    <div class="order-details-grid">
+      <div class="order-details-block">
+        <h4>Szállítás</h4>
+        <p><strong>Mód:</strong> {{ selectedOrderDetails.shippingMethod?.label || '-' }}</p>
+        <p>
+          <strong>Cím:</strong>
+          {{ selectedOrderDetails.shipping.zip || '-' }},
+          {{ selectedOrderDetails.shipping.city || '-' }},
+          {{ selectedOrderDetails.shipping.address || '-' }}
+        </p>
+      </div>
+
+      <div class="order-details-block">
+        <h4>Számlázás</h4>
+        <p><strong>Név:</strong> {{ selectedOrderDetails.billing.name || '-' }}</p>
+        <p>
+          <strong>Cím:</strong>
+          {{ selectedOrderDetails.billing.zip || '-' }},
+          {{ selectedOrderDetails.billing.city || '-' }},
+          {{ selectedOrderDetails.billing.address || '-' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="order-details-block">
+      <h4>Fizetés és összesítés</h4>
+      <p><strong>Fizetési mód:</strong> {{ selectedOrderDetails.paymentMethod?.label || '-' }}</p>
+      <p><strong>Részösszeg:</strong> {{ selectedOrderDetails.pricing?.subtotal || selectedOrderDetails.total }} Ft</p>
+      <p><strong>Szállítási díj:</strong> {{ selectedOrderDetails.pricing?.shippingFee || 0 }} Ft</p>
+      <p><strong>Fizetési díj:</strong> {{ selectedOrderDetails.pricing?.paymentFee || 0 }} Ft</p>
+      <p><strong>Kedvezmény:</strong> -{{ selectedOrderDetails.pricing?.discount || 0 }} Ft</p>
+      <p><strong>Kupon:</strong> {{ selectedOrderDetails.appliedCoupon?.code || selectedOrderDetails.couponCode || '-' }}</p>
+      <p><strong>Végösszeg:</strong> {{ selectedOrderDetails.total }} Ft</p>
+    </div>
+
+    <div class="order-details-block">
+      <h4>Tételek</h4>
+      <div class="order-detail-items">
+        <div class="order-detail-row" *ngFor="let item of selectedOrderDetails.items">
+          <span>{{ item.name }} x{{ item.quantity }}</span>
+          <strong>{{ item.price * item.quantity }} Ft</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="userDetailsOpen && selectedUserDetails" (click)="closeUserDetails()">
+  <section class="low-stock-modal card order-details-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeUserDetails()">X</button>
+    <h3>Felhasználó részletek és szerkesztés</h3>
+
+    <div class="local-sale-grid">
+      <div class="field-group">
+        <label>Email</label>
+        <input [(ngModel)]="userEditorEmail">
+      </div>
+      <div class="field-group">
+        <label>Megjelenített név</label>
+        <input [(ngModel)]="userEditorDisplayName">
+      </div>
+      <div class="field-group">
+        <label>Szerepkör</label>
+        <select [(ngModel)]="userEditorRole">
+          <option value="customer">Vásárló</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Típus</label>
+        <select [(ngModel)]="userEditorAccountType">
+          <option value="private">Magánszemély</option>
+          <option value="company">Cég</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="local-sale-grid">
+      <div class="field-group">
+        <label>Telefon</label>
+        <input [(ngModel)]="userEditorPhone">
+      </div>
+      <div class="field-group">
+        <label>Cégnév</label>
+        <input [(ngModel)]="userEditorCompanyName">
+      </div>
+      <div class="field-group">
+        <label>Adószám</label>
+        <input [(ngModel)]="userEditorTaxNumber">
+      </div>
+      <div class="field-group">
+        <label>Megjegyzés</label>
+        <input [(ngModel)]="userEditorNote">
+      </div>
+    </div>
+
+    <label class="checkbox-line">
+      <input type="checkbox" [(ngModel)]="userEditorDisabled">
+      Fiók letiltva
+    </label>
+
+    <div class="product-admin-actions">
+      <button class="btn cancel-btn" type="button" (click)="closeUserDetails()">Mégsem</button>
+      <button class="btn btn-secondary" type="button" (click)="saveUserDetails()" [disabled]="userDetailsSaving">
+        {{ userDetailsSaving ? 'Mentés...' : 'Változások mentése' }}
+      </button>
+    </div>
+  </section>
+</div>
+
+

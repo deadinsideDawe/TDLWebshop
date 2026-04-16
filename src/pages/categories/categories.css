@@ -1,0 +1,34 @@
+/* Kategoria kartya racs. */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Kategoria kartya stilus. */
+.category-box {
+  padding: 24px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  transition: 0.2s ease;
+}
+
+.category-box:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+}
+
+.category-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+}
+
+@media (max-width: 900px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

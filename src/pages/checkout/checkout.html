@@ -1,0 +1,259 @@
+<!-- Checkout oldal: auth + szállítás/számlázás + végösszeg. -->
+<div class="page-container checkout-page">
+  <h1>Rendelés véglegesítése</h1>
+
+  <!-- Kétoszlopos checkout layout. -->
+  <div class="checkout-layout">
+    <section class="card checkout-form">
+      <!-- Bejelentkezés blokk vendég usernek. -->
+      <div class="section-block" *ngIf="!(authService.user$ | async); else loggedInBlock">
+        <h2>Bejelentkezés</h2>
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="authEmail" placeholder="Email">
+        </div>
+        <div class="field-group">
+          <label>Jelszó</label>
+          <input type="password" [(ngModel)]="authPassword" placeholder="Jelszó">
+        </div>
+
+        <button class="btn btn-secondary" (click)="submitAuth()" [disabled]="authLoading">
+          {{ authLoading ? 'Folyamatban...' : 'Bejelentkezés' }}
+        </button>
+
+        <button class="switch-btn register-checkout-link" type="button" (click)="openRegisterModal()">Nincs fiókod? Regisztrálj</button>
+
+        <p class="success-text" *ngIf="authMessage">{{ authMessage }}</p>
+        <p class="error-text" *ngIf="authError">{{ authError }}</p>
+      </div>
+
+      <!-- Belépett állapot blokk. -->
+      <ng-template #loggedInBlock>
+        <div class="section-block">
+          <h2>Felhasználó</h2>
+          <p class="info-pill">Be vagy jelentkezve, folytathatod a rendelést.</p>
+        </div>
+      </ng-template>
+
+      <div class="section-block">
+        <h2>Elérhetőségi adatok</h2>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Teljes név</label>
+            <input [(ngModel)]="customerName" placeholder="Teljes név">
+          </div>
+          <div class="field-group">
+            <label>Email cím</label>
+            <input [(ngModel)]="customerEmail" placeholder="Email cím">
+          </div>
+          <div class="field-group">
+            <label>Telefonszám</label>
+            <input [(ngModel)]="customerPhone" placeholder="Telefonszám">
+          </div>
+        </div>
+        <label class="checkbox-line">
+          <input type="checkbox" [(ngModel)]="isBusinessBuyer">
+          Céges vagy szerelői vásárlás (adószámmal)
+        </label>
+        <div class="form-grid" *ngIf="isBusinessBuyer">
+          <div class="field-group">
+            <label>Cég neve</label>
+            <input [(ngModel)]="businessCompanyName" placeholder="Cég neve (opcionális)">
+          </div>
+          <div class="field-group">
+            <label>Adószám</label>
+            <input [(ngModel)]="businessTaxNumber" placeholder="Adószám (pl. 12345678-1-42)">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Szállítási adatok</h2>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Irányítószám</label>
+            <input
+              [(ngModel)]="shippingZip"
+              placeholder="Irányítószám"
+              maxlength="4"
+              inputmode="numeric"
+              (input)="onShippingZipChange()"
+              (blur)="onShippingZipChange()">
+          </div>
+          <div class="field-group">
+            <label>Város</label>
+            <input [(ngModel)]="shippingCity" placeholder="Város">
+          </div>
+          <div class="field-group full-width">
+            <label>Szállítási cím</label>
+            <input class="full-width" [(ngModel)]="shippingAddress" placeholder="Utca, házszám, emelet, ajtó">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="billing-header">
+          <h2>Számlázási adatok</h2>
+          <label class="checkbox-line">
+            <input type="checkbox" [(ngModel)]="billingSameAsShipping">
+            Megegyezik a szállítási címmel
+          </label>
+        </div>
+
+        <div class="form-grid" *ngIf="!billingSameAsShipping">
+          <div class="field-group">
+            <label>Számlázási név</label>
+            <input [(ngModel)]="billingName" placeholder="Számlázási név">
+          </div>
+          <div class="field-group">
+            <label>Irányítószám</label>
+            <input
+              [(ngModel)]="billingZip"
+              placeholder="Irányítószám"
+              maxlength="4"
+              inputmode="numeric"
+              (input)="onBillingZipChange()"
+              (blur)="onBillingZipChange()">
+          </div>
+          <div class="field-group">
+            <label>Város</label>
+            <input [(ngModel)]="billingCity" placeholder="Város">
+          </div>
+          <div class="field-group full-width">
+            <label>Számlázási cím</label>
+            <input class="full-width" [(ngModel)]="billingAddress" placeholder="Számlázási cím">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Szállítási mód</h2>
+        <div class="option-list">
+          <label class="option-item" *ngFor="let method of shippingMethods">
+            <input type="radio" name="shippingMethod" [value]="method.id" [(ngModel)]="selectedShippingMethod">
+            <span>
+              <strong>{{ method.label }}</strong>
+              <small>{{ method.fee }} Ft - {{ method.eta }}</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="form-grid" *ngIf="selectedShippingMethod === 'pickup'">
+          <div class="field-group">
+            <label>Átvétel időpontja</label>
+            <input type="datetime-local" [(ngModel)]="pickupDateTime">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Fizetési mód</h2>
+        <div class="option-list">
+          <label class="option-item" *ngFor="let method of paymentMethods">
+            <input type="radio" name="paymentMethod" [value]="method.id" [(ngModel)]="selectedPaymentMethod">
+            <span>
+              <strong>{{ method.label }}</strong>
+              <small *ngIf="method.fee > 0">Kezelési díj: {{ method.fee }} Ft</small>
+              <small *ngIf="method.fee === 0">Nincs extra díj</small>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Kupon és megjegyzés</h2>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Kuponkód</label>
+            <input [(ngModel)]="couponCode" placeholder="Kuponkód">
+          </div>
+          <div class="field-group full-width">
+            <label>Megjegyzés</label>
+            <textarea class="full-width note-area" [(ngModel)]="orderComment" placeholder="Megjegyzés a rendeléshez"></textarea>
+          </div>
+        </div>
+        <p class="info-pill">Használható kuponok: DEMO500, TDL10, WELCOME2000, SHIPFREE</p>
+        <p class="success-text" *ngIf="coupon?.valid">
+          Aktív kupon: {{ coupon?.code }} - Kedvezmény: {{ coupon?.discount }} Ft
+        </p>
+        <p class="error-text" *ngIf="coupon && !coupon.valid">{{ coupon.reason }}</p>
+      </div>
+
+      <p class="success-text" *ngIf="orderMessage">{{ orderMessage }}</p>
+      <p class="error-text" *ngIf="orderError">{{ orderError }}</p>
+      <ul class="error-list" *ngIf="orderValidationErrors.length > 0">
+        <li *ngFor="let item of orderValidationErrors">{{ item }}</li>
+      </ul>
+    </section>
+
+    <!-- Rendelési összesítő oldalsáv. -->
+    <aside class="card checkout-summary">
+      <h3>Rendelés összegzés</h3>
+
+      <div class="summary-line" *ngFor="let item of cartService.getItems()">
+        <span>{{ item.name }} x{{ item.quantity }}</span>
+        <strong>{{ item.price * item.quantity }} Ft</strong>
+      </div>
+
+      <div class="summary-line">
+        <span>Részösszeg</span>
+        <strong>{{ subtotal }} Ft</strong>
+      </div>
+
+      <div class="summary-line">
+        <span>Szállítás</span>
+        <strong>{{ shippingFee }} Ft</strong>
+      </div>
+
+      <div class="summary-line">
+        <span>Fizetési díj</span>
+        <strong>{{ paymentFee }} Ft</strong>
+      </div>
+
+      <div class="summary-line" *ngIf="discount > 0">
+        <span>Kedvezmény</span>
+        <strong>-{{ discount }} Ft</strong>
+      </div>
+
+      <div class="summary-total">
+        <span>Végösszeg</span>
+        <strong>{{ grandTotal }} Ft</strong>
+      </div>
+
+      <button class="btn btn-secondary" (click)="finalizeOrder()" [disabled]="orderLoading">
+        {{ orderLoading ? 'Mentés folyamatban...' : 'Rendelés elküldése' }}
+      </button>
+      <a class="btn back-link" routerLink="/cart">Vissza a kosárhoz</a>
+    </aside>
+  </div>
+</div>
+
+<!-- Checkout közbeni regisztrációs popup. -->
+<div class="register-modal-backdrop" *ngIf="registerModalOpen" (click)="closeRegisterModal()">
+  <section class="register-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeRegisterModal()">X</button>
+    <h2>Regisztráció</h2>
+
+    <div class="register-modal-form">
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="registerEmail" placeholder="Email">
+      </div>
+      <div class="field-group">
+        <label>Jelszó</label>
+        <input type="password" [(ngModel)]="registerPassword" placeholder="Jelszó">
+      </div>
+      <div class="field-group">
+        <label>Jelszó újra</label>
+        <input type="password" [(ngModel)]="registerConfirmPassword" placeholder="Jelszó újra">
+      </div>
+
+      <button class="btn btn-secondary" type="button" (click)="submitRegister()" [disabled]="registerLoading">
+        {{ registerLoading ? 'Folyamatban...' : 'Regisztráció' }}
+      </button>
+
+      <p class="success-text" *ngIf="registerMessage">{{ registerMessage }}</p>
+      <p class="error-text" *ngIf="registerError">{{ registerError }}</p>
+    </div>
+  </section>
+</div>

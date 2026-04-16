@@ -1,0 +1,25 @@
+<!-- Login oldal: auth form vagy bejelentkezett állapot. -->
+<div class="login-container">
+  <ng-container *ngIf="auth.user$ | async as user; else authForm">
+    <h2>Bejelentkezve</h2>
+    <p class="status-text">Aktuális felhasználó: <strong>{{ user.email }}</strong></p>
+    <button (click)="logout()">Kijelentkezés</button>
+  </ng-container>
+
+  <ng-template #authForm>
+    <h2>Bejelentkezés</h2>
+    <p class="info-message" *ngIf="adminOnlyNotice">Az admin oldal csak az engedélyezett admin felhasználóknak érhető el.</p>
+
+    <input type="email" placeholder="Email" [(ngModel)]="email">
+    <input type="password" placeholder="Jelszó" [(ngModel)]="password">
+
+    <button (click)="submit()" [disabled]="loading">
+      {{ loading ? 'Folyamatban...' : 'Belépés' }}
+    </button>
+
+    <a class="toggle-text register-link" routerLink="/register">Nincs fiókod? Regisztrálj</a>
+  </ng-template>
+
+  <p class="success-message" *ngIf="successMessage">{{ successMessage }}</p>
+  <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+</div>

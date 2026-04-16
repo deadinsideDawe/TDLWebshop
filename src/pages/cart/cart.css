@@ -1,0 +1,84 @@
+/* Ures kosar nezet. */
+.empty-cart {
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--card)), color-mix(in srgb, var(--secondary) 8%, var(--card)));
+}
+
+.continue-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 280px;
+}
+
+/* Kosar ketoszlopos layout. */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+}
+
+.cart-list {
+  display: grid;
+  gap: 16px;
+}
+
+/* Kosar termek kartya. */
+.cart-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, var(--background-soft)), var(--card));
+}
+
+.cart-item img {
+  width: 100%;
+  border-radius: 14px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.cart-item-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.remove-btn {
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--card));
+  color: var(--accent);
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.summary {
+  padding: 20px;
+  height: fit-content;
+  display: grid;
+  gap: 12px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 94%, var(--background-soft)), var(--card));
+}
+
+@media (max-width: 900px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-item {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-item-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

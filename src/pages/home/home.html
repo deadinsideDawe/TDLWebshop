@@ -1,0 +1,226 @@
+<div class="page-container home-page">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">Épületgépészeti webshop</span>
+      <h1>{{ heroTitle }}</h1>
+      <p>{{ heroText }}</p>
+
+      <div class="hero-tags">
+        <button
+          type="button"
+          *ngFor="let tag of heroTags"
+          (click)="goToProducts({ category: tag.query })"
+        >
+          {{ tag.label }}
+        </button>
+      </div>
+
+      <div class="hero-actions">
+        <button class="btn hero-link" type="button" (click)="goToProducts()">{{ heroButton }}</button>
+        <button class="hero-secondary-link" type="button" (click)="goToProducts({ promo: 'discount15' })">
+          {{ heroSecondaryButton }}
+        </button>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="metric-item" *ngFor="let metric of metrics">
+          <strong>{{ metric.value }}</strong>
+          <span>{{ metric.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual card">
+      <div class="hero-grid"></div>
+      <img [src]="heroImage" alt="TDL webshop hero">
+
+      <div class="hero-news card" [class.clickable-news]="activeNews && hasNewsTarget(activeNews)">
+        <span class="hero-news-kicker">Aktuális hírek</span>
+
+        <ng-container *ngIf="activeNews as news; else noNewsBlock">
+          <h3>{{ news.title }}</h3>
+          <p>{{ news.content }}</p>
+          <span class="hero-news-label" *ngIf="news.label">{{ news.label }}</span>
+          <button
+            class="btn hero-news-link"
+            type="button"
+            *ngIf="hasNewsTarget(news)"
+            (click)="openNewsTarget(news)"
+          >
+            Megnézem
+          </button>
+        </ng-container>
+
+        <ng-template #noNewsBlock>
+          <h3>Nincsenek még hírek</h3>
+          <p>Az admin panelről tudsz új hírt hozzáadni, ami itt automatikusan megjelenik.</p>
+        </ng-template>
+
+        <div class="hero-news-dots" *ngIf="newsItems.length > 1">
+          <button
+            type="button"
+            class="news-dot"
+            *ngFor="let item of newsItems; let index = index"
+            [class.active]="index === activeNewsIndex"
+            (click)="goToNews(index)"
+            [attr.aria-label]="'Hír ' + (index + 1)"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="section-heading">
+      <span class="section-kicker">Kategóriák</span>
+      <h2>Főbb épületgépészeti kategóriák</h2>
+      <p>Hat fő termékkategória, gyors áttekintéssel és egykattintásos szűréssel.</p>
+    </div>
+
+    <div class="category-showcase">
+      <button
+        type="button"
+        class="category-item card"
+        *ngFor="let category of categories"
+        (click)="goToProducts({ category: category.query })"
+      >
+        <img class="category-image" [src]="category.image" [alt]="category.label">
+        <div class="category-content">
+          <h3>{{ category.label }}</h3>
+          <p>{{ category.description }}</p>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="section-heading">
+      <span class="section-kicker">Kiemelt termékek</span>
+      <h2>Népszerű termékek a kínálatból</h2>
+      <p>Valós készletinformációval megjelenített termékek. A Részletek gomb felugró ablakot nyit.</p>
+    </div>
+
+    <div class="card home-loading" *ngIf="featuredLoading">Termékek betöltése...</div>
+    <div class="card home-loading" *ngIf="!featuredLoading && featuredProducts.length === 0">
+      Jelenleg nincs kiemelhető termék az adatbázisban.
+    </div>
+
+    <div class="featured-grid" *ngIf="featuredProducts.length > 0">
+      <article class="featured-card card" *ngFor="let product of featuredProducts">
+        <span class="featured-badge">{{ product.badge }}</span>
+        <div style="position:absolute;top:16px;right:16px;z-index:1;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+          <span class="promo-badge" style="color:#38bdf8;" *ngIf="product.isTopProduct || product.badge === 'TOP TERMÉK'">TOP</span>
+          <span class="promo-badge" style="color:#bef264;" *ngIf="product.isWeeklyDeal">Heti ajánlat</span>
+          <span class="promo-badge" style="color:#f8fafc;" *ngIf="product.hasDiscount">-{{ product.discountPercent }}%</span>
+        </div>
+        <img [src]="product.image" [alt]="product.name">
+        <p class="featured-category">{{ product.category }}</p>
+        <h3>{{ product.name }}</h3>
+        <p class="featured-short">{{ product.shortDescription }}</p>
+        <div class="featured-price-block">
+          <p class="featured-original-price" *ngIf="product.hasDiscount">{{ product.originalPrice }} Ft</p>
+          <p class="featured-price">{{ product.price }} Ft</p>
+        </div>
+        <span class="featured-stock" [class]="product.stockClass">{{ product.stockLabel }}</span>
+        <div class="featured-actions">
+          <button class="btn featured-link" type="button" (click)="openFeaturedDetails(product)">Részletek</button>
+          <button class="btn btn-secondary" type="button" [disabled]="!canAddToCart(product)" (click)="addFeaturedToCart(product)">
+            {{ canAddToCart(product) ? 'Kosárba' : 'Nincs készleten' }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="section-heading">
+      <span class="section-kicker">Ajánlatok</span>
+      <h2>Heti ajánlatok, top termékek és újdonságok</h2>
+      <p>Az aktuális akciók és kiemelt termékcsoportok gyors eléréséhez.</p>
+    </div>
+
+    <div class="promo-grid">
+      <button
+        type="button"
+        class="promo-card card"
+        *ngFor="let promo of promoBanners"
+        [style.--promo-accent]="promo.accent"
+        (click)="goToProducts(promo.queryParams)"
+      >
+        <span class="promo-badge">{{ promo.badge }}</span>
+        <h3>{{ promo.title }}</h3>
+        <p>{{ promo.subtitle }}</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="home-section trust-section card">
+    <div class="section-heading">
+      <span class="section-kicker">Miért minket válasszon?</span>
+      <h2>Megbízható vásárlási élmény</h2>
+      <p>Átlátható folyamat, valós készletadatok és gyors ügyintézés minden rendelésnél.</p>
+    </div>
+
+    <div class="trust-grid">
+      <article class="trust-card" *ngFor="let item of trustItems">
+        <span class="trust-icon">{{ item.icon }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+      </article>
+    </div>
+  </section>
+</div>
+
+<div class="product-modal-backdrop" *ngIf="selectedFeaturedProduct" (click)="closeFeaturedDetails()">
+  <section class="product-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeFeaturedDetails()">X</button>
+
+    <div class="modal-layout" *ngIf="selectedFeaturedProduct as item">
+      <div class="modal-gallery">
+        <img class="main-image" [src]="selectedFeaturedImage || item.image" [alt]="item.name">
+
+        <div class="thumb-row">
+          <button
+            type="button"
+            class="thumb-btn"
+            *ngFor="let image of item.images"
+            [class.active]="(selectedFeaturedImage || item.image) === image"
+            (click)="selectFeaturedImage(image)"
+          >
+            <img [src]="image" [alt]="item.name">
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-content">
+        <p class="modal-category">{{ item.category }}</p>
+        <h2>{{ item.name }}</h2>
+        <div class="modal-price-block">
+          <p class="modal-original-price" *ngIf="item.hasDiscount">{{ item.originalPrice }} Ft</p>
+          <p class="modal-price">{{ item.price }} Ft</p>
+        </div>
+        <p class="modal-stock">Készlet: {{ item.stock }} ({{ item.stockQuantity }} db)</p>
+        <p class="modal-description">{{ item.description }}</p>
+
+        <div class="modal-specs">
+          <div class="spec-item">
+            <span class="spec-label">Cikkszám</span>
+            <strong>{{ item.sku }}</strong>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Márka</span>
+            <strong>{{ item.brand }}</strong>
+          </div>
+        </div>
+
+        <button
+          class="btn btn-secondary modal-cart-btn"
+          [disabled]="!canAddToCart(item)"
+          (click)="addFeaturedToCart(item)"
+        >
+          {{ canAddToCart(item) ? 'Kosárba' : 'Nincs készleten' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

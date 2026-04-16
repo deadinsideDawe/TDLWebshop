@@ -1,0 +1,10 @@
+<div class="toast-stack" *ngIf="toastService.toasts$ | async as toasts">
+  <article class="toast-item" *ngFor="let toast of toasts" [class]="toast.kind">
+    <span class="toast-icon">{{ getIcon(toast.kind) }}</span>
+    <div class="toast-content">
+      <strong>{{ toast.title }}</strong>
+      <p *ngIf="toast.text">{{ toast.text }}</p>
+    </div>
+    <button type="button" class="toast-close" (click)="remove(toast.id)">X</button>
+  </article>
+</div>

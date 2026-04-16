@@ -1,0 +1,155 @@
+<div class="page-container profile-page">
+  <section class="card profile-header">
+    <h1>Profilom</h1>
+    <p>Itt kezelheted a felhasználói, szállítási, számlázási és céges adataidat, valamint a rendeléseidet.</p>
+  </section>
+
+  <section class="card empty-state" *ngIf="!(authService.user$ | async)">
+    A profil megtekintéséhez jelentkezz be.
+    <a routerLink="/login" class="btn btn-secondary">Bejelentkezés</a>
+  </section>
+
+  <section class="card profile-tabs" *ngIf="authService.user$ | async">
+    <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="setTab('profile')">Adataim</button>
+    <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="setTab('orders')">Rendeléseim</button>
+  </section>
+
+  <section class="card profile-form-card" *ngIf="(authService.user$ | async) && activeTab === 'profile'">
+    <div class="empty-state" *ngIf="loading">Profiladatok betöltése...</div>
+
+    <div class="profile-form" *ngIf="!loading">
+      <h2>Felhasználói adatok</h2>
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Email</label>
+          <input [value]="email" disabled>
+        </div>
+        <div class="field-group">
+          <label>Teljes név</label>
+          <input [(ngModel)]="displayName" placeholder="Teljes név">
+        </div>
+        <div class="field-group">
+          <label>Telefonszám</label>
+          <input [(ngModel)]="phone" placeholder="Telefonszám">
+        </div>
+      </div>
+
+      <h2>Szállítási cím</h2>
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Irányítószám</label>
+          <input [(ngModel)]="shippingZip" placeholder="Irányítószám">
+        </div>
+        <div class="field-group">
+          <label>Város</label>
+          <input [(ngModel)]="shippingCity" placeholder="Város">
+        </div>
+        <div class="field-group full-width">
+          <label>Szállítási cím</label>
+          <input [(ngModel)]="shippingAddress" placeholder="Utca, házszám, emelet, ajtó">
+        </div>
+      </div>
+
+      <h2>Számlázási adatok</h2>
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="billingSameAsShipping">
+        Megegyezik a szállítási címmel
+      </label>
+
+      <div class="form-grid" *ngIf="!billingSameAsShipping">
+        <div class="field-group">
+          <label>Számlázási név</label>
+          <input [(ngModel)]="billingName" placeholder="Számlázási név">
+        </div>
+        <div class="field-group">
+          <label>Irányítószám</label>
+          <input [(ngModel)]="billingZip" placeholder="Irányítószám">
+        </div>
+        <div class="field-group">
+          <label>Város</label>
+          <input [(ngModel)]="billingCity" placeholder="Város">
+        </div>
+        <div class="field-group full-width">
+          <label>Számlázási cím</label>
+          <input [(ngModel)]="billingAddress" placeholder="Számlázási cím">
+        </div>
+      </div>
+
+      <h2>Céges adatok</h2>
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Vásárló típusa</label>
+          <select [(ngModel)]="accountType">
+            <option value="private">Magánszemély</option>
+            <option value="company">Cég / szerelő</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid" *ngIf="accountType === 'company'">
+        <div class="field-group">
+          <label>Cég neve</label>
+          <input [(ngModel)]="companyName" placeholder="Cég neve">
+        </div>
+        <div class="field-group">
+          <label>Adószám</label>
+          <input [(ngModel)]="taxNumber" placeholder="Adószám">
+        </div>
+      </div>
+
+      <p class="success-text" *ngIf="saveMessage">{{ saveMessage }}</p>
+      <p class="error-text" *ngIf="profileError">{{ profileError }}</p>
+
+      <button class="btn btn-secondary save-btn" type="button" (click)="saveProfile()" [disabled]="saving">
+        {{ saving ? 'Mentés folyamatban...' : 'Profil mentése' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="orders-section" *ngIf="(authService.user$ | async) && activeTab === 'orders'">
+    <div class="card empty-state" *ngIf="ordersLoading">Rendelések betöltése...</div>
+    <div class="card empty-state error-state" *ngIf="ordersError">{{ ordersError }}</div>
+
+    <div class="orders-grid" *ngIf="!ordersLoading && !ordersError && orders.length > 0">
+      <article class="card order-card" *ngFor="let order of orders">
+        <div class="order-head">
+          <strong>#{{ order.id }}</strong>
+          <span class="status-pill" [class.status-new]="order.status === 'uj'" [class.status-progress]="order.status === 'feldolgozas alatt'" [class.status-done]="order.status === 'teljesitve'" [class.status-cancel]="order.status === 'lemondva'">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+        <p>Dátum: {{ formatDate(order.createdAt) }}</p>
+        <p *ngIf="order.pickupAt">Átvétel időpontja: {{ formatDate(order.pickupAt) }}</p>
+        <p>Termékek: {{ getOrderItemCount(order) }} db</p>
+        <p>Végösszeg: {{ order.total }} Ft</p>
+        <button class="btn btn-secondary" type="button" (click)="openOrderDetails(order)">Részletek</button>
+      </article>
+    </div>
+
+    <div class="card empty-state" *ngIf="!ordersLoading && !ordersError && orders.length === 0">
+      Még nincs rendelése a fiókodnak.
+    </div>
+  </section>
+</div>
+
+<div class="details-backdrop" *ngIf="selectedOrder" (click)="closeOrderDetails()">
+  <section class="card details-modal" (click)="$event.stopPropagation()">
+    <button class="close-btn" type="button" (click)="closeOrderDetails()">X</button>
+    <h3>Rendelés részletei</h3>
+    <p><strong>Azonosító:</strong> {{ selectedOrder.id }}</p>
+    <p><strong>Státusz:</strong> {{ getStatusLabel(selectedOrder.status) }}</p>
+    <p><strong>Dátum:</strong> {{ formatDate(selectedOrder.createdAt) }}</p>
+    <p><strong>Átvétel időpontja:</strong> {{ selectedOrder.pickupAt ? formatDate(selectedOrder.pickupAt) : '-' }}</p>
+    <p><strong>Szállítási mód:</strong> {{ selectedOrder.shippingMethod?.label || '-' }}</p>
+    <p><strong>Fizetési mód:</strong> {{ selectedOrder.paymentMethod?.label || '-' }}</p>
+    <p><strong>Végösszeg:</strong> {{ selectedOrder.total }} Ft</p>
+
+    <div class="items-list" *ngIf="selectedOrder.items.length">
+      <h4>Tételek</h4>
+      <div class="item-row" *ngFor="let item of selectedOrder.items">
+        <span>{{ item.name }} x{{ item.quantity }}</span>
+        <strong>{{ item.price * item.quantity }} Ft</strong>
+      </div>
+    </div>
+  </section>
+</div>

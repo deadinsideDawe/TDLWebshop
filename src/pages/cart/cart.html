@@ -1,0 +1,35 @@
+<!-- Kosár oldal: tétellista + összesítő. -->
+<div class="page-container">
+  <h1 class="section-title">Kosár</h1>
+
+  <!-- Üres kosár állapot. -->
+  <div *ngIf="items.length === 0" class="card empty-cart">
+    <p>A kosár üres.</p>
+    <a class="btn continue-link" routerLink="/products">Termékek megtekintése</a>
+  </div>
+
+  <!-- Nem üres kosár: termékek és véglegesítés. -->
+  <div *ngIf="items.length > 0" class="cart-layout">
+    <div class="cart-list">
+      <div class="cart-item card" *ngFor="let item of items">
+        <img [src]="item.image" [alt]="item.name">
+        <div class="cart-item-content">
+          <div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.price }} Ft</p>
+            <p>Mennyiség: {{ item.quantity }}</p>
+          </div>
+
+          <button class="remove-btn" (click)="removeItem(item.id)">Termék eltávolítása</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="summary card">
+      <h3>Összesítés</h3>
+      <p>Végösszeg: {{ cartService.getTotal() }} Ft</p>
+      <button class="btn btn-secondary" (click)="goToCheckout()">Rendelés véglegesítése</button>
+      <button class="btn" (click)="cartService.clearCart()">Kosár ürítése</button>
+    </aside>
+  </div>
+</div>

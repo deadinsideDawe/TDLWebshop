@@ -1,0 +1,16 @@
+<!-- Kategória oldal: kártyákra kattintva szűrt terméklista nyílik. -->
+<div class="page-container">
+  <h1 class="section-title">Kategóriák</h1>
+
+  <div class="category-grid">
+    <a
+      class="category-box card"
+      *ngFor="let item of categories"
+      [routerLink]="['/products']"
+      [queryParams]="{ category: item }"
+    >
+      <div class="category-icon"></div>
+      <h3>{{ item }}</h3>
+    </a>
+  </div>
+</div>

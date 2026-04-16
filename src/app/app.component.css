@@ -1,0 +1,303 @@
+:host {
+  display: block;
+}
+
+/* Fix fejléc teljes navigációval. */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 1200;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(14px);
+  overflow: visible;
+}
+
+/* Fejléc belső rácsszerkezet: brand | kereső | akciók. */
+.topbar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 330px minmax(280px, 500px) auto;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Bal oldali brand és kategória nyitó gomb. */
+.brand-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  padding: 8px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px var(--button-border);
+}
+
+.brand img {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: 54px;
+  object-fit: contain;
+}
+
+/* Fejléc gombok közös átmenete. */
+.category-button,
+.search-btn,
+.theme-btn,
+.logout-btn,
+.admin-toggle {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.category-button {
+  background: rgba(150, 216, 60, 0.12);
+  color: var(--secondary);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.category-button:hover,
+.search-btn:hover,
+.theme-btn:hover,
+.logout-btn:hover,
+.admin-toggle:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.search-area {
+  display: flex;
+  align-items: center;
+  background: var(--background-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  max-width: 500px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 14px 16px;
+  outline: none;
+  color: var(--text);
+}
+
+.search-btn {
+  background: linear-gradient(135deg, #0f5fa8, #1aa8ff);
+  color: #fff;
+  padding: 14px 18px;
+}
+
+/* Jobb oldal: téma, auth, admin, kosár. */
+.actions-area {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.theme-btn {
+  background: var(--background-soft);
+  border-radius: 999px;
+  min-width: 62px;
+  height: 40px;
+  color: var(--text);
+}
+
+body.theme-dark .theme-btn {
+  color: #ffffff;
+}
+
+.logout-btn {
+  background: rgba(150, 216, 60, 0.12);
+  color: var(--secondary);
+  border-radius: 999px;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.admin-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f5fa8, #1aa8ff);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.icon-link {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: var(--background-soft);
+}
+
+.user-label {
+  font-size: 14px;
+  color: var(--text);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-link {
+  padding-right: 10px;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Kategória mega menü + füstös háttér overlay. */
+.mega-menu {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: max(20px, calc((100vw - 1400px) / 2 + 20px));
+  width: min(760px, calc(100vw - 40px));
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+  z-index: 1201;
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(12, 18, 14, 0.4);
+  backdrop-filter: blur(6px);
+}
+
+.mega-column h4 {
+  margin: 0 0 10px;
+  color: var(--secondary);
+}
+
+.mega-column a {
+  display: block;
+  padding: 8px 0;
+  text-decoration: none;
+  color: var(--text);
+}
+
+/* Fix header miatt felül extra tér a route tartalomnak. */
+.page-shell {
+  padding-top: 120px;
+  min-height: calc(100vh - 300px);
+}
+
+/* Márkázott footer blokk. */
+.site-footer {
+  margin-top: 56px;
+  border-top: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(11, 15, 20, 0.96), rgba(17, 24, 39, 0.98));
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 34px 20px 42px;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+.footer-brand img {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.footer-brand p,
+.footer-column span,
+.footer-column a {
+  color: var(--muted);
+  text-decoration: none;
+  line-height: 1.7;
+}
+
+.footer-column {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.footer-column h4 {
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+@media (max-width: 1000px) {
+  .topbar-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-area {
+    justify-content: flex-start;
+  }
+
+  .search-area {
+    max-width: 100%;
+  }
+
+  .mega-menu {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .page-shell {
+    padding-top: 220px;
+  }
+}
+
+@media (max-width: 700px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+  }
+}

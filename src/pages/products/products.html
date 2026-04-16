@@ -1,0 +1,176 @@
+<!-- Termékoldal: bal oldali szűrőpanel + jobb oldali találati lista. -->
+<div class="page-container products-layout">
+  <!-- Szűrő sidebar. -->
+  <aside class="filters card">
+    <h2>Szűrők</h2>
+
+    <div class="filter-group" *ngIf="searchTerm">
+      <h4>Aktív keresés</h4>
+      <p class="active-search">Keresett kifejezés: "{{ searchTerm }}"</p>
+    </div>
+
+    <div class="filter-group">
+      <h4>Ár</h4>
+
+      <label>Minimum ár</label>
+      <input type="number" [(ngModel)]="minPrice">
+
+      <label>Maximum ár</label>
+      <input type="number" [(ngModel)]="maxPrice" placeholder="Nincs felső korlát">
+    </div>
+
+    <div class="filter-group">
+      <h4>Kategória</h4>
+
+      <label *ngFor="let category of categories">
+        <input
+          type="checkbox"
+          [checked]="selectedCategories.includes(category)"
+          (change)="onCategoryChange(category, $event)"
+        />
+        {{ category }}
+      </label>
+    </div>
+
+    <div class="filter-group">
+      <h4>Elérhetőség</h4>
+
+      <label *ngFor="let stock of stockOptions">
+        <input
+          type="checkbox"
+          [checked]="selectedStocks.includes(stock)"
+          (change)="onStockChange(stock, $event)"
+        />
+        {{ stock }}
+      </label>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-secondary" (click)="applyFilters()">Szűrés</button>
+      <button class="btn" (click)="resetFilters()">Szűrők törlése</button>
+    </div>
+  </aside>
+
+  <!-- Találati panel és termékkártyák. -->
+  <section class="products-content">
+    <div class="promo-small card">
+      <h2>Épületgépészeti termékek</h2>
+      <p>Találatok száma: {{ filteredProducts.length }}</p>
+      <p class="data-source">Adatforrás: {{ dataSourceLabel }}</p>
+      <p class="load-message" *ngIf="loading">Termékek betöltése folyamatban...</p>
+      <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </div>
+
+    <div class="empty-products card" *ngIf="!loading && filteredProducts.length === 0">
+      Nincs a szűrőknek megfelelő termék.
+    </div>
+
+    <div class="product-grid" *ngIf="filteredProducts.length > 0">
+      <article class="product-card card" *ngFor="let item of filteredProducts">
+        <span class="product-stock-badge" [class]="getStockState(item)">{{ getStockStateLabel(item) }}</span>
+        <div class="product-promo-badges">
+          <span class="promo-chip top-chip" *ngIf="hasTopBadge(item)">TOP</span>
+          <span class="promo-chip deal-chip" *ngIf="item.isWeeklyDeal">Heti ajánlat</span>
+          <span class="promo-chip deal-chip" *ngIf="item.hasDiscount">-{{ item.discountPercent }}%</span>
+        </div>
+        <img [src]="item.image" [alt]="item.name" loading="lazy" decoding="async">
+        <h3>{{ item.name }}</h3>
+        <p class="product-category">{{ item.category }}</p>
+        <p class="product-short">{{ item.shortDescription }}</p>
+        <div class="price-block">
+          <p class="original-price" *ngIf="item.hasDiscount">{{ item.originalPrice }} Ft</p>
+          <p class="price">{{ item.price }} Ft</p>
+        </div>
+        <p class="stock">{{ item.stock }}</p>
+        <p class="stock-quantity">Raktárkészlet: {{ item.stockQuantity }} db</p>
+        <p class="reserved-stock" *ngIf="getReservedQuantity(item) > 0">
+          Foglalás alatt: {{ getReservedQuantity(item) }} db
+        </p>
+        <div class="product-actions">
+          <button class="btn details-btn" (click)="openProductDetails(item)">Részletek</button>
+          <button class="btn btn-secondary" [disabled]="!canAddToCart(item)" (click)="addToCart(item)">
+            {{ canAddToCart(item) ? 'Kosárba' : 'Nincs készleten' }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<!-- Részletek modal. -->
+<div class="product-modal-backdrop" *ngIf="selectedProduct" (click)="closeProductDetails()">
+  <section class="product-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeProductDetails()">X</button>
+
+    <div class="modal-layout" *ngIf="selectedProduct as item">
+      <div class="modal-gallery">
+        <img class="main-image" [src]="selectedProductImage || item.image" [alt]="item.name">
+
+        <div class="thumb-row">
+          <button
+            type="button"
+            class="thumb-btn"
+            *ngFor="let image of item.images"
+            [class.active]="(selectedProductImage || item.image) === image"
+            (click)="selectProductImage(image)"
+          >
+            <img [src]="image" [alt]="item.name">
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-content">
+        <p class="modal-category">{{ item.category }}</p>
+        <h2>{{ item.name }}</h2>
+        <div class="modal-price-block">
+          <p class="modal-original-price" *ngIf="item.hasDiscount">{{ item.originalPrice }} Ft</p>
+          <p class="modal-price">{{ item.price }} Ft</p>
+        </div>
+        <p class="modal-stock">Készlet: {{ item.stock }} ({{ item.stockQuantity }} db)</p>
+        <p class="modal-description">{{ item.description }}</p>
+
+        <div class="modal-specs">
+          <div class="spec-item">
+            <span class="spec-label">Cikkszám</span>
+            <strong>{{ item.sku }}</strong>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Márka</span>
+            <strong>{{ item.brand }}</strong>
+          </div>
+        </div>
+
+        <button
+          class="btn btn-secondary modal-cart-btn"
+          [disabled]="!canAddToCart(item)"
+          (click)="addSelectedProductToCart()"
+        >
+          {{ canAddToCart(item) ? 'Kosárba' : 'Nincs készleten' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Kosár előnézet modal. -->
+<div class="product-modal-backdrop" *ngIf="cartPreviewProduct" (click)="closeCartPreview()">
+  <section class="cart-preview-modal card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeCartPreview()">X</button>
+
+    <div class="cart-preview-content" *ngIf="cartPreviewProduct as product">
+      <img class="cart-preview-image" [src]="product.image" [alt]="product.name">
+      <p class="cart-preview-badge">Termék a kosárban</p>
+      <h2>{{ product.name }}</h2>
+      <p class="cart-preview-category">{{ product.category }}</p>
+      <div class="modal-price-block">
+        <p class="modal-original-price" *ngIf="product.hasDiscount">{{ product.originalPrice }} Ft</p>
+        <p class="cart-preview-price">{{ product.price }} Ft</p>
+      </div>
+
+      <div class="cart-preview-actions">
+        <button class="btn details-btn" (click)="closeCartPreview()">Vásárlás folytatása</button>
+        <button class="btn btn-secondary" (click)="goToCart()">Ugrás a kosárra</button>
+      </div>
+    </div>
+  </section>
+</div>

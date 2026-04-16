@@ -1,0 +1,67 @@
+/* Login kartya layout. */
+.login-container {
+  max-width: 420px;
+  margin: 56px auto;
+  padding: 28px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Login input stilus. */
+input {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background-soft);
+  color: var(--text);
+}
+
+button {
+  background: var(--primary);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.toggle-text {
+  margin: 0;
+  color: var(--secondary);
+  font-weight: 600;
+}
+
+.register-link {
+  text-decoration: none;
+}
+
+.status-text,
+.info-message,
+.success-message,
+.error-message {
+  margin: 0;
+}
+
+.info-message {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.success-message {
+  color: #1f7a36;
+}
+
+.error-message {
+  color: #c0392b;
+}

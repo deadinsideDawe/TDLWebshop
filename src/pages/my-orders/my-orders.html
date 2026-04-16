@@ -1,0 +1,80 @@
+<!-- Saját rendelések oldal: státuszlista és részletek modal. -->
+<div class="page-container my-orders-page">
+  <div class="card page-header">
+    <h1>Saját rendelések</h1>
+    <p>Itt látod a saját rendeléseid állapotát és részleteit.</p>
+  </div>
+
+  <div class="card empty-state" *ngIf="!(authService.user$ | async)">
+    A rendelések megtekintéséhez jelentkezz be.
+    <a routerLink="/login" class="btn btn-secondary">Bejelentkezés</a>
+  </div>
+
+  <div class="card empty-state" *ngIf="(authService.user$ | async) && loading">
+    Rendelések betöltése...
+  </div>
+
+  <div class="card empty-state error-state" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="orders-grid" *ngIf="(authService.user$ | async) && !loading && !error && orders.length > 0">
+    <article class="card order-card" *ngFor="let order of orders">
+      <div class="order-head">
+        <strong>#{{ order.id }}</strong>
+        <span class="status-pill" [class.status-new]="order.status === 'uj'" [class.status-progress]="order.status === 'feldolgozas alatt'" [class.status-done]="order.status === 'teljesitve'" [class.status-cancel]="order.status === 'lemondva'">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+      <p>Dátum: {{ formatDate(order.createdAt) }}</p>
+      <p *ngIf="order.pickupAt">Átvétel időpontja: {{ formatDate(order.pickupAt) }}</p>
+      <p>Termékek: {{ getOrderItemCount(order) }} db</p>
+      <p>Végösszeg: {{ order.total }} Ft</p>
+
+      <div class="order-timeline" [class.cancelled]="order.status === 'lemondva'">
+        <div class="timeline-step" [class.done]="isTimelineReached(order.status, 1)">Új</div>
+        <div class="timeline-step" [class.done]="isTimelineReached(order.status, 2)">Feldolgozás</div>
+        <div class="timeline-step" [class.done]="isTimelineReached(order.status, 3)">Teljesítve</div>
+      </div>
+      <p class="timeline-cancelled" *ngIf="order.status === 'lemondva'">Ez a rendelés lemondva.</p>
+
+      <button class="btn btn-secondary" type="button" (click)="openDetails(order)">
+        Részletek
+      </button>
+    </article>
+  </div>
+
+  <div class="card empty-state" *ngIf="(authService.user$ | async) && !loading && !error && orders.length === 0">
+    Még nincs rendelése a fiókodnak.
+  </div>
+</div>
+
+<div class="details-backdrop" *ngIf="selectedOrder" (click)="closeDetails()">
+  <section class="card details-modal" (click)="$event.stopPropagation()">
+    <button class="close-btn" type="button" (click)="closeDetails()">X</button>
+    <h3>Rendelés részletei</h3>
+    <p><strong>Azonosító:</strong> {{ selectedOrder.id }}</p>
+    <p><strong>Státusz:</strong> {{ getStatusLabel(selectedOrder.status) }}</p>
+    <p><strong>Dátum:</strong> {{ formatDate(selectedOrder.createdAt) }}</p>
+    <p><strong>Átvétel időpontja:</strong> {{ selectedOrder.pickupAt ? formatDate(selectedOrder.pickupAt) : '-' }}</p>
+    <p><strong>Szállítási mód:</strong> {{ selectedOrder.shippingMethod?.label || '-' }}</p>
+    <p><strong>Fizetési mód:</strong> {{ selectedOrder.paymentMethod?.label || '-' }}</p>
+    <p><strong>Végösszeg:</strong> {{ selectedOrder.total }} Ft</p>
+
+    <div class="order-timeline modal-timeline" [class.cancelled]="selectedOrder.status === 'lemondva'">
+      <div class="timeline-step" [class.done]="isTimelineReached(selectedOrder.status, 1)">Új</div>
+      <div class="timeline-step" [class.done]="isTimelineReached(selectedOrder.status, 2)">Feldolgozás</div>
+      <div class="timeline-step" [class.done]="isTimelineReached(selectedOrder.status, 3)">Teljesítve</div>
+    </div>
+    <p class="timeline-cancelled" *ngIf="selectedOrder.status === 'lemondva'">Ez a rendelés lemondva.</p>
+
+    <div class="items-list" *ngIf="selectedOrder.items.length">
+      <h4>Tételek</h4>
+      <div class="item-row" *ngFor="let item of selectedOrder.items">
+        <span>{{ item.name }} x{{ item.quantity }}</span>
+        <strong>{{ item.price * item.quantity }} Ft</strong>
+      </div>
+    </div>
+  </section>
+</div>

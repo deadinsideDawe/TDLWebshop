@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Szakdolgozat - 1-3. fejezet</title>
+  <style>
+    body { font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.5; margin: 2.5cm; }
+    h1 { font-size: 18pt; margin-top: 24pt; margin-bottom: 12pt; }
+    h2 { font-size: 15pt; margin-top: 20pt; margin-bottom: 10pt; }
+    h3 { font-size: 13pt; margin-top: 14pt; margin-bottom: 8pt; }
+    p { text-align: justify; margin: 0 0 10pt 0; }
+    .meta { margin-bottom: 20pt; }
+  </style>
+</head>
+<body>
+  <h1>1. Motiváció</h1>
+
+  <p>
+    A digitalizáció az elmúlt években a kereskedelem szinte minden területét átalakította, ez alól az épületgépészeti
+    szektor sem kivétel. A nagy országos áruházláncok és multinacionális webáruházak már hosszabb ideje képesek
+    professzionális online értékesítési felületeket működtetni, ugyanakkor a kisebb helyi vállalkozások jelentős része
+    továbbra is főként telefonos, e-mailes vagy személyes rendelésfelvételre támaszkodik. Ez a gyakorlat rövid távon
+    működőképes lehet, de közép- és hosszú távon versenyhátrányt okoz, különösen akkor, amikor a vásárlók egyre inkább
+    elvárják a gyors, átlátható és digitálisan támogatott ügyintézést.
+  </p>
+
+  <p>
+    A szakdolgozat témaválasztásának közvetlen oka, hogy a saját környezetemben több olyan kisebb épületgépészeti
+    vállalkozással találkoztam, amelyek szakmailag jól működnek, stabil vevőkörrel rendelkeznek, azonban a rendelési és
+    készletkezelési folyamataik digitalizáltsága alacsony szintű. A gyakorlatban ez azt jelenti, hogy a vásárló sokszor
+    csak telefonon tud érdeklődni, a termékek aktuális elérhetősége nem mindig ellenőrizhető azonnal, valamint az
+    adminisztráció jelentős része manuálisan történik. Ezek a problémák nemcsak a vevői élményt rontják, hanem az üzleti
+    folyamatokat is lassítják.
+  </p>
+
+  <p>
+    A dolgozat célja ezért egy olyan épületgépészeti webshop létrehozása volt, amelyet kifejezetten kisebb vállalkozások
+    működési modelljéhez lehet illeszteni. A hangsúly nem egy túlméretezett, vállalatirányítási rendszer kiváltásán volt,
+    hanem egy fokozatosan bevezethető, gyakorlatban használható, könnyen kezelhető megoldás kialakításán. A tervezés
+    során elsődleges szempontként jelent meg, hogy a rendszer támogassa:
+  </p>
+
+  <p>
+    a termékek strukturált megjelenítését (kategóriák, szűrés, keresés),<br>
+    a vásárlói rendelési folyamat egyszerű végigvitelét,<br>
+    a valós készletkövetést és készletcsökkenés jelzését,<br>
+    az adminisztratív feladatok (termékkezelés, rendeléskezelés) gyors és átlátható elvégzését.
+  </p>
+
+  <p>
+    A projekt további motivációja, hogy a megvalósított rendszer ne csupán demonstrációs célú prototípus legyen, hanem
+    a későbbiekben valós vállalkozói környezetben is továbbfejleszthető és használható alapot jelentsen. Ennek érdekében
+    a fejlesztési döntések során tudatosan olyan technológiai és architekturális irányt választottam, amely a gyors
+    implementáció mellett biztosítja a skálázhatóságot és a későbbi bővíthetőséget is.
+  </p>
+
+  <p>
+    A motivációs háttérhez szorosan kapcsolódik az is, hogy a szakdolgozat gyakorlati értéket képviseljen. A téma nem
+    kizárólag elméleti kutatásként jelent meg, hanem konkrét fejlesztési feladatként: működő felület, tényleges
+    adatkezelés, adminisztrációs folyamat és felhasználói útvonalak kidolgozásával. Ezáltal a dolgozat egyszerre
+    szolgálja a szakmai fejlődést, a gyakorlati alkalmazhatóságot és a későbbi piaci hasznosíthatóság lehetőségét.
+  </p>
+
+  <h1>2. Terület áttekintése</h1>
+
+  <h2>2.1. Épületgépészeti termékértékesítés sajátosságai</h2>
+  <p>
+    Az épületgépészeti termékek értékesítése több szempontból eltér az általános fogyasztási cikkek webes kereskedelmétől.
+    Egyrészt a termékpaletta nagy számú műszaki elemből áll, amelyek gyakran hasonló névvel, de eltérő paraméterekkel
+    rendelkeznek. Másrészt a vásárlói kör összetett: magánszemélyek, szerelők, kivitelezők és kisebb cégek egyaránt jelen
+    vannak. Emiatt a webshopnak egyszerre kell közérthetőnek és szakmailag pontosnak lennie.
+  </p>
+
+  <p>
+    A kategorizálás és a kereshetőség kiemelt jelentőségű. Egy jól felépített termékoldal esetében a vásárló jellemzően
+    két módon jut el a megfelelő termékhez: vagy kategória-alapú böngészéssel (például fűtés, hűtés, víz, szellőzés,
+    szerelvények), vagy kulcsszavas kereséssel. Ha bármelyik útvonal lassú, pontatlan vagy nehezen értelmezhető,
+    megnő a félbehagyott vásárlások aránya.
+  </p>
+
+  <h2>2.2. Kisebb vállalkozások működési korlátai</h2>
+  <p>
+    A kis- és mikrovállalkozások számára általában korlátozott erőforrás áll rendelkezésre informatikai fejlesztésre.
+    Gyakori, hogy nincs dedikált IT szakember, a napi működés pedig nem teszi lehetővé komplex rendszerek bevezetését.
+    Emiatt különösen fontos, hogy a webshop bevezetése alacsony belépési küszöb mellett történjen: a kezelőfelület legyen
+    egyszerű, a karbantartás minimális, az adminisztráció pedig gyorsan elsajátítható.
+  </p>
+
+  <p>
+    Ezen vállalkozásoknál a készletinformáció pontossága üzletileg kritikus kérdés. Ha a weboldalon elérhetőként jelölt
+    termékről a valóságban kiderül, hogy nincs raktáron, az bizalomvesztéshez vezethet. Ugyanígy problémát jelenthet az is,
+    ha a helyszíni és a webes értékesítés nincs összehangolva. A rendszernek ezért támogatnia kell a foglalások és a
+    készletváltozások egységes nyomon követését.
+  </p>
+
+  <h2>2.3. Webshopokkal szembeni alapvető követelmények</h2>
+  <p>
+    Egy korszerű webshop minimális elvárásai közé tartozik a mobilbarát megjelenés, a gyors oldalbetöltés, az egyértelmű
+    navigáció, a biztonságos bejelentkezés, valamint az átlátható rendelési folyamat. Ezen túlmenően az épületgépészeti
+    területen kiemelten fontos:
+  </p>
+
+  <p>
+    pontos termékinformáció megjelenítése (név, ár, kategória, készlet),<br>
+    többféle szűrési lehetőség (kategória, ár, elérhetőség),<br>
+    admin oldali gyors termékfrissítés, akciók kezelése,<br>
+    rendelésállapotok kezelése és visszakereshetősége.
+  </p>
+
+  <p>
+    A szakdolgozatban fejlesztett rendszer ennek megfelelően nem pusztán termékkatalógusként működik, hanem egy olyan
+    alap üzleti folyamatot is támogat, amelyben a rendelés leadása, admin oldali feldolgozása és készletfrissítése
+    összekapcsolódik.
+  </p>
+
+  <h2>2.4. Hasonló megoldások és a fejlesztés pozicionálása</h2>
+  <p>
+    A piacon elérhető nagy webshop motorok (például általános e-kereskedelmi rendszerek) sok esetben széles funkcionalitást
+    biztosítanak, azonban ezek bevezetése kisebb vállalkozások számára költséges vagy túl összetett lehet. A dolgozat
+    megközelítése ezzel szemben célzott: olyan funkciók kerültek fókuszba, amelyek közvetlenül támogatják az
+    épületgépészeti értékesítést és az adminisztratív működést.
+  </p>
+
+  <p>
+    A rendszer újdonságát nem egyetlen technológiai áttörés adja, hanem a gyakorlati használhatóságra optimalizált
+    funkciókombináció: valós készletkövetés, admin figyelmeztetés alacsony készlet esetén, termékek promóciós jelölése,
+    rendelésállapotok kezelése, valamint a felhasználói és admin nézet szétválasztása.
+  </p>
+
+  <h1>3. Funkcionális specifikáció</h1>
+
+  <h2>3.1. Rendszercél és lehatárolás</h2>
+  <p>
+    A rendszer célja egy olyan webes értékesítési felület biztosítása, amelyen a vásárló egyszerűen tud terméket keresni,
+    kosárba helyezni és rendelést leadni, míg az admin felhasználó képes a termékkatalógus és rendelések kezelésére.
+    A projekt jelenlegi verziója az alap online rendelési folyamatot fedi le, kiegészítve készletkezelési és promóciós
+    funkciókkal. A fejlesztés során tudatos lehatárolás történt: a teljes online fizetési integráció helyett a rendszer
+    a személyes átvételre és admin oldali feldolgozásra fókuszál.
+  </p>
+
+  <h2>3.2. Szerepkörök</h2>
+  <h3>3.2.1. Vendég felhasználó</h3>
+  <p>
+    A vendég felhasználó böngészheti a termékeket, használhatja a keresőt és a szűrőket, valamint kosárba helyezheti a
+    kiválasztott tételeket. A rendelés véglegesítéséhez regisztráció vagy bejelentkezés szükséges.
+  </p>
+
+  <h3>3.2.2. Regisztrált vásárló</h3>
+  <p>
+    A regisztrált felhasználó a vendég funkcióin túl eléri a saját profilját, megadhatja szállítási és számlázási adatait,
+    valamint nyomon követheti rendeléseit. A checkout folyamatban kuponkódot adhat meg, és kiválaszthatja az átvételi
+    opciót.
+  </p>
+
+  <h3>3.2.3. Admin felhasználó</h3>
+  <p>
+    Az admin szerepkör a rendszer működtetéséért felel. Jogosult termék létrehozására, módosítására, törlésére, akciók
+    beállítására, rendelésállapotok kezelésére, valamint alacsony készlet figyelmeztetések megtekintésére.
+  </p>
+
+  <h2>3.3. Funkcionális követelmények</h2>
+
+  <h3>3.3.1. Hitelesítés és jogosultságkezelés</h3>
+  <p>
+    A rendszer Firebase Authentication alapú bejelentkezést és regisztrációt használ. A felhasználói állapot valós időben
+    követhető, az admin felület pedig csak engedélyezett admin e-mail címekkel érhető el. A jogosultság ellenőrzése
+    route szinten és felületi logika szinten is megtörténik.
+  </p>
+
+  <h3>3.3.2. Termékmegjelenítés és keresés</h3>
+  <p>
+    A termékek Firestore adatbázisból töltődnek. A felhasználó ár, kategória és elérhetőség alapján szűrhet, továbbá
+    keresőkifejezéssel szűkítheti a találati listát. A termékkártyákon megjelenik a név, kategória, ár, készletinformáció,
+    valamint a részletek és kosárba helyezés lehetősége.
+  </p>
+
+  <h3>3.3.3. Kosár és rendelés</h3>
+  <p>
+    A kosárkezelés kliensoldali szolgáltatással történik, lokális tárolás támogatásával. A checkout oldalon a felhasználó
+    megadja elérhetőségi, szállítási és számlázási adatait, kiválasztja a fizetési és átvételi módot, majd véglegesíti
+    a rendelést. A rendelés adatai Firestore-ba kerülnek mentésre.
+  </p>
+
+  <h3>3.3.4. Készletkezelés</h3>
+  <p>
+    A termékekhez tartozó készletmennyiség és készletstátusz a rendszerben külön mezőként szerepel. Rendelés feldolgozásakor
+    a készlet automatikusan frissül, így a felhasználói oldalon megjelenő információ naprakész marad. Az admin felület
+    alacsony készlet esetén figyelmeztető jelzést ad.
+  </p>
+
+  <h3>3.3.5. Akciók és promóciók</h3>
+  <p>
+    Az admin egyes termékeket akciósként jelölhet, meghatározott kedvezményszázalékkal és időablakkal. A felhasználói
+    felületen az eredeti és akciós ár egyértelműen elkülönítve jelenik meg. A kiemelt termékek (heti ajánlat, top termék,
+    újdonság) külön szűrhető csoportokat alkotnak.
+  </p>
+
+  <h3>3.3.6. Profil és rendeléstörténet</h3>
+  <p>
+    A regisztrált vásárló saját profiloldalon kezelheti személyes adatait, valamint megtekintheti korábbi rendeléseit.
+    A rendelési tételek és státuszok visszakereshetők, ami támogatja az ügyféloldali átláthatóságot.
+  </p>
+
+  <h2>3.4. Nem funkcionális követelmények</h2>
+  <p>
+    A rendszernek biztosítania kell a reszponzív megjelenést, a stabil működést és az átlátható hibakezelést. Fontos
+    elvárás a gyors betöltés, a konzisztens navigáció, valamint a felhasználóbarát visszajelzés (loading, siker, hiba
+    állapotok). A biztonság szempontjából kulcsfontosságú az autentikáció és a Firestore szabályok megfelelő kialakítása.
+  </p>
+
+  <h2>3.5. Elfogadási kritériumok</h2>
+  <p>
+    A megoldás akkor tekinthető sikeresnek, ha:
+  </p>
+  <p>
+    a vásárló képes önállóan végigvinni a teljes rendelési folyamatot;<br>
+    az admin képes terméket és rendelést kezelni külső fejlesztői beavatkozás nélkül;<br>
+    a készletadatok frissítése konzisztensen megtörténik;<br>
+    az akciós termékek és kiemelések a felületen helyesen jelennek meg;<br>
+    az alkalmazás Firebase Hosting környezetben stabilan elérhető.
+  </p>
+
+  <h2>3.6. Összegzés a specifikációhoz</h2>
+  <p>
+    A funkcionális specifikáció alapján a rendszer egy célzott, gyakorlatban is alkalmazható webshop-megoldást nyújt
+    kisebb épületgépészeti vállalkozások számára. A hangsúly a napi működést támogató funkciókon van: gyors termékkezelés,
+    megbízható rendelési folyamat, valós készletinformáció és admin oldali kontroll. Ez a specifikáció megfelelő alapot
+    ad a későbbi fejezetekben bemutatott architekturális és megvalósítási döntések értelmezéséhez.
+  </p>
+
+  <p class="meta">
+    <strong>Megjegyzés:</strong> Ez egy szerkeszthető vázlatváltozat. A végleges leadás előtt egészítsd ki saját
+    intézményi formai követelményekkel, hivatkozásokkal, ábrákkal és képernyőképekkel.
+  </p>
+</body>
+</html>
