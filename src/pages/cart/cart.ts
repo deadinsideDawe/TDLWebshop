@@ -24,8 +24,8 @@ export class Cart {
     });
   }
 
-  removeItem(itemId: number): void {
-    this.cartService.removeFromCart(itemId);
+  removeItem(item: CartItem | number): void {
+    this.cartService.removeFromCart(item);
   }
 
   goToCheckout(): void {

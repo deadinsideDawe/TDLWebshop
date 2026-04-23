@@ -155,6 +155,7 @@
               <strong>{{ method.label }}</strong>
               <small *ngIf="method.fee > 0">Kezelési díj: {{ method.fee }} Ft</small>
               <small *ngIf="method.fee === 0">Nincs extra díj</small>
+              <small *ngIf="method.id === 'card'">A rendelés rögzül, de valódi bankkártya-terhelés nem történik.</small>
             </span>
           </label>
         </div>

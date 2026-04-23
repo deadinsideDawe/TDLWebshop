@@ -6,6 +6,9 @@
     "start": "node scripts/start-dev-stable.js",
     "start:ng": "ng serve",
     "build": "ng build",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:spark": "npm run build && npm run deploy:hosting",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "postinstall": "powershell -ExecutionPolicy Bypass -File scripts/postinstall-dev.ps1"

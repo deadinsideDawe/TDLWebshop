@@ -1,7 +1,7 @@
 /* Termek adatlap oldal layout. */
 .product-details-page {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .back-link {
@@ -21,10 +21,14 @@
 
 /* Galeria + tartalom ket oszlopban. */
 .details-shell {
-  padding: 22px;
+  padding: 24px;
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
   gap: 24px;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 10%, transparent), transparent 28%),
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, var(--background-soft)), var(--card));
 }
 
 .gallery {
@@ -34,10 +38,12 @@
 
 .main-image {
   width: 100%;
-  border-radius: 16px;
+  border-radius: 10px;
   aspect-ratio: 16 / 10;
-  object-fit: cover;
+  object-fit: contain;
   border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--background-soft) 80%, transparent);
+  padding: 18px;
 }
 
 .thumb-row {
@@ -49,7 +55,7 @@
 .thumb-btn {
   padding: 0;
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   background: transparent;
@@ -69,7 +75,11 @@
 .content {
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
 }
 
 .content h1,
@@ -83,9 +93,19 @@
 }
 
 .price {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
   color: var(--primary);
+}
+
+.stock {
+  width: fit-content;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-weight: 800;
 }
 
 .desc {
@@ -104,6 +124,15 @@
   cursor: not-allowed;
 }
 
+.content .btn {
+  max-width: 260px;
+}
+
+.wishlist-btn {
+  background: var(--background-soft);
+  color: var(--text);
+}
+
 .specs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -112,7 +141,7 @@
 
 .spec-item {
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--background-soft);
   display: grid;
@@ -127,5 +156,9 @@
 @media (max-width: 920px) {
   .details-shell {
     grid-template-columns: 1fr;
+  }
+
+  .content .btn {
+    max-width: none;
   }
 }

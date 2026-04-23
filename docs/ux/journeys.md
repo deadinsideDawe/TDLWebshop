@@ -1,78 +1,74 @@
 # Top 3 user journey
 
-## 1) Webes rendelés leadása személyes átvétellel
-**Persona:** Lakossági vásárló, aki gyorsan le akarja foglalni a szükséges termékeket, és üzletben venné át.
+## 1) Vásárló rendelést ad le személyes átvétellel
+**Persona:** Olyan vásárló, aki gyorsan szeretné lefoglalni a szükséges termékeket, és személyesen venné át.
 
-**Belépési pont:** `S01` Főoldal vagy közvetlen terméklista link (`S02`).
+**Belépési pont:** `S01` (Főoldal)
 
 1. **S01 - Főoldal**  
-   A felhasználó rákattint egy kategóriára vagy a "Termékek böngészése" gombra.  
-   Rendszerválasz: megnyílik a terméklista (`S02`) előszűrve.  
+   A felhasználó kategóriát választ vagy a terméklistára megy.  
+   Rendszerválasz: megnyílik a `S02` (Terméklista).  
    Hibaág: ha nincs találat, üres állapot jelenik meg.
 2. **S02 - Terméklista**  
-   A felhasználó szűr, majd kosárba rak egy terméket.  
-   Rendszerválasz: kosár-visszajelző modál jelenik meg (`S16`).  
-   Hibaág: készlethiánynál a kosárba gomb tiltott vagy hibaüzenet jelenik meg.
-3. **S16 - Kosárba visszajelző modál**  
-   A felhasználó az "Ugrás a kosárra" gombra kattint.  
-   Rendszerválasz: megnyílik a kosár oldal (`S05`).
+   A felhasználó kiválaszt egy terméket és kosárba teszi.  
+   Rendszerválasz: `S16` (Kosárba visszajelző modál) megjelenik.
+3. **S16 - Kosárba modál**  
+   A felhasználó „Ugrás a kosárra” opciót választ.  
+   Rendszerválasz: `S05` (Kosár) oldal nyílik.
 4. **S05 - Kosár**  
-   A felhasználó ellenőrzi a tételeket és a "Rendelés véglegesítése" gombot választja.  
-   Rendszerválasz: checkout oldal (`S06`).  
-   Hibaág: üres kosárnál nincs továbblépés.
+   A felhasználó ellenőrzi a tételeket és a tovább gombra kattint.  
+   Rendszerválasz: `S06` (Checkout) oldal nyílik.
 5. **S06 - Checkout**  
-   A felhasználó kitölti az adatokat, kiválasztja a személyes átvételt és leadja a rendelést.  
-   Rendszerválasz: rendelés mentése, készletfrissítés, sikeroldal (`S07`).  
-   Hibaág: validációs hiba, jogosultsági hiba vagy Firestore mentési hiba.
-6. **S07 - Rendelés sikeres**  
-   A felhasználó visszaigazolást lát rendelésazonosítóval.
+   A felhasználó megadja az adatokat és leadja a rendelést.  
+   Rendszerválasz: `S07` (Rendelés sikeres).  
+   Hibaág: hibás mező vagy mentési hiba esetén hibaüzenet.
 
-**Sikerkritérium:** a rendelés bekerül a Firestore-ba, a készlet csökken, és megjelenik a sikeres státusz.  
-**Mért időtartam (kb.):** 70-120 mp, 8-12 kattintás.
+**Sikerkritérium:** létrejön a rendelés, és megjelenik a sikeroldal.  
+**Mért időtartam:** kb. 1-2 perc, 8-12 kattintás.
 
 ---
 
-## 2) Profilfrissítés és rendelések megtekintése
-**Persona:** Bejelentkezett vásárló, aki módosítani szeretné az adatait és ellenőrizné korábbi rendeléseit.
+## 2) Bejelentkezett felhasználó profiladatot frissít
+**Persona:** Visszatérő vásárló, aki módosítani szeretné a profil adatait.
 
-**Belépési pont:** fejléc "Profilom" menüpont (`S10`).
+**Belépési pont:** `S10` (Profilom + rendeléseim)
 
-1. **S10 - Profilom + rendeléseim**  
-   A felhasználó módosítja az adatokat (szállítási/számlázási adatok, céges adatok), majd ment.  
-   Rendszerválasz: sikeres mentési visszajelzés.  
-   Hibaág: hibás formátum vagy hiányzó kötelező mező.
-2. **S10 - Profilom + rendeléseim**  
-   A felhasználó a rendeléslistához görget.  
-   Rendszerválasz: megjelennek a saját rendelések státuszai.  
-   Hibaág: üres lista állapot.
+1. **S10 - Profilom**  
+   A felhasználó módosítja a szállítási/számlázási adatokat.  
+   Rendszerválasz: mentés után siker visszajelzés jelenik meg.  
+   Hibaág: hiányzó kötelező mező.
+2. **S10 - Rendeléseim szekció**  
+   A felhasználó átnézi a rendeléslista státuszait.  
+   Rendszerválasz: rendelések betöltődnek.  
+   Hibaág: üres állapot jelenik meg.
 
-**Sikerkritérium:** a profil adatai mentésre kerülnek, és a user látja a rendelési előzményeit.  
-**Mért időtartam (kb.):** 30-60 mp, 4-7 kattintás.
+**Sikerkritérium:** profil mentve, rendelések láthatók.  
+**Mért időtartam:** kb. 30-60 mp, 4-7 kattintás.
 
 ---
 
-## 3) Admin rendeléskezelés és készletfigyelés
-**Persona:** Üzlet adminisztrátora, aki a rendelések státuszát kezeli és figyeli az alacsony készletet.
+## 3) Admin rendelést kezel és készletet figyel
+**Persona:** Az üzlet adminisztrátora, aki a napi rendeléseket állítja és készletet ellenőriz.
 
-**Belépési pont:** login (`S08`) admin fiókkal, majd admin panel (`S11`).
+**Belépési pont:** `S08` (Login), majd `S11` (Admin áttekintés)
 
 1. **S08 - Login**  
    Az admin bejelentkezik.  
-   Rendszerválasz: admin áttekintés oldal (`S11`).  
-   Hibaág: rossz jelszó vagy nem admin jogosultság.
+   Rendszerválasz: `S11` admin oldal megnyílik.  
+   Hibaág: hibás belépési adat.
 2. **S11 - Admin áttekintés**  
-   Az admin ellenőrzi az alacsony készlet jelzéseket és gyors statisztikákat.  
-   Rendszerválasz: dashboard adatok betöltése Firestore-ból.  
-   Hibaág: hálózati vagy Firestore hiba.
+   Az admin ellenőrzi a statisztikákat és az alacsony készlet jelzéseket.
 3. **S14 - Admin rendeléskezelés**  
    Az admin kiválaszt egy rendelést és státuszt vált.  
-   Rendszerválasz: megerősítő modál nyílik (`S17`).
+   Rendszerválasz: `S17` megerősítő modál.
 4. **S17 - Státusz megerősítő modál**  
    Az admin megerősíti a műveletet.  
-   Rendszerválasz: státusz frissül, készlet módosul.  
-   Hibaág: írási jogosultság vagy tranzakciós hiba.
-5. **S14 - Admin rendeléskezelés**  
-   Az admin PDF bizonylatot generál/letölt.
+   Rendszerválasz: státusz frissül, készlet módosul.
 
-**Sikerkritérium:** a státusz frissül, a készlet konzisztens marad, és a bizonylat letölthető.  
-**Mért időtartam (kb.):** 40-90 mp, 5-9 kattintás.
+**Sikerkritérium:** a rendelés státusza frissül és az adat konzisztens marad.  
+**Mért időtartam:** kb. 40-90 mp, 5-9 kattintás.
+
+---
+
+## Osszegzes
+A legerosebb felhasznaloi folyamat a termekkeresesbol indul, majd kosaron es checkouton keresztul jut el a rendelésig. Admin oldalon ezt a keszletkezeles, statuszvaltas es bizonylatletoltes egesziti ki, igy a rendszer nem csak vasarloi, hanem uzemeltetoi oldalrol is bemutathato.

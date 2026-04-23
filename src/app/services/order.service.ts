@@ -19,9 +19,8 @@ import { CartItem } from './cart.service';
   providedIn: 'root'
 })
 export class OrderService {
-  // Rendelesek + email queue kollekciok.
+  // Rendelesek + statusz audit kollekciok.
   private ordersCollection = collection(db, 'orders');
-  private mailCollection = collection(db, 'mail');
   private orderStatusAuditCollection = collection(db, 'orderStatusAudit');
 
   addOrder(order: Order) {
@@ -47,7 +46,7 @@ export class OrderService {
     actorEmail?: string;
     note?: string;
   }): Promise<void> {
-    // Státuszfrissítés + audit napló egy tranzakcióban, hogy együtt mozogjanak.
+    // Státuszfrissítés + audit napló + készletkorrekció egy tranzakcióban.
     const orderRef = doc(db, 'orders', params.orderId);
     const auditRef = doc(this.orderStatusAuditCollection);
     const changedAt = Date.now();
@@ -58,6 +57,57 @@ export class OrderService {
         throw new Error('order-not-found');
       }
 
+      const orderData = orderSnap.data() as Order;
+      const currentStatus = orderData.status || params.fromStatus;
+      if (currentStatus === params.toStatus) {
+        return;
+      }
+
+      const wasCompleted = currentStatus === 'teljesitve';
+      const willBeCompleted = params.toStatus === 'teljesitve';
+      const shouldAdjustStock = wasCompleted !== willBeCompleted;
+      const direction = willBeCompleted ? -1 : 1;
+      // Csak akkor nyúlunk készlethez, ha a rendelés belép vagy kilép a teljesített állapotból.
+      // Így egy "új" -> "feldolgozás alatt" váltás nem foglal/vesz el duplán készletet.
+      const stockUpdates: Array<{
+        ref: ReturnType<typeof doc>;
+        quantity: number;
+        previousStock: string;
+        delta: number;
+      }> = [];
+
+      if (shouldAdjustStock) {
+        const items = Array.isArray(orderData.items) ? orderData.items : [];
+
+        for (const item of items) {
+          if (!item.firestoreId) {
+            continue;
+          }
+
+          const productRef = doc(db, 'products', item.firestoreId);
+          const productSnap = await transaction.get(productRef);
+          if (!productSnap.exists()) {
+            continue;
+          }
+
+          const productData = productSnap.data() as { stockQuantity?: number; stock?: string };
+          stockUpdates.push({
+            ref: productRef,
+            quantity: Math.max(0, Number(productData.stockQuantity) || 0),
+            previousStock: productData.stock || 'Keszleten',
+            delta: Math.max(0, Number(item.quantity) || 0) * direction
+          });
+        }
+      }
+
+      for (const update of stockUpdates) {
+        const nextQuantity = Math.max(0, update.quantity + update.delta);
+        transaction.update(update.ref, {
+          stockQuantity: nextQuantity,
+          stock: this.resolveStockLabel(nextQuantity, update.previousStock)
+        });
+      }
+
       transaction.update(orderRef, {
         status: params.toStatus,
         statusUpdatedAt: changedAt,
@@ -66,7 +116,7 @@ export class OrderService {
 
       transaction.set(auditRef, {
         orderId: params.orderId,
-        fromStatus: params.fromStatus,
+        fromStatus: currentStatus,
         toStatus: params.toStatus,
         changedAt,
         changedByUid: params.actorUid || '',
@@ -89,66 +139,6 @@ export class OrderService {
       id: snapshot.id,
       ...(snapshot.data() as Omit<Order, 'id'>)
     };
-  }
-
-  queueOrderConfirmationEmail(payload: {
-    to: string;
-    customerName: string;
-    orderId: string;
-    total: number;
-    shippingMethod: string;
-    paymentMethod: string;
-    items: Array<{ name: string; quantity: number; price: number }>;
-  }) {
-    // Trigger Email extension a "mail" collectionbol kuldi ki.
-    const lines = payload.items
-      .map(item => `- ${item.name} x${item.quantity} - ${item.price * item.quantity} Ft`)
-      .join('\n');
-
-    const subject = `TDL Webshop rendelési visszaigazolás - ${payload.orderId}`;
-    const text = [
-      `Kedves ${payload.customerName}!`,
-      '',
-      'Köszönjük a rendelésedet a TDL Webshopban.',
-      `Rendelés azonosító: ${payload.orderId}`,
-      `Szállítási mód: ${payload.shippingMethod}`,
-      `Fizetési mód: ${payload.paymentMethod}`,
-      '',
-      'Rendelt termékek:',
-      lines,
-      '',
-      `Végösszeg: ${payload.total} Ft`,
-      '',
-      'Üdv,',
-      'TDL Webshop'
-    ].join('\n');
-
-    const htmlItems = payload.items
-      .map(item => `<li>${item.name} x${item.quantity} - ${item.price * item.quantity} Ft</li>`)
-      .join('');
-
-    const html = `
-      <p>Kedves ${payload.customerName}!</p>
-      <p>Köszönjük a rendelésedet a TDL Webshopban.</p>
-      <p><strong>Rendelés azonosító:</strong> ${payload.orderId}</p>
-      <p><strong>Szállítási mód:</strong> ${payload.shippingMethod}<br/>
-      <strong>Fizetési mód:</strong> ${payload.paymentMethod}</p>
-      <p><strong>Rendelt termékek:</strong></p>
-      <ul>${htmlItems}</ul>
-      <p><strong>Végösszeg:</strong> ${payload.total} Ft</p>
-      <p>Üdv,<br/>TDL Webshop</p>
-    `;
-
-    return addDoc(this.mailCollection, {
-      to: [payload.to],
-      message: {
-        subject,
-        text,
-        html
-      },
-      createdAt: Date.now(),
-      source: 'checkout-order-confirmation'
-    });
   }
 
   private removeUndefinedDeep<T>(value: T): T {
@@ -255,7 +245,7 @@ export class OrderService {
         }
 
         const nextQty = Math.max(0, currentQty - item.quantity);
-      const previousStock = data.stock || 'Keszleten';
+        const previousStock = data.stock || 'Keszleten';
         const nextStock = this.resolveStockLabel(nextQty, previousStock);
 
         transaction.update(productRef, {
@@ -314,18 +304,18 @@ export class OrderService {
 
   private resolveStockLabel(quantity: number, previous: string): string {
     if (quantity <= 0) {
-        return 'Nincs keszleten';
+      return 'Nincs keszleten';
     }
 
     if (quantity <= 5) {
       return 'Szallithato';
     }
 
-      if (previous === 'Rendelesre') {
-        return 'Rendelesre';
-      }
+    if (previous === 'Rendelesre') {
+      return 'Rendelesre';
+    }
 
-      return 'Keszleten';
+    return 'Keszleten';
   }
 }
 

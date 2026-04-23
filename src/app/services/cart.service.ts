@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface CartItem {
   id: number;
+  key?: string;
   firestoreId?: string;
   name: string;
   sku?: string;
@@ -35,16 +36,22 @@ export class CartService {
     return this.items;
   }
 
-  addToCart(product: { id: number; firestoreId?: string; name: string; sku?: string; category?: string; price: number; image: string }): void {
-    const existing = this.items.find(i => i.id === product.id);
+  addToCart(
+    product: { id: number; key?: string; firestoreId?: string; name: string; sku?: string; category?: string; price: number; image: string },
+    quantity = 1
+  ): void {
+    const productKey = this.getItemKey(product);
+    const existing = this.items.find(item => this.getItemKey(item) === productKey);
+    const safeQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
 
     // Ha mar van ilyen termek, csak noveljuk a mennyiseget.
     if (existing) {
-      existing.quantity += 1;
+      existing.quantity += safeQuantity;
     } else {
       this.items.push({
         ...product,
-        quantity: 1
+        key: productKey,
+        quantity: safeQuantity
       });
     }
 
@@ -56,8 +63,9 @@ export class CartService {
     this.sync();
   }
 
-  removeFromCart(productId: number): void {
-    this.items = this.items.filter(item => item.id !== productId);
+  removeFromCart(product: CartItem | number | string): void {
+    const key = typeof product === 'object' ? this.getItemKey(product) : String(product);
+    this.items = this.items.filter(item => this.getItemKey(item) !== key);
     this.sync();
   }
 
@@ -69,5 +77,9 @@ export class CartService {
     // Egy helyen kezeljuk a tarolast + stream frissitest.
     localStorage.setItem('cart', JSON.stringify(this.items));
     this.itemsSubject.next([...this.items]);
+  }
+
+  private getItemKey(item: { id: number; key?: string; firestoreId?: string; sku?: string; name?: string }): string {
+    return item.key || item.firestoreId || item.sku || String(item.id);
   }
 }

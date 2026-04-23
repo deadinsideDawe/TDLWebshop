@@ -42,6 +42,9 @@
       <button class="btn btn-secondary" type="button" [disabled]="!canAddToCart" (click)="addToCart()">
         {{ canAddToCart ? 'Kosárba' : 'Nincs készleten' }}
       </button>
+      <button class="btn wishlist-btn" type="button" (click)="toggleWishlist()">
+        {{ isWishlisted ? 'Eltávolítás a kívánságlistából' : 'Kívánságlistára teszem' }}
+      </button>
       <p class="stock-note" *ngIf="!canAddToCart">Ez a termék jelenleg nem rendelhető.</p>
     </div>
   </section>

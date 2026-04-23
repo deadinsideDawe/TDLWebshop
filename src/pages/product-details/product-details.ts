@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CartService } from '../../app/services/cart.service';
 import { ProductService } from '../../app/services/product.service';
+import { WishlistService } from '../../app/services/wishlist.service';
 import { Product } from '../../app/models/product.model';
 
 interface ProductDetailsView {
   id: number;
+  key?: string;
   firestoreId?: string;
   name: string;
   price: number;
@@ -38,7 +40,8 @@ export class ProductDetails implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
+    private wishlistService: WishlistService
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +85,30 @@ export class ProductDetails implements OnInit {
     this.cartService.addToCart(this.product);
   }
 
+  toggleWishlist(): void {
+    if (!this.product) {
+      return;
+    }
+
+    this.wishlistService.toggleWishlist({
+      id: this.product.id,
+      key: this.product.key,
+      firestoreId: this.product.firestoreId,
+      name: this.product.name,
+      sku: this.product.sku,
+      category: this.product.category,
+      price: this.product.price,
+      image: this.product.image,
+      stock: this.product.stock,
+      stockQuantity: this.product.stockQuantity,
+      shortDescription: this.product.shortDescription
+    });
+  }
+
+  get isWishlisted(): boolean {
+    return !!this.product && this.wishlistService.isInWishlist(this.product);
+  }
+
   selectImage(image: string): void {
     this.selectedImage = image;
   }
@@ -106,6 +133,7 @@ export class ProductDetails implements OnInit {
 
     return {
       id: Date.now(),
+      key: product.id || product.sku || product.name,
       firestoreId: product.id,
       name: product.name,
       price: Number(product.price) || 0,

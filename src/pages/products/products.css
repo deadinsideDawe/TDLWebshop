@@ -1,23 +1,47 @@
 /* Termék oldal fő rács: szűrő + tartalom. */
 .products-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 22px;
 }
 
 /* Bal oldali szűrő panel. */
 .filters {
-  padding: 20px;
+  padding: 18px;
   height: fit-content;
   position: sticky;
-  top: 140px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--background-soft)), var(--card));
+  top: 142px;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 94%, var(--background-soft)), var(--card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.filters h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
 }
 
 .filter-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   display: grid;
-  gap: 10px;
+  gap: 9px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-group:last-of-type {
+  border-bottom: 0;
+}
+
+.filter-group h4 {
+  margin: 0;
+  color: var(--text);
+}
+
+.filter-group label {
+  color: var(--muted);
+  font-weight: 650;
 }
 
 .filter-group input[type='number'] {
@@ -42,8 +66,11 @@
 }
 
 .promo-small {
-  padding: 20px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--card)), color-mix(in srgb, var(--secondary) 10%, var(--card)));
+  padding: 18px 20px;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at right center, color-mix(in srgb, var(--primary) 12%, transparent), transparent 28%),
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--card)), var(--card));
 }
 
 .promo-small h2 {
@@ -70,27 +97,134 @@
   padding: 28px;
 }
 
-/* Termékkártyák rácsa. */
-.product-grid {
+.installer-package-panel {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.product-card {
-  position: relative;
-  padding: 16px;
-  display: grid;
-  gap: 10px;
-  align-content: start;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, var(--background-soft)), var(--card));
+  gap: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--card);
   border: 1px solid var(--border);
   box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
 }
 
+.installer-package-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.installer-package-head h2,
+.installer-package-head p {
+  margin: 0;
+}
+
+.installer-package-head h2 {
+  margin-bottom: 6px;
+}
+
+.installer-package-head strong {
+  color: var(--primary);
+  font-size: 24px;
+  white-space: nowrap;
+}
+
+.package-kicker {
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.package-subtitle {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.package-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.package-tabs button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: var(--background-soft);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.package-tabs button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.package-items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.package-item {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--background-soft);
+}
+
+.package-item span {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.package-item p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.package-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  color: var(--muted);
+}
+
+.package-footer .btn {
+  width: auto;
+  min-width: 220px;
+}
+
+/* Termékkártyák rácsa. */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  position: relative;
+  padding: 14px;
+  display: grid;
+  gap: 9px;
+  align-content: start;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, var(--background-soft)), var(--card));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
 .product-card:hover {
-  border-color: rgba(17, 157, 255, 0.34);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18), 0 0 22px rgba(17, 157, 255, 0.08);
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+  box-shadow: var(--hover-glow);
 }
 
 .product-stock-badge {
@@ -106,8 +240,31 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--button-border);
+  background: color-mix(in srgb, var(--background) 72%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.favorite-btn:hover,
+.favorite-btn.active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
 .product-stock-badge.in-stock {
-  color: #bef264;
+  color: var(--primary);
 }
 
 .product-stock-badge.low-stock {
@@ -139,18 +296,30 @@
 }
 
 .top-chip {
-  color: #38bdf8;
+  color: var(--primary);
 }
 
 .deal-chip {
-  color: #bef264;
+  color: var(--accent);
 }
 
 .product-card img {
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  border-radius: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: transform 0.25s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.03);
+}
+
+.product-card h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.25;
 }
 
 .product-category {
@@ -160,6 +329,7 @@
 }
 
 .product-short {
+  display: none;
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
@@ -173,9 +343,9 @@
 
 .price {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
-  color: var(--primary);
+  color: var(--text);
 }
 
 .price-block {
@@ -192,8 +362,16 @@
 }
 
 .stock {
+  margin: 0;
   color: var(--secondary);
   font-weight: 700;
+}
+
+.product-stock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .stock-quantity {
@@ -214,10 +392,16 @@
   margin-top: auto;
 }
 
+.product-card:hover .product-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .details-btn {
   background: var(--background-soft);
   color: var(--text);
   border: 1px solid var(--border);
+  min-width: 0;
 }
 
 .product-actions .btn:disabled {
@@ -432,7 +616,7 @@
   }
 
   .product-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .modal-layout {
@@ -442,17 +626,43 @@
 
 @media (max-width: 700px) {
   .product-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .product-actions,
   .modal-specs,
   .thumb-row,
-  .cart-preview-actions {
+  .cart-preview-actions,
+  .package-items {
     grid-template-columns: 1fr;
+  }
+
+  .installer-package-head,
+  .package-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .product-modal {
     padding: 20px;
+  }
+
+  .product-card {
+    padding: 10px;
+  }
+
+  .product-card h3 {
+    font-size: 13px;
+  }
+
+  .product-category,
+  .stock-quantity,
+  .reserved-stock {
+    display: none;
+  }
+
+  .price {
+    font-size: 16px;
   }
 }

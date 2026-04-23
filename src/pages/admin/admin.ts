@@ -9,11 +9,13 @@ import { UserService } from '../../app/services/user.service';
 import { CustomerDirectoryService } from '../../app/services/customer-directory.service';
 import { InvoiceService } from '../../app/services/invoice.service';
 import { NewsService } from '../../app/services/news.service';
+import { NewsletterService } from '../../app/services/newsletter.service';
 import { Order } from '../../app/models/order.model';
 import { Product } from '../../app/models/product.model';
 import { UserProfile } from '../../app/models/user-profile.model';
 import { CustomerProfile } from '../../app/models/customer-profile.model';
 import { NewsItem } from '../../app/models/news.model';
+import { NewsletterSubscriber } from '../../app/models/newsletter-subscriber.model';
 import { environment } from '../../environments/environment';
 import { CartItem } from '../../app/services/cart.service';
 import { ToastService } from '../../app/services/toast.service';
@@ -31,6 +33,37 @@ interface StockChartItem {
   availableStock: number;
   reservedPercent: number;
   availablePercent: number;
+}
+
+interface SmartStockSuggestion {
+  productId: string;
+  name: string;
+  sku: string;
+  category: string;
+  availableStock: number;
+  reservedStock: number;
+  sold30Days: number;
+  dailyDemand: number;
+  daysLeft: number | null;
+  reorderQuantity: number;
+  priority: 'critical' | 'warning' | 'stable';
+  label: string;
+}
+
+interface TopProductReportItem {
+  name: string;
+  quantity: number;
+  revenue: number;
+}
+
+interface BusinessReport {
+  totalRevenue: number;
+  monthlyRevenue: number;
+  averageOrderValue: number;
+  completedOrderCount: number;
+  webOrderCount: number;
+  localOrderCount: number;
+  topProducts: TopProductReportItem[];
 }
 
 interface AdminUserView {
@@ -83,6 +116,14 @@ export class Admin implements OnInit, OnDestroy {
   productName = '';
   productPrice: number | null = null;
   productCategory = '';
+  productCategoryOptions = [
+    'Fűtés',
+    'Hűtés',
+    'Víz',
+    'Szellőzés',
+    'Szerelvények',
+    'Lakossági megoldások'
+  ];
   productImage = '';
   productStock = 'Keszleten';
   productBrand = '';
@@ -102,13 +143,16 @@ export class Admin implements OnInit, OnDestroy {
   newsIsActive = true;
   newsTargetType: 'none' | 'products' | 'category' | 'promo' = 'none';
   newsTargetValue = '';
-  // Ha van id, akkor szerkesztes modban vagyok az adott hirnel.
+  // Ha van id, akkor az adott hir szerkesztesi modban van.
   editingNewsId: string | null = null;
   newsSaving = false;
   deletingNewsId: string | null = null;
   newsLoading = true;
   newsError = '';
   newsItems: NewsItem[] = [];
+  newsletterSubscribers: NewsletterSubscriber[] = [];
+  newsletterLoading = true;
+  newsletterError = '';
 
   loading = false;
   seedingProducts = false;
@@ -169,6 +213,9 @@ export class Admin implements OnInit, OnDestroy {
   createUserNote = '';
   stockChart: StockChartItem[] = [];
   lowStockAlerts: StockChartItem[] = [];
+  smartStockSuggestions: SmartStockSuggestion[] = [];
+  businessReport: BusinessReport = this.getEmptyBusinessReport();
+  selectedInventoryCategory = '';
   lowStockModalOpen = false;
   private hasShownLowStockWarning = false;
   localSaleCustomerName = '';
@@ -200,6 +247,7 @@ export class Admin implements OnInit, OnDestroy {
   private unsubscribeUsers?: () => void;
   private unsubscribeLocalSaleProfiles?: () => void;
   private unsubscribeNews?: () => void;
+  private unsubscribeNewsletter?: () => void;
   private unsubscribeLogs?: () => void;
   private authSubscription?: Subscription;
   private loadingFallbackTimer?: ReturnType<typeof setTimeout>;
@@ -214,6 +262,7 @@ export class Admin implements OnInit, OnDestroy {
     private customerDirectoryService: CustomerDirectoryService,
     private invoiceService: InvoiceService,
     private newsService: NewsService,
+    private newsletterService: NewsletterService,
     private toastService: ToastService,
     private monitoringService: MonitoringService,
     private ngZone: NgZone,
@@ -223,7 +272,7 @@ export class Admin implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Admin bejelentkezésnél ujraengedem az alacsony készlet popupot.
     this.authSubscription = this.auth.user$.subscribe(user => {
-      const isAdmin = !!user?.email && this.auth.isAdminEmail(user.email);
+      const isAdmin = !!user?.email && this.auth.isCurrentUserAdmin();
 
       if (!isAdmin) {
         this.lastAdminUserId = '';
@@ -347,7 +396,7 @@ export class Admin implements OnInit, OnDestroy {
 
     this.unsubscribeNews = this.newsService.getAllNewsStream(
       items => {
-        // Admin oldalon mindig a teljes hirlistat mutatom (aktiv + inaktiv).
+    // Admin oldalon a teljes hirlista latszik (aktiv + inaktiv).
         this.ngZone.run(() => {
           this.newsItems = items;
           this.newsLoading = false;
@@ -360,6 +409,25 @@ export class Admin implements OnInit, OnDestroy {
           console.error(error);
           this.newsLoading = false;
           this.newsError = 'A hírek betöltése nem sikerült.';
+          this.cdr.detectChanges();
+        });
+      }
+    );
+
+    this.unsubscribeNewsletter = this.newsletterService.getSubscribersStream(
+      items => {
+        this.ngZone.run(() => {
+          this.newsletterSubscribers = items;
+          this.newsletterLoading = false;
+          this.newsletterError = '';
+          this.cdr.detectChanges();
+        });
+      },
+      error => {
+        this.ngZone.run(() => {
+          console.error(error);
+          this.newsletterLoading = false;
+          this.newsletterError = 'A hírlevél feliratkozók betöltése nem sikerült.';
           this.cdr.detectChanges();
         });
       }
@@ -409,6 +477,10 @@ export class Admin implements OnInit, OnDestroy {
 
     if (this.unsubscribeNews) {
       this.unsubscribeNews();
+    }
+
+    if (this.unsubscribeNewsletter) {
+      this.unsubscribeNewsletter();
     }
 
     if (this.unsubscribeLogs) {
@@ -797,17 +869,53 @@ export class Admin implements OnInit, OnDestroy {
       'Termék minta 2;5990;Víz;products/golyoscsap.jpg;Készleten;25;TDL;TDL-VIZ-100;Rövid leírás;Hosszabb termékleírás;true;false;0'
     ].join('\n');
 
-    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'termek-import-minta.csv';
-    anchor.click();
-    URL.revokeObjectURL(url);
+    this.downloadTextFile(template, 'termek-import-minta.csv');
+  }
+
+  downloadSmartStockCsv(): void {
+    const csv = this.getSmartStockCsvContent();
+    this.downloadTextFile(csv, 'utanrendelesi-javaslat.csv');
+  }
+
+  getSmartStockCsvContent(): string {
+    const header = [
+      'Termek',
+      'Cikkszam',
+      'Kategoria',
+      'Szabad keszlet',
+      'Foglalt keszlet',
+      '30 napos fogyas',
+      'Napi atlag',
+      'Becsult napok',
+      'Javasolt utanrendeles',
+      'Prioritas',
+      'Megjegyzes'
+    ];
+
+    const rows = this.filteredSmartStockSuggestions
+      .filter(item => item.reorderQuantity > 0 || item.priority !== 'stable')
+      .map(item => [
+        item.name,
+        item.sku,
+        item.category,
+        item.availableStock,
+        item.reservedStock,
+        item.sold30Days,
+        item.dailyDemand.toFixed(2),
+        item.daysLeft === null ? '' : item.daysLeft,
+        item.reorderQuantity,
+        item.priority,
+        item.label
+      ]);
+
+    return [header, ...rows]
+      .map(row => row.map(value => this.escapeCsvValue(value)).join(';'))
+      .join('\n');
   }
 
   private parseCsv(content: string): string[][] {
-    // Egyszeru CSV parser pontosvesszo/veszto delimiter tamogatassal.
+    // Egyszeru CSV parser pontosvesszo/vesszo delimiter tamogatassal.
+    // Idézőjeles mezőket is kezel, így termékleírásban szereplő vessző nem töri szét a sort.
     const rows: string[][] = [];
     const normalized = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const lines = normalized.split('\n').filter(line => line.trim() !== '');
@@ -969,6 +1077,15 @@ export class Admin implements OnInit, OnDestroy {
     return order.items.reduce((sum, item) => sum + item.quantity, 0);
   }
 
+  getChannelPercent(count: number): number {
+    const total = this.businessReport.webOrderCount + this.businessReport.localOrderCount;
+    if (total === 0) {
+      return 0;
+    }
+
+    return Math.round((count / total) * 100);
+  }
+
   setOrderListView(view: 'active' | 'completed' | 'local'): void {
     this.orderListView = view;
   }
@@ -1055,7 +1172,6 @@ export class Admin implements OnInit, OnDestroy {
     this.orderStatusConfirmOpen = false;
 
     try {
-      await this.applyStockTransition(order, order.status, nextStatus);
       const actor = this.auth.getUser();
       await this.orderService.updateOrderStatusWithAudit({
         orderId,
@@ -1098,19 +1214,50 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   hasStockData(): boolean {
-    return this.stockChart.length > 0;
+    return this.filteredStockChart.length > 0;
   }
 
   get stockItemCount(): number {
-    return this.stockChart.length;
+    return this.filteredStockChart.length;
   }
 
   get stockTotalUnits(): number {
-    return this.stockChart.reduce((sum, item) => sum + item.totalStock, 0);
+    return this.filteredStockChart.reduce((sum, item) => sum + item.totalStock, 0);
   }
 
   get stockAvailableUnits(): number {
-    return this.stockChart.reduce((sum, item) => sum + item.availableStock, 0);
+    return this.filteredStockChart.reduce((sum, item) => sum + item.availableStock, 0);
+  }
+
+  get inventoryCategories(): string[] {
+    return [...new Set(this.stockChart.map(item => item.category).filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right, 'hu-HU'));
+  }
+
+  get filteredStockChart(): StockChartItem[] {
+    // A készlet nézet kategóriaszűrője csak a megjelenített listát szűri,
+    // a teljes dashboard aggregáció ettől még változatlanul rendelkezésre áll.
+    if (!this.selectedInventoryCategory) {
+      return this.stockChart;
+    }
+
+    return this.stockChart.filter(item => item.category === this.selectedInventoryCategory);
+  }
+
+  get filteredLowStockCount(): number {
+    return this.filteredStockChart.filter(item => item.availableStock <= environment.lowStockThreshold).length;
+  }
+
+  get filteredSmartStockSuggestions(): SmartStockSuggestion[] {
+    if (!this.selectedInventoryCategory) {
+      return this.smartStockSuggestions;
+    }
+
+    return this.smartStockSuggestions.filter(item => item.category === this.selectedInventoryCategory);
+  }
+
+  get urgentReorderCount(): number {
+    return this.filteredSmartStockSuggestions.filter(item => item.reorderQuantity > 0).length;
   }
 
   addLocalSaleLine(): void {
@@ -1425,6 +1572,47 @@ export class Admin implements OnInit, OnDestroy {
     }
   }
 
+  getOrderEmailHref(order: Order): string {
+    return `mailto:${encodeURIComponent(order.customerEmail || '')}?subject=${encodeURIComponent(this.getOrderEmailSubject(order))}&body=${encodeURIComponent(this.getOrderEmailBody(order))}`;
+  }
+
+  getOrderEmailSubject(order: Order): string {
+    return `TDL Webshop rendelési visszaigazolás - ${order.id || 'rendelés'}`;
+  }
+
+  getOrderEmailBody(order: Order): string {
+    const itemLines = (order.items || [])
+      .map(item => `- ${item.name} x${item.quantity} - ${Number(item.price || 0) * Number(item.quantity || 0)} Ft`)
+      .join('\n');
+    const pricing = order.pricing;
+
+    return [
+      `Kedves ${order.customerName || 'Vásárló'}!`,
+      '',
+      'Köszönjük a rendelésedet a TDL Webshopban.',
+      `Rendelés azonosító: ${order.id || '-'}`,
+      `Rendelés státusza: ${this.getOrderStatusLabel(order.status)}`,
+      '',
+      'Rendelt termékek:',
+      itemLines || '- Nincs tételadat',
+      '',
+      `Szállítási mód: ${order.shippingMethod?.label || '-'}`,
+      `Fizetési mód: ${order.paymentMethod?.label || '-'}`,
+      ...(order.pickupAt ? [`Átvétel időpontja: ${this.formatDate(order.pickupAt)}`] : []),
+      `Részösszeg: ${pricing?.subtotal ?? order.total} Ft`,
+      `Szállítás: ${pricing?.shippingFee ?? 0} Ft`,
+      `Fizetési díj: ${pricing?.paymentFee ?? 0} Ft`,
+      ...(pricing?.discount ? [`Kedvezmény: -${pricing.discount} Ft`] : []),
+      ...(order.appliedCoupon?.code || order.couponCode ? [`Kupon: ${order.appliedCoupon?.code || order.couponCode}`] : []),
+      `Végösszeg: ${order.total} Ft`,
+      '',
+      'Hamarosan felvesszük veled a kapcsolatot a feldolgozással kapcsolatban.',
+      '',
+      'Üdv,',
+      'TDL Webshop'
+    ].join('\n');
+  }
+
   isSection(section: 'overview' | 'inventory' | 'products' | 'orders' | 'users'): boolean {
     return this.activeSection === section;
   }
@@ -1477,7 +1665,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   getNewsTargetLabel(item: NewsItem): string {
-    // Ez az admin listaban jelenik meg, hogy lassam a hir kattintasi celjat.
+  // Az admin listaban jelzi a hir kattintasi celjat.
     const type = item.targetType || 'none';
     const value = item.targetValue || '';
 
@@ -1501,7 +1689,7 @@ export class Admin implements OnInit, OnDestroy {
     this.editingProductId = product.id || null;
     this.productName = product.name;
     this.productPrice = Number(product.price) || null;
-    this.productCategory = product.category;
+    this.productCategory = this.normalizeProductCategoryForForm(product.category);
     this.productImage = product.image;
     this.productStock = product.stock || 'Keszleten';
     this.productStockQuantity = Number(product.stockQuantity) || 0;
@@ -1799,23 +1987,29 @@ export class Admin implements OnInit, OnDestroy {
   private rebuildDashboard(): void {
     // Dashboard aggregációk újraszámítása (készlet chart + low stock + user stat).
     const reservations = new Map<string, number>();
+    const sold30Days = new Map<string, number>();
     const reservingStatuses = new Set(['uj', 'feldolgozas alatt']);
+    const completedStatuses = new Set(['teljesitve']);
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
     for (const order of this.orders) {
-      if (!reservingStatuses.has(order.status)) {
-        continue;
-      }
-
       for (const item of order.items) {
-        const key = item.sku || item.firestoreId || item.name;
-        reservations.set(key, (reservations.get(key) || 0) + item.quantity);
+        const keys = this.getOrderItemKeys(item);
+
+        if (reservingStatuses.has(order.status)) {
+          this.addQuantityToKeys(reservations, keys, item.quantity);
+        }
+
+        if (completedStatuses.has(order.status) && (order.createdAt || 0) >= thirtyDaysAgo) {
+          this.addQuantityToKeys(sold30Days, keys, item.quantity);
+        }
       }
     }
 
     this.stockChart = this.products.map(product => {
-      const key = product.sku || product.id || product.name;
+      const keys = this.getProductKeys(product);
       const totalStock = Math.max(0, Number(product.stockQuantity) || 0);
-      const reservedStock = Math.min(totalStock, reservations.get(key) || 0);
+      const reservedStock = Math.min(totalStock, this.getFirstQuantityForKeys(reservations, keys));
       const availableStock = Math.max(0, totalStock - reservedStock);
       const denominator = Math.max(totalStock, 1);
 
@@ -1833,6 +2027,8 @@ export class Admin implements OnInit, OnDestroy {
     });
 
     this.lowStockAlerts = this.stockChart.filter(item => item.availableStock <= environment.lowStockThreshold);
+    this.smartStockSuggestions = this.buildSmartStockSuggestions(sold30Days);
+    this.businessReport = this.buildBusinessReport();
 
     if (this.lowStockAlerts.length > 0 && !this.hasShownLowStockWarning) {
       this.lowStockModalOpen = true;
@@ -1866,6 +2062,67 @@ export class Admin implements OnInit, OnDestroy {
     });
   }
 
+  private getEmptyBusinessReport(): BusinessReport {
+    return {
+      totalRevenue: 0,
+      monthlyRevenue: 0,
+      averageOrderValue: 0,
+      completedOrderCount: 0,
+      webOrderCount: 0,
+      localOrderCount: 0,
+      topProducts: []
+    };
+  }
+
+  private buildBusinessReport(): BusinessReport {
+    const completedOrders = this.orders.filter(order => order.status === 'teljesitve');
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const topProductMap = new Map<string, TopProductReportItem>();
+
+    let totalRevenue = 0;
+    let monthlyRevenue = 0;
+    let webOrderCount = 0;
+    let localOrderCount = 0;
+
+    for (const order of completedOrders) {
+      const total = Math.max(0, Number(order.total) || 0);
+      totalRevenue += total;
+
+      if ((order.createdAt || 0) >= monthStart) {
+        monthlyRevenue += total;
+      }
+
+      if (order.salesChannel === 'local-admin') {
+        localOrderCount += 1;
+      } else {
+        webOrderCount += 1;
+      }
+
+      for (const item of order.items || []) {
+        const name = item.name || 'Ismeretlen termék';
+        const quantity = Math.max(0, Number(item.quantity) || 0);
+        const revenue = Math.max(0, Number(item.price) || 0) * quantity;
+        const current = topProductMap.get(name) || { name, quantity: 0, revenue: 0 };
+        current.quantity += quantity;
+        current.revenue += revenue;
+        topProductMap.set(name, current);
+      }
+    }
+
+    return {
+      totalRevenue,
+      monthlyRevenue,
+      averageOrderValue: completedOrders.length > 0 ? Math.round(totalRevenue / completedOrders.length) : 0,
+      completedOrderCount: completedOrders.length,
+      webOrderCount,
+      localOrderCount,
+      topProducts: [...topProductMap.values()]
+        .sort((left, right) => right.revenue - left.revenue || right.quantity - left.quantity)
+        .slice(0, 5)
+    };
+  }
+
   private resetForm(): void {
     // Termék form alap allapot.
     this.editingProductId = null;
@@ -1884,6 +2141,165 @@ export class Admin implements OnInit, OnDestroy {
     this.productSalePercent = null;
     this.productSaleStartsAt = '';
     this.productSaleEndsAt = '';
+  }
+
+  private normalizeProductCategoryForForm(category: string): string {
+    const normalizedCategory = this.normalizeCategoryKey(category);
+    const matchingOption = this.productCategoryOptions.find(option =>
+      this.normalizeCategoryKey(option) === normalizedCategory
+    );
+
+    return matchingOption || category;
+  }
+
+  private getOrderItemKeys(item: CartItem): string[] {
+    return [
+      item.firestoreId || '',
+      item.sku || '',
+      item.name?.toLowerCase() || ''
+    ].filter(Boolean);
+  }
+
+  private getProductKeys(product: Product): string[] {
+    return [
+      product.id || '',
+      product.sku || '',
+      product.name?.toLowerCase() || ''
+    ].filter(Boolean);
+  }
+
+  private addQuantityToKeys(target: Map<string, number>, keys: string[], quantity: number): void {
+    for (const key of keys) {
+      target.set(key, (target.get(key) || 0) + Math.max(0, Number(quantity) || 0));
+    }
+  }
+
+  private getFirstQuantityForKeys(source: Map<string, number>, keys: string[]): number {
+    for (const key of keys) {
+      const value = source.get(key);
+      if (value) {
+        return value;
+      }
+    }
+
+    return 0;
+  }
+
+  private buildSmartStockSuggestions(sold30DaysMap: Map<string, number>): SmartStockSuggestion[] {
+    return this.stockChart
+      .map(row => {
+        const product = this.products.find(item => item.id === row.productId);
+        const keys = product ? this.getProductKeys(product) : [row.productId, row.sku, row.name.toLowerCase()];
+        const sold30Days = this.getFirstQuantityForKeys(sold30DaysMap, keys);
+        const dailyDemand = sold30Days > 0 ? sold30Days / 30 : 0;
+        const daysLeft = dailyDemand > 0 ? Math.floor(row.availableStock / dailyDemand) : null;
+        const targetDays = 21;
+        const safetyStock = environment.lowStockThreshold;
+        const targetStock = Math.ceil(dailyDemand * targetDays) + safetyStock;
+        const reorderQuantity = this.calculateReorderQuantity(row.availableStock, targetStock, sold30Days, row.reservedStock);
+        const priority = this.resolveSmartStockPriority(row.availableStock, reorderQuantity, daysLeft);
+
+        return {
+          productId: row.productId,
+          name: row.name,
+          sku: row.sku,
+          category: row.category,
+          availableStock: row.availableStock,
+          reservedStock: row.reservedStock,
+          sold30Days,
+          dailyDemand,
+          daysLeft,
+          reorderQuantity,
+          priority,
+          label: this.getSmartStockLabel(priority, daysLeft, reorderQuantity)
+        };
+      })
+      .sort((left, right) => {
+        const priorityScore = { critical: 0, warning: 1, stable: 2 };
+        const priorityDiff = priorityScore[left.priority] - priorityScore[right.priority];
+        if (priorityDiff !== 0) {
+          return priorityDiff;
+        }
+
+        return right.reorderQuantity - left.reorderQuantity;
+      });
+  }
+
+  private calculateReorderQuantity(
+    availableStock: number,
+    targetStock: number,
+    sold30Days: number,
+    reservedStock: number
+  ): number {
+    if (availableStock <= environment.lowStockThreshold) {
+      return Math.max(5, targetStock - availableStock, reservedStock);
+    }
+
+    if (sold30Days > 0 && availableStock < targetStock) {
+      return Math.max(0, targetStock - availableStock);
+    }
+
+    return 0;
+  }
+
+  private resolveSmartStockPriority(
+    availableStock: number,
+    reorderQuantity: number,
+    daysLeft: number | null
+  ): SmartStockSuggestion['priority'] {
+    if (availableStock <= 0 || (daysLeft !== null && daysLeft <= 7)) {
+      return 'critical';
+    }
+
+    if (reorderQuantity > 0 || (daysLeft !== null && daysLeft <= 14)) {
+      return 'warning';
+    }
+
+    return 'stable';
+  }
+
+  private getSmartStockLabel(
+    priority: SmartStockSuggestion['priority'],
+    daysLeft: number | null,
+    reorderQuantity: number
+  ): string {
+    if (priority === 'critical') {
+      return reorderQuantity > 0 ? 'Azonnali utánrendelés javasolt' : 'Kritikus készletszint';
+    }
+
+    if (priority === 'warning') {
+      return daysLeft !== null ? `${daysLeft} napra elegendő készlet` : 'Alacsony készletszint';
+    }
+
+    return 'Stabil készlet';
+  }
+
+  private escapeCsvValue(value: string | number | null | undefined): string {
+    const text = String(value ?? '');
+    if (!/[;"\n\r]/.test(text)) {
+      return text;
+    }
+
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  private downloadTextFile(content: string, fileName: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private normalizeCategoryKey(category: string): string {
+    return (category || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '')
+      .trim();
   }
 
   private resetNewsForm(): void {
@@ -2265,7 +2681,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   private getExtendedCatalogProducts(): Product[] {
-    // Kategoriaankent bovitett katalógus (5-os szakdolgozati termékmennyiseghez).
+    // Kategoriaankent bovitett katalogus a nagyobb termekvalasztekhoz.
     return [
       // FUTES
       { name: 'Radiator leereszto szelep', price: 3290, category: 'Futes', image: 'products/radiator-szelep.jpg', stock: 'Keszleten', stockQuantity: 32, sku: 'TDL-FUT-027', brand: 'TDL', shortDescription: 'Leereszteshez es karbantartashoz.', description: 'Egyszeru radiator karbantartasi muveletekhez.', images: ['products/radiator-szelep.jpg'] },
@@ -2356,79 +2772,6 @@ export class Admin implements OnInit, OnDestroy {
     const date = new Date(timestamp);
     const tzOffset = date.getTimezoneOffset() * 60000;
     return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
-  }
-
-  private async applyStockTransition(order: Order, fromStatus: string, toStatus: string): Promise<void> {
-    // Keszletet csak akkor modositunk, ha a rendelest teljesitve-re vagy onnan vissza allitjuk.
-    const wasCompleted = fromStatus === 'teljesitve';
-    const willBeCompleted = toStatus === 'teljesitve';
-
-    if (wasCompleted === willBeCompleted) {
-      return;
-    }
-
-    const direction = willBeCompleted ? -1 : 1;
-    const updates: Array<Promise<void>> = [];
-
-    for (const item of order.items) {
-      const product = this.findProductByOrderItem(item.firestoreId, item.sku, item.name);
-      if (!product?.id) {
-        continue;
-      }
-
-      const currentQty = Math.max(0, Number(product.stockQuantity) || 0);
-      const changedQty = Math.max(0, currentQty + direction * item.quantity);
-      const nextStock = this.resolveStockLabel(changedQty, product.stock);
-
-      updates.push(
-        this.productService.updateProduct(product.id, {
-          stockQuantity: changedQty,
-          stock: nextStock
-        })
-      );
-    }
-
-    await Promise.all(updates);
-  }
-
-  private findProductByOrderItem(firestoreId?: string, sku?: string, name?: string): Product | undefined {
-    // Termék párosítás: document id -> sku -> nev.
-    if (firestoreId) {
-      const byId = this.products.find(product => product.id === firestoreId);
-      if (byId) {
-        return byId;
-      }
-    }
-
-    if (sku) {
-      const bySku = this.products.find(product => product.sku === sku);
-      if (bySku) {
-        return bySku;
-      }
-    }
-
-    if (name) {
-      return this.products.find(product => product.name === name);
-    }
-
-    return undefined;
-  }
-
-  private resolveStockLabel(quantity: number, previous: string): string {
-    // Keszlet mennyiségből UI cimke.
-    if (quantity <= 0) {
-      return 'Nincs készleten';
-    }
-
-    if (quantity <= environment.lowStockThreshold) {
-      return 'Szallithato';
-    }
-
-    if (previous === 'Rendelesre') {
-      return 'Rendelesre';
-    }
-
-    return 'Keszleten';
   }
 
   private mapClientLog(item: ClientLogItem): AdminClientLogView {

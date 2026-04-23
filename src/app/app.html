@@ -1,80 +1,101 @@
 <!-- Globális fix fejléc (brand + kereső + auth/nav). -->
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand-area">
-      <a routerLink="/" class="brand" (click)="closeMenu()">
-        <img [src]="headerLogo" alt="TDL webshop logó">
-      </a>
+    <div class="topbar-main">
+      <div class="brand-area">
+        <a routerLink="/" class="brand" (click)="closeMenu()">
+          <img [src]="headerLogo" alt="TDL webshop logó">
+        </a>
+      </div>
 
-      <button class="category-button" (click)="toggleMenu()">
-        Kategóriák
-      </button>
+      <div class="search-area">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Keresés termékre, kategóriára..."
+          class="search-input"
+          (keyup.enter)="search()"
+        />
+        <button class="search-btn" (click)="search()" aria-label="Keresés">Keresés</button>
+      </div>
+
+      <div class="actions-area utility-actions">
+        <a routerLink="/wishlist" class="icon-link utility-only wishlist-link">
+          Kívánságlista
+          <span class="cart-badge" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
+        </a>
+
+        <ng-container *ngIf="authService.user$ | async as user; else loginLink">
+          <a *ngIf="isAdminUser()" routerLink="/admin" class="admin-toggle">Admin</a>
+
+          <a *ngIf="canShowMyOrdersByEmail(user.email)" routerLink="/profile" class="icon-link">Profil</a>
+          <span class="user-label">{{ user.email }}</span>
+          <button class="logout-btn" (click)="logout()">Kilépés</button>
+        </ng-container>
+
+        <ng-template #loginLink>
+          <a routerLink="/login" class="icon-link">Profil</a>
+        </ng-template>
+
+        <a routerLink="/cart" class="icon-link cart-link">
+          Kosár
+          <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+        </a>
+
+        <button class="theme-btn" (click)="toggleTheme()" [attr.aria-label]="themeService.getTheme() === 'dark' ? 'Vilagos mod' : 'Sotet mod'">
+          <span class="theme-icon">{{ themeService.getTheme() === 'dark' ? '☀' : '☾' }}</span>
+          <span class="theme-label">{{ themeService.getTheme() === 'dark' ? 'Light' : 'Dark' }}</span>
+        </button>
+      </div>
     </div>
 
-    <div class="search-area">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        placeholder="Termék keresése"
-        class="search-input"
-        (keyup.enter)="search()"
-      />
-      <button class="search-btn" (click)="search()">Keresés</button>
+    <nav class="topbar-nav" aria-label="Fő navigáció">
+      <a routerLink="/" class="nav-link" (click)="closeMenu()">Kezdőlap</a>
+
+      <div class="category-menu-shell">
+        <button class="category-button" (click)="toggleMenu()" aria-label="Kategóriák" [attr.aria-expanded]="menuOpen">
+          <span class="category-button-label">Kategóriák</span>
+          <span class="category-button-icon">⌄</span>
+        </button>
+
+        <div class="mega-menu" *ngIf="menuOpen">
+          <a routerLink="/products" [queryParams]="{ category: 'Futes' }" (click)="closeMenu()">
+            <span>Fűtés</span>
+            <span class="menu-arrow">›</span>
+          </a>
+          <a routerLink="/products" [queryParams]="{ category: 'Viz' }" (click)="closeMenu()">
+            <span>Vízszerelés</span>
+            <span class="menu-arrow">›</span>
+          </a>
+          <a routerLink="/products" [queryParams]="{ category: 'Hutes' }" (click)="closeMenu()">
+            <span>Klíma</span>
+            <span class="menu-arrow">›</span>
+          </a>
+          <a routerLink="/products" [queryParams]="{ category: 'Gaz' }" (click)="closeMenu()">
+            <span>Gáz</span>
+            <span class="menu-arrow">›</span>
+          </a>
+          <a routerLink="/products" [queryParams]="{ category: 'Szellozes' }" (click)="closeMenu()">
+            <span>Szellőzés</span>
+            <span class="menu-arrow">›</span>
+          </a>
+          <a routerLink="/products" [queryParams]="{ category: 'Szerelvenyek' }" (click)="closeMenu()">
+            <span>Szerelési anyagok</span>
+            <span class="menu-arrow">›</span>
+          </a>
+          <a routerLink="/products" [queryParams]="{ category: 'Szerszamok' }" (click)="closeMenu()">
+            <span>Szerszámok</span>
+            <span class="menu-arrow">›</span>
+          </a>
+        </div>
+      </div>
+
+      <a routerLink="/products" class="nav-link" (click)="closeMenu()">Termékek</a>
+      <a routerLink="/products" [queryParams]="{ promo: 'discount15' }" class="nav-link" (click)="closeMenu()">Akciók</a>
+      <a routerLink="/products" [queryParams]="{ promo: 'new' }" class="nav-link" (click)="closeMenu()">Újdonságok</a>
+      <a routerLink="/contact" class="nav-link" (click)="closeMenu()">Kapcsolat</a>
+    </nav>
     </div>
-
-    <div class="actions-area">
-      <button class="theme-btn" (click)="toggleTheme()">
-        {{ themeService.getTheme() === 'dark' ? 'Világos mód' : 'Sötét mód' }}
-      </button>
-
-      <ng-container *ngIf="authService.user$ | async as user; else loginLink">
-        <a *ngIf="isAdminUser()" routerLink="/admin" class="admin-toggle">Admin</a>
-
-        <a *ngIf="canShowMyOrdersByEmail(user.email)" routerLink="/profile" class="icon-link">Profilom</a>
-        <span class="user-label">{{ user.email }}</span>
-        <button class="logout-btn" (click)="logout()">Kilépés</button>
-      </ng-container>
-
-      <ng-template #loginLink>
-        <a routerLink="/login" class="icon-link">Belépés</a>
-      </ng-template>
-
-      <a routerLink="/cart" class="icon-link cart-link">
-        Kosár
-        <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
-      </a>
-    </div>
-  </div>
-
-  <!-- Kategória mega menü lenyitott állapota. -->
-  <div class="mega-menu" *ngIf="menuOpen">
-    <div class="mega-column">
-      <h4>Fő navigáció</h4>
-      <a routerLink="/" (click)="closeMenu()">Főoldal</a>
-      <a routerLink="/products" (click)="closeMenu()">Termékek</a>
-      <a routerLink="/categories" (click)="closeMenu()">Kategóriák</a>
-      <a routerLink="/cart" (click)="closeMenu()">Kosár</a>
-      <a routerLink="/login" (click)="closeMenu()">Bejelentkezés</a>
-      <a *ngIf="canShowMyOrders()" routerLink="/profile" (click)="closeMenu()">Profilom</a>
-      <a *ngIf="isAdminUser()" routerLink="/admin" (click)="closeMenu()">Admin</a>
-    </div>
-
-    <div class="mega-column">
-      <h4>Épületgépészet</h4>
-      <a routerLink="/products" [queryParams]="{ category: 'Futes' }" (click)="closeMenu()">Fűtés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Hutes' }" (click)="closeMenu()">Hűtés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Viz' }" (click)="closeMenu()">Vízszerelés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Szellozes' }" (click)="closeMenu()">Szellőzés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Szerelvenyek' }" (click)="closeMenu()">Szerelvények</a>
-    </div>
-
-    <div class="mega-column">
-      <h4>Kiemelt</h4>
-      <a routerLink="/products" [queryParams]="{ promo: 'discount15' }" (click)="closeMenu()">Akciós termékek</a>
-      <a routerLink="/products" [queryParams]="{ promo: 'new' }" (click)="closeMenu()">Újdonságok</a>
-      <a routerLink="/products" [queryParams]="{ promo: 'top' }" (click)="closeMenu()">Legnépszerűbbek</a>
-    </div>
-  </div>
 </header>
 
 <!-- Füstös háttér a lenyitott menühöz. -->
@@ -93,32 +114,57 @@
   <div class="footer-inner">
     <div class="footer-brand">
       <img [src]="headerLogo" alt="TDL webshop footer logó">
-      <p>Épületgépészeti termékek egy helyen, átlátható kategóriákkal és valós készletinformációval.</p>
-    </div>
+      <p>Épületgépészeti termékek széles választéka, szakértői támogatással és gyors szállítással.</p>
 
-    <div class="footer-column">
-      <h4>Kategóriák</h4>
-      <a routerLink="/products" [queryParams]="{ category: 'Futes' }">Fűtés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Hutes' }">Hűtés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Viz' }">Vízszerelés</a>
-      <a routerLink="/products" [queryParams]="{ category: 'Szerelvenyek' }">Szerelvények</a>
-    </div>
-
-    <div class="footer-column">
-      <h4>Navigáció</h4>
-      <a routerLink="/">Főoldal</a>
-      <a routerLink="/products">Termékek</a>
-      <a routerLink="/cart">Kosár</a>
-      <a *ngIf="canShowMyOrders()" routerLink="/profile">Profilom</a>
-      <a routerLink="/login">Belépés</a>
+      <div class="footer-socials" aria-label="Közösségi linkek">
+        <span>f</span>
+        <span>◎</span>
+        <span>▶</span>
+        <span>in</span>
+      </div>
     </div>
 
     <div class="footer-column">
       <h4>Információk</h4>
-      <span>Gyors kiszállítás</span>
-      <span>Firebase rendeléskezelés</span>
-      <span>ÁSZF</span>
-      <span>Adatkezelés</span>
+      <a routerLink="/products">Rólunk</a>
+      <a routerLink="/products">Szállítás és fizetés</a>
+      <a routerLink="/products">Garancia és visszaküldés</a>
+      <a routerLink="/products">Általános szerződési feltételek</a>
+      <a routerLink="/products">Adatvédelmi tájékoztató</a>
     </div>
+
+    <div class="footer-column">
+      <h4>Vásárlás</h4>
+      <a routerLink="/products" [queryParams]="{ promo: 'discount15' }">Akciós termékek</a>
+      <a routerLink="/products" [queryParams]="{ promo: 'new' }">Újdonságok</a>
+      <a routerLink="/products" [queryParams]="{ promo: 'top' }">Top termékek</a>
+      <a routerLink="/categories">Kategóriák</a>
+    </div>
+
+    <div class="footer-column">
+      <h4>Ügyfélszolgálat</h4>
+      <span>☎ +36 1 234 5678</span>
+      <span>✉ info@tdlwebshop.hu</span>
+      <span>◷ H-P: 8:00 - 16:00</span>
+      <a routerLink="/contact">▣ Üzenet küldése</a>
+    </div>
+
+    <div class="footer-column payment-column">
+      <h4>Fizetési módok</h4>
+      <div class="payment-grid">
+        <span class="payment-tile payment-bank"><img src="payments/banki-atutalas.png" alt="Banki átutalás"></span>
+        <span class="payment-tile payment-cash"><img src="payments/utanvet.png" alt="Utánvét"></span>
+        <span class="payment-tile payment-visa"><img src="payments/visa.png" alt="Visa"></span>
+        <span class="payment-tile payment-mastercard"><img src="payments/mastercard.png" alt="Mastercard"></span>
+        <span class="payment-tile payment-apple"><img src="payments/apple-pay.png" alt="Apple Pay"></span>
+        <span class="payment-tile payment-google"><img src="payments/google-pay.png" alt="Google Pay"></span>
+        <span class="payment-tile payment-paypal"><img src="payments/paypal.png" alt="PayPal"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2024 TDL Webshop - Minden jog fenntartva.</span>
+    <span>Webshop készítés: TDLWebshop csapat</span>
   </div>
 </footer>

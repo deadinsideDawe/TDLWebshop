@@ -7,6 +7,8 @@ export const routes: Routes = [
   { path: 'products', loadComponent: () => import('../pages/products/products').then(m => m.Products) },
   { path: 'products/:id', loadComponent: () => import('../pages/product-details/product-details').then(m => m.ProductDetails) },
   { path: 'categories', loadComponent: () => import('../pages/categories/categories').then(m => m.Categories) },
+  { path: 'contact', loadComponent: () => import('../pages/contact/contact').then(m => m.Contact) },
+  { path: 'wishlist', loadComponent: () => import('../pages/wishlist/wishlist').then(m => m.Wishlist) },
   { path: 'cart', loadComponent: () => import('../pages/cart/cart').then(m => m.Cart) },
   { path: 'checkout', loadComponent: () => import('../pages/checkout/checkout').then(m => m.Checkout) },
   { path: 'order-success', loadComponent: () => import('../pages/order-success/order-success').then(m => m.OrderSuccess) },

@@ -108,6 +108,7 @@ export class ProductService {
     let opCount = 0;
 
     const commitBatch = async (force = false) => {
+      // Firestore batch limit 500 művelet, ezért 450-nél biztonsági ráhagyással commitolunk.
       if (opCount >= 450 || (force && opCount > 0)) {
         await batch.commit();
         batch = writeBatch(db);
@@ -192,7 +193,7 @@ export class ProductService {
   }
 
   async seedProductsIfEmpty(products: Product[]): Promise<boolean> {
-    // Demo/projekt inditaskor csak akkor seedelunk, ha tenyleg ures az adatbazis.
+    // Kezdo katalogus feltoltese csak ures adatbazis eseten tortenik.
     const snapshot = await getDocs(query(this.productsCollection, limit(1)));
     if (!snapshot.empty) {
       return false;

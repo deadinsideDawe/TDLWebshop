@@ -17,8 +17,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
+    function userDocExists() {
       return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isActiveUser() {
+      // Tiltott user tokennel se tudjon Ă­rni, de Ăşj regisztrĂˇciĂłnĂˇl mĂ©g nincs user doc.
+      return isSignedIn()
+        && (
+          !userDocExists()
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.disabled != true
+        );
+    }
+
+    function isAdmin() {
+      return isActiveUser()
         && (
           (
             request.auth.token.email != null
@@ -103,6 +117,20 @@ service cloud.firestore {
       && request.resource.data.updatedAt is number;
     }
 
+    function validNewsletterSubscriberPayload() {
+      return request.resource.data.keys().hasAll([
+        'email',
+        'source',
+        'status',
+        'createdAt'
+      ])
+      && request.resource.data.email is string
+      && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+      && request.resource.data.source is string
+      && request.resource.data.status == 'active'
+      && request.resource.data.createdAt is number;
+    }
+
     function validOrderStatusAuditPayload() {
       return request.resource.data.keys().hasAll([
         'orderId',
@@ -157,7 +185,7 @@ service cloud.firestore {
           && (
             !('userId' in request.resource.data)
             || (
-              isSignedIn()
+              isActiveUser()
               && request.resource.data.userId == request.auth.uid
             )
           )
@@ -166,21 +194,9 @@ service cloud.firestore {
     }
 
     function isOrderOwner() {
-      return isSignedIn()
+      return isActiveUser()
       && resource.data.userId is string
       && resource.data.userId == request.auth.uid;
-    }
-
-    function validMailPayload() {
-      return request.resource.data.keys().hasAll(['to', 'message', 'createdAt', 'source'])
-      && request.resource.data.to is list
-      && request.resource.data.to.size() > 0
-      && request.resource.data.message is map
-      && request.resource.data.message.subject is string
-      && request.resource.data.message.text is string
-      && request.resource.data.message.html is string
-      && request.resource.data.createdAt is number
-      && request.resource.data.source is string;
     }
 
     function validUserCreate(userId) {
@@ -205,7 +221,7 @@ service cloud.firestore {
     }
 
     function validSelfUserUpdate(userId) {
-      return isSignedIn()
+      return isActiveUser()
       && request.auth.uid == userId
       && request.resource.data.role == resource.data.role
       && request.resource.data.disabled == resource.data.disabled
@@ -257,6 +273,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /newsletterSubscribers/{subscriberId} {
+      allow create: if validNewsletterSubscriberPayload();
+      allow read, update, delete: if isAdmin();
+    }
+
     match /orders/{orderId} {
       allow create: if validOrderCreate();
       allow read: if isAdmin() || isOrderOwner();
@@ -275,7 +296,7 @@ service cloud.firestore {
       allow create, update: if (
         isAdmin()
         || (
-          isSignedIn()
+          isActiveUser()
           && request.auth.uid == profileId
           && request.auth.token.email != null
           && request.resource.data.email == request.auth.token.email
@@ -283,11 +304,6 @@ service cloud.firestore {
         )
         || isGuestProfileWrite(profileId)
       );
-    }
-
-    match /mail/{mailId} {
-      allow create: if isSignedIn() && validMailPayload();
-      allow read, update, delete: if isAdmin();
     }
 
     match /invoiceCounters/{counterId} {
@@ -301,7 +317,7 @@ service cloud.firestore {
     }
 
     match /clientLogs/{logId} {
-      allow create: if isSignedIn() && validClientLogPayload();
+      allow create: if isActiveUser() && validClientLogPayload();
       allow read: if isAdmin();
       allow update, delete: if false;
     }

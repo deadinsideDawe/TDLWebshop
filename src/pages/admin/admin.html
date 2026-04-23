@@ -29,7 +29,10 @@
       <input type="number" [(ngModel)]="productPrice">
 
       <label>Kategória</label>
-      <input [(ngModel)]="productCategory" placeholder="pl. Szelepek">
+      <select [(ngModel)]="productCategory">
+        <option value="">Válassz kategóriát</option>
+        <option *ngFor="let category of productCategoryOptions" [value]="category">{{ category }}</option>
+      </select>
 
       <label>Kép URL</label>
       <input [(ngModel)]="productImage" placeholder="https://...">
@@ -267,6 +270,45 @@
             </div>
           </div>
 
+          <section class="local-sale-card">
+            <div class="product-admin-actions">
+              <div>
+                <p class="section-kicker">Vezetői riport</p>
+                <h4>Bevétel és rendelési teljesítmény</h4>
+              </div>
+              <span>{{ businessReport.completedOrderCount }} teljesített rendelés</span>
+            </div>
+
+            <div class="overview-grid business-metrics">
+              <div class="overview-card">
+                <span>Összes bevétel</span>
+                <strong>{{ businessReport.totalRevenue }} Ft</strong>
+              </div>
+              <div class="overview-card">
+                <span>Havi bevétel</span>
+                <strong>{{ businessReport.monthlyRevenue }} Ft</strong>
+              </div>
+              <div class="overview-card">
+                <span>Átlagos kosárérték</span>
+                <strong>{{ businessReport.averageOrderValue }} Ft</strong>
+              </div>
+              <div class="overview-card">
+                <span>Web / helyszíni</span>
+                <strong>{{ getChannelPercent(businessReport.webOrderCount) }}% / {{ getChannelPercent(businessReport.localOrderCount) }}%</strong>
+              </div>
+            </div>
+
+            <div class="mini-list" *ngIf="businessReport.topProducts.length > 0; else noTopProducts">
+              <div class="mini-row" *ngFor="let item of businessReport.topProducts">
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.quantity }} db - {{ item.revenue }} Ft</span>
+              </div>
+            </div>
+            <ng-template #noTopProducts>
+              <p class="muted-line">Még nincs teljesített rendelésből számítható top termék.</p>
+            </ng-template>
+          </section>
+
           <div class="admin-highlights">
             <div class="highlight-card">
               <h4>Legutóbbi rendelések</h4>
@@ -291,6 +333,18 @@
               </div>
               <ng-template #noLowStockLeft>
                 <p class="muted-line">Jelenleg nincs küszöb alatti készlet.</p>
+              </ng-template>
+            </div>
+            <div class="highlight-card">
+              <h4>Utánrendelési javaslat</h4>
+              <div class="mini-list" *ngIf="smartStockSuggestions.length > 0; else noSmartStockOverview">
+                <div class="mini-row" *ngFor="let item of smartStockSuggestions.slice(0, 3)">
+                  <strong>{{ item.name }}</strong>
+                  <span>{{ item.reorderQuantity > 0 ? item.reorderQuantity + ' db' : item.label }}</span>
+                </div>
+              </div>
+              <ng-template #noSmartStockOverview>
+                <p class="muted-line">Nincs számítható készletjavaslat.</p>
               </ng-template>
             </div>
           </div>
@@ -379,6 +433,30 @@
               Még nincs felvett hír a főoldalhoz.
             </div>
           </section>
+
+          <section class="local-sale-card newsletter-admin-card">
+            <div class="product-admin-actions">
+              <div>
+                <p class="section-kicker">Hírlevél</p>
+                <h4>Feliratkozók</h4>
+              </div>
+              <span>{{ newsletterSubscribers.length }} feliratkozó</span>
+            </div>
+
+            <p class="info-text" *ngIf="newsletterLoading">Feliratkozók betöltése...</p>
+            <p class="error-box" *ngIf="newsletterError">{{ newsletterError }}</p>
+
+            <div class="mini-list" *ngIf="!newsletterLoading && newsletterSubscribers.length > 0">
+              <div class="mini-row newsletter-row" *ngFor="let subscriber of newsletterSubscribers.slice(0, 8)">
+                <strong>{{ subscriber.email }}</strong>
+                <span>{{ formatDate(subscriber.createdAt) }}</span>
+              </div>
+            </div>
+
+            <div class="empty-orders" *ngIf="!newsletterLoading && newsletterSubscribers.length === 0">
+              Még nincs hírlevél feliratkozó.
+            </div>
+          </section>
         </div>
 
         <div class="intro-block" *ngIf="isSection('inventory')">
@@ -388,6 +466,16 @@
             <li>Foglalt készlet</li>
             <li>Alacsony készlet figyelmeztetés</li>
           </ul>
+
+          <div class="local-sale-grid" *ngIf="!productsLoading && stockChart.length > 0">
+            <div class="field-group">
+              <label>Kategória szűrés</label>
+              <select [(ngModel)]="selectedInventoryCategory">
+                <option value="">Minden kategória</option>
+                <option *ngFor="let category of inventoryCategories" [value]="category">{{ category }}</option>
+              </select>
+            </div>
+          </div>
 
           <div class="section-summary-strip compact-summary" *ngIf="!productsLoading && hasStockData()">
             <div class="summary-pill">
@@ -404,15 +492,49 @@
             </div>
             <div class="summary-pill">
               <span>Alacsony készlet</span>
-              <strong>{{ lowStockAlerts.length }}</strong>
+              <strong>{{ filteredLowStockCount }}</strong>
+            </div>
+            <div class="summary-pill">
+              <span>Utánrendelés</span>
+              <strong>{{ urgentReorderCount }}</strong>
             </div>
           </div>
+
+          <section class="smart-stock-panel" *ngIf="!productsLoading && filteredSmartStockSuggestions.length > 0">
+            <div class="smart-stock-head">
+              <div>
+                <h4>Okos készletfigyelés</h4>
+                <p>Az elmúlt 30 nap teljesített rendelései alapján becsült fogyás és utánrendelési javaslat.</p>
+              </div>
+              <button class="btn edit-btn compact-action-btn" type="button" (click)="downloadSmartStockCsv()">
+                CSV export
+              </button>
+            </div>
+            <div class="smart-stock-grid">
+              <article
+                class="smart-stock-card"
+                *ngFor="let item of filteredSmartStockSuggestions.slice(0, 8)"
+                [ngClass]="'smart-' + item.priority"
+              >
+                <div>
+                  <strong>{{ item.name }}</strong>
+                  <p>{{ item.sku }} - {{ item.category }}</p>
+                </div>
+                <div class="smart-stock-metrics">
+                  <span>30 nap: {{ item.sold30Days }} db</span>
+                  <span>Szabad: {{ item.availableStock }} db</span>
+                  <span>{{ item.daysLeft === null ? 'Nincs fogyási adat' : item.daysLeft + ' napra elég' }}</span>
+                  <strong>{{ item.reorderQuantity > 0 ? 'Javaslat: +' + item.reorderQuantity + ' db' : item.label }}</strong>
+                </div>
+              </article>
+            </div>
+          </section>
 
           <p class="info-text" *ngIf="productsLoading">Készletadatok betöltése...</p>
           <p class="error-box" *ngIf="productsError">{{ productsError }}</p>
 
           <div class="inventory-quick-list" *ngIf="!productsLoading && hasStockData()">
-            <article class="inventory-quick-row" *ngFor="let item of stockChart">
+            <article class="inventory-quick-row" *ngFor="let item of filteredStockChart">
               <div>
                 <strong>{{ item.name }}</strong>
                 <p>{{ item.sku }} - {{ item.category }}</p>
@@ -428,7 +550,7 @@
           </div>
 
           <div class="empty-orders" *ngIf="!productsLoading && !hasStockData() && !productsError">
-            Még nincs olyan feltöltött termék, amihez készletadatot lehet mutatni.
+            Nincs a kiválasztott kategóriához tartozó készletadat.
           </div>
         </div>
 
@@ -458,7 +580,7 @@
       <h3 *ngIf="isSection('products')">Terméklista</h3>
       <h3 *ngIf="isSection('orders')">Rendelések listája</h3>
       <h3 *ngIf="isSection('users')">Felhasználók listája</h3>
-      <p class="info-text">Az admin panel csak a megadott admin e-mail címekkel érhető el.</p>
+      <p class="info-text">Az admin panel admin jogosultságú felhasználókkal érhető el.</p>
 
       <div *ngIf="isSection('overview')" class="sidebar-low-stock">
         <h4>Alacsony készlet figyelő</h4>
@@ -489,7 +611,7 @@
       </div>
 
       <div *ngIf="isSection('inventory')">
-        <p class="info-text">A teljes készletlista az oldali összefoglaló alatt, kompakt nézetben jelenik meg.</p>
+        <p class="info-text">A teljes készletlista az összefoglaló alatt, kompakt nézetben jelenik meg.</p>
       </div>
 
       <div *ngIf="isSection('products')">
@@ -687,6 +809,9 @@
             >
               {{ invoiceLoadingId === order.id ? 'Számla generálása...' : 'Számla letöltése' }}
             </button>
+            <a class="btn edit-btn compact-action-btn" [href]="getOrderEmailHref(order)">
+              Email sablon
+            </a>
             <div class="status-editor">
               <span>Állapot: <strong>{{ order.status }}</strong></span>
               <button
@@ -995,6 +1120,14 @@
           <strong>{{ item.price * item.quantity }} Ft</strong>
         </div>
       </div>
+    </div>
+    <div class="product-admin-actions">
+      <button class="btn details-btn" type="button" (click)="downloadOrderInvoice(selectedOrderDetails)">
+        Számla letöltése
+      </button>
+      <a class="btn edit-btn compact-action-btn" [href]="getOrderEmailHref(selectedOrderDetails)">
+        Email sablon
+      </a>
     </div>
   </section>
 </div>

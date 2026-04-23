@@ -1,59 +1,89 @@
-# Webshop
+# TDL Épületgépészeti Webshop
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+> Szakdolgozati projekt - kisebb épületgépészeti vállalkozásoknak tervezett webshop rendszer.
 
-## Development server
+## Egy mondatos leírás
+Ez a rendszer egy olyan épületgépészeti webshopot valósít meg, ahol a vásárlók gyorsan tudnak terméket keresni és rendelni, az admin pedig valós időben kezeli a készletet, rendeléseket és kiemelt tartalmakat.
 
-To start a local development server, run:
+## Fő funkciók
+- vásárlói felület: főoldal, kategóriák, terméklista, termék részletek, kosár, checkout
+- Firebase Auth alapú bejelentkezés és regisztráció
+- profilkezelés és saját rendelések megtekintése
+- admin panel: termékek, készlet, rendelések, felhasználók, főoldali hírek
+- Firestore alapú valós adatok (termékek, rendelések, felhasználói profilok)
+- helyszíni vásárlás rögzítése és PDF bizonylat készítés
+- kuponlogika és akciós termék kezelés (időablak + kedvezmény százalék)
+- világos/sötét mód és reszponzív megjelenés
 
+## Technológiai stack
+- frontend: Angular (standalone komponensek), TypeScript, HTML, CSS
+- backend szolgáltatások: Firebase Spark kompatibilis használat (Auth, Firestore, Hosting)
+- adatkezelés: Firestore + lokális kosár (localStorage)
+
+## Gyors indítás lokálisan
+### 1) Elvárt környezet
+- Node.js: `>=20 <23` (a projekt erre van beállítva)
+- npm: a Node verzióhoz tartozó alap npm
+
+### 2) Telepítés
 ```bash
-ng serve
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### 3) Fejlesztői futtatás
 ```bash
-ng generate component component-name
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Alapértelmezett cím:
+`http://localhost:4200`
 
+## Build és ellenőrzés
 ```bash
-ng generate --help
+npm run build
+npm test -- --watch=false
 ```
 
-## Building
-
-To build the project run:
-
+## Firebase deploy (ha szükséges)
 ```bash
-ng build
+npm run deploy:spark
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
+Firestore szabály módosításakor külön futtatható:
 ```bash
-ng test
+npm run deploy:rules
 ```
 
-## Running end-to-end tests
+Megjegyzés: a projekt az alap Firebase Spark csomaggal futtatható. Cloud Functions deploy nincs bekötve az alap deployba, mert ahhoz fizetős Blaze csomag kellene.
 
-For end-to-end (e2e) testing, run:
+## Hosted verzió
+- élő URL: [https://tdlwebshop.web.app](https://tdlwebshop.web.app)
 
-```bash
-ng e2e
+## Projektstruktúra (röviden)
+```text
+src/
+  app/
+    services/
+    guards/
+    components/
+  pages/
+    home/
+    products/
+    product-details/
+    cart/
+    checkout/
+    profile/
+    admin/
+docs/
+  ux/
+functions/  # opcionális továbbfejlesztés Blaze csomag esetén
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Dokumentáció
+- UX dokumentáció: [docs/ux/README.md](docs/ux/README.md)
+- Szakdolgozati funkció összefoglaló: [docs/thesis-feature-summary.md](docs/thesis-feature-summary.md)
+- Védési kérdés-válasz jegyzet: [docs/thesis-defense-notes.md](docs/thesis-defense-notes.md)
+- Bemutató forgatókönyv: [docs/demo-script.md](docs/demo-script.md)
+- Végső manuális ellenőrző lista: [docs/final-manual-checklist.md](docs/final-manual-checklist.md)
+- Regressziós ellenőrző lista: [docs/testing/regression-checklist.md](docs/testing/regression-checklist.md)
+- Projektterv: [project_plan.md](project_plan.md)

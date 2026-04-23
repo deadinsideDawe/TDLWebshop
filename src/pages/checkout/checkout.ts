@@ -8,6 +8,7 @@ import { OrderService } from '../../app/services/order.service';
 import { UserService } from '../../app/services/user.service';
 import { CustomerDirectoryService } from '../../app/services/customer-directory.service';
 import { ToastService } from '../../app/services/toast.service';
+import { MonitoringService } from '../../app/services/monitoring.service';
 import { Subscription } from 'rxjs';
 import { normalizeErrorMessage, getErrorCode } from '../../app/utils/error-message';
 
@@ -105,7 +106,7 @@ export class Checkout {
     { id: 'pickup', label: 'Személyes átvétel', fee: 0, eta: 'Átvétel 24 órán belül' }
   ];
   paymentMethods = [
-    { id: 'card', label: 'Bankkártyás fizetés', fee: 0 },
+    { id: 'card', label: 'Bankkártyás fizetés (bemutató - online terhelés nélkül)', fee: 0 },
     { id: 'transfer', label: 'Átutalás', fee: 0 },
     { id: 'cod', label: 'Utánvét', fee: 590 }
   ];
@@ -182,7 +183,8 @@ export class Checkout {
     private orderService: OrderService,
     private userService: UserService,
     private customerDirectoryService: CustomerDirectoryService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private monitoringService: MonitoringService
   ) {
     // Ha már be van jelentkezve a user, átemeljük az emailt a checkoutba.
     this.authSubscription = this.authService.user$.subscribe(user => {
@@ -294,7 +296,9 @@ export class Checkout {
 
   async finalizeOrder(): Promise<void> {
     // Checkout fő folyamat:
-    // 1) validáció, 2) rendelés mentés, 3) user/customer profile update, 4) email queue, 5) success oldal.
+    // 1) validáció, 2) rendelés mentés, 3) user/customer profile update, 4) success oldal.
+    // Spark Firebase csomagon nincs Cloud Functions deploy, ezért az email visszaigazolás
+    // manuális mailto sablonként érhető el a sikeres rendelés és az admin rendelés nézetben.
     const items = this.cartService.getItems();
 
     this.orderMessage = '';
@@ -432,7 +436,11 @@ export class Checkout {
             }
           );
         } catch (profileError) {
-          console.warn('Customer profile upsert sikertelen:', profileError);
+          this.monitoringService.capture('checkout-customer-profile-upsert', profileError, {
+            orderId: orderRef.id,
+            email: sanitized.customerEmail,
+            mode: 'user'
+          });
         }
       } else {
         try {
@@ -445,26 +453,12 @@ export class Checkout {
             taxNumber: this.isBusinessBuyer ? sanitized.businessTaxNumber : ''
           });
         } catch (guestProfileError) {
-          console.warn('Guest customer profile upsert sikertelen:', guestProfileError);
+          this.monitoringService.capture('checkout-customer-profile-upsert', guestProfileError, {
+            orderId: orderRef.id,
+            email: sanitized.customerEmail,
+            mode: 'guest'
+          });
         }
-      }
-
-      try {
-        await this.orderService.queueOrderConfirmationEmail({
-          to: sanitized.customerEmail,
-          customerName: sanitized.customerName,
-          orderId: orderRef.id,
-          total,
-          shippingMethod: shippingMethod.label,
-          paymentMethod: paymentMethod.label,
-          items: items.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        });
-      } catch (mailError) {
-        console.warn('Email queue mentes sikertelen:', mailError);
       }
 
       this.orderMessage = 'Rendelés sikeresen elmentve a Firestore adatbázisba.';

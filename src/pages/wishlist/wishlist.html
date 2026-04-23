@@ -1,0 +1,48 @@
+<div class="page-container wishlist-page">
+  <div class="wishlist-hero">
+    <div>
+      <span class="wishlist-kicker">Kívánságlista</span>
+      <h1>Elmentett termékek</h1>
+      <p>Itt gyűjtheted azokat a termékeket, amelyeket később szeretnél összehasonlítani vagy kosárba tenni.</p>
+    </div>
+
+    <button class="btn clear-btn" type="button" *ngIf="items.length > 0" (click)="clearWishlist()">
+      Lista ürítése
+    </button>
+  </div>
+
+  <section class="card empty-wishlist" *ngIf="items.length === 0">
+    <h2>Még nincs mentett terméked.</h2>
+    <p>A termékkártyákon található szív gombbal bármelyik terméket elmentheted ide.</p>
+    <a class="btn continue-link" routerLink="/products">Termékek böngészése</a>
+  </section>
+
+  <section class="wishlist-grid" *ngIf="items.length > 0">
+    <article class="wishlist-card card" *ngFor="let item of items">
+      <button class="favorite-remove" type="button" (click)="removeItem(item)" aria-label="Eltávolítás a kívánságlistából">
+        ♥
+      </button>
+
+      <button class="image-button" type="button" (click)="openProduct(item)">
+        <img [src]="item.image" [alt]="item.name">
+      </button>
+
+      <div class="wishlist-content">
+        <p class="category">{{ item.category || 'Termék' }}</p>
+        <h2>{{ item.name }}</h2>
+        <p class="short" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+        <strong class="price">{{ item.price }} Ft</strong>
+        <span class="stock" [class.out]="!canAddToCart(item)">
+          {{ canAddToCart(item) ? (item.stock || 'Raktáron') : 'Nincs készleten' }}
+        </span>
+      </div>
+
+      <div class="wishlist-actions">
+        <button class="btn details-btn" type="button" (click)="openProduct(item)">Részletek</button>
+        <button class="btn btn-secondary" type="button" [disabled]="!canAddToCart(item)" (click)="addToCart(item)">
+          {{ canAddToCart(item) ? 'Kosárba' : 'Nem rendelhető' }}
+        </button>
+      </div>
+    </article>
+  </section>
+</div>

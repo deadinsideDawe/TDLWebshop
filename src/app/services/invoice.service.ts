@@ -78,7 +78,8 @@ export class InvoiceService {
     vatTotal: number;
     grossTotal: number;
   }): Uint8Array {
-    // Egyszeru, de testreszabhato PDF generator kulso library nelkul.
+    // Egyszeru, kliensoldali PDF generator rendelési bizonylathoz.
+    // Eles szamlazashoz NAV-kompatibilis szamlazo vagy szerveroldali integracio kell.
     const c: string[] = [];
 
     c.push('q 0.96 0.97 0.99 rg 36 760 523 64 re f Q');
@@ -116,13 +117,21 @@ export class InvoiceService {
     c.push(this.drawText(460, 573, 'F2', 10, 'Bruttó'));
 
     let y = 552;
-    for (const item of data.items.slice(0, 18)) {
+    const visibleItems = data.items.slice(0, 18);
+    // A jelenlegi szakdolgozati PDF egyoldalas; hosszú rendelésnél jelzést teszünk,
+    // hogy ne tűnjön úgy, mintha a fennmaradó tételek elvesztek volna.
+    for (const item of visibleItems) {
       c.push('q 0.92 0.94 0.97 rg 36 ' + (y - 6) + ' 523 20 re f Q');
       c.push(this.drawText(48, y, 'F1', 10, this.truncate(item.name, 38)));
       c.push(this.drawText(326, y, 'F1', 10, `${item.quantity} db`));
       c.push(this.drawText(380, y, 'F1', 10, `${this.formatFt(item.unitPrice)} Ft`));
       c.push(this.drawText(458, y, 'F1', 10, `${this.formatFt(item.gross)} Ft`));
       y -= 22;
+    }
+
+    if (data.items.length > visibleItems.length) {
+      c.push(this.drawText(48, y, 'F1', 9, `Tovabbi ${data.items.length - visibleItems.length} tetel a rendelesben.`));
+      y -= 18;
     }
 
     const summaryY = Math.max(120, y - 24);
@@ -183,6 +192,7 @@ export class InvoiceService {
   }
 
   private stripDiacritics(text: string): string {
+    // A beépített Helvetica font nem kezeli megbízhatóan a magyar ékezeteket nyers PDF-ben.
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 }

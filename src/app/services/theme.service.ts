@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 export class ThemeService {
   // Alapertelmezett tema: dark (user kerese alapjan).
   private currentTheme: 'light' | 'dark' = 'dark';
+  private readonly mediaQuery = window.matchMedia?.('(prefers-color-scheme: light)');
 
   constructor() {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
@@ -14,9 +15,14 @@ export class ThemeService {
     if (userSetTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       this.currentTheme = savedTheme;
     } else {
-      // Default to dark on fresh/legacy installs until the user explicitly chooses.
-      this.currentTheme = 'dark';
-      localStorage.setItem('theme', 'dark');
+      // Kezi valasztas nelkul a rendszer beallitasat kovetjuk, fallbackkent dark marad.
+      this.currentTheme = this.getSystemTheme();
+      this.mediaQuery?.addEventListener('change', event => {
+        if (localStorage.getItem('themeUserSet') !== '1') {
+          this.currentTheme = event.matches ? 'light' : 'dark';
+          this.applyTheme(this.currentTheme);
+        }
+      });
     }
 
     this.applyTheme(this.currentTheme);
@@ -37,5 +43,9 @@ export class ThemeService {
   private applyTheme(theme: 'light' | 'dark'): void {
     document.body.classList.remove('theme-light', 'theme-dark');
     document.body.classList.add(`theme-${theme}`);
+  }
+
+  private getSystemTheme(): 'light' | 'dark' {
+    return this.mediaQuery?.matches ? 'light' : 'dark';
   }
 }

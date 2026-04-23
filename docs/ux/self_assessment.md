@@ -2,17 +2,19 @@
 
 | Szempont | Pontszám | Indoklás |
 |---|---:|---|
-| Vizuális konzisztencia (szín, tipográfia, spacing) | 4 | A főoldal, terméklista és admin nézet egységes stílusra épül, kisebb finomítások még lehetnek. |
-| Információs hierarchia és olvashatóság | 4 | A fő folyamatok jól követhetők, a CTA-k kiemeltek, a fontos információk jól csoportosítva jelennek meg. |
-| Visszajelzések (loading, validáció, hiba, siker) | 5 | Betöltési állapot, validációs hibák, siker és hiba visszajelzések több kulcsfolyamatban is implementálva vannak. |
-| Hibakezelés és üres állapotok | 4 | Van üres lista és hiba állapotkezelés, de néhány ritkább edge case tovább javítható. |
-| Mobil / asztal lefedettség | 4 | A fő vásárlói nézetek mobilon is használhatók, admin oldalon van még optimalizálási lehetőség. |
-| Akadálymentesség (a11y) | 3 | Alap szintű billentyűzetes és fókusz-kezelés megvan, de ARIA lefedettség még bővíthető. |
-| Onboarding és új-user élmény | 4 | Kategóriaindítás, keresés és checkout útvonal gyorsan érthető egy új felhasználónak is. |
-| Teljesítményérzet (gyorsaság, animációk) | 4 | A felület általában gyors, de képek és cache terén további optimalizálás emelné az élményt. |
+| Vizuális konzisztencia (szín, tipográfia, spacing) | 4 | A fő oldalak egységes stílust követnek, kisebb finomhangolás még lehetséges. |
+| Információs hierarchia és olvashatóság | 4 | A fő funkciók jól elkülönülnek, a fontos CTA-k láthatók. |
+| Visszajelzések (loading, validáció, hiba, siker) | 5 | A kritikus folyamatokban vannak jól látható visszajelzések. |
+| Hibakezelés és üres állapotok | 4 | Az alap hiba- és üresállapot kezelés elkészült, néhány edge case még fejleszthető. |
+| Mobil / asztal lefedettség | 4 | A vásárlói oldalak jól működnek mobilon is, admin nézet még tömöríthető. |
+| Akadálymentesség (a11y) | 3 | Alap fókusz- és billentyűkezelés van, de ARIA bővíthető. |
+| Onboarding és új-user élmény | 4 | Kategóriák, keresés és checkout útvonal egyszerűen követhető. |
+| Teljesítményérzet (gyorsaság, animációk) | 4 | A felület gyors, de további optimalizálás még lehetséges. |
 
-## Szabadszöveges értékelés
-A projekt erőssége, hogy a vásárlói és admin folyamatok egy adatmodellre épülnek, így a készlet és rendelés adatok konzisztensen kezelhetők.  
-Külön előny a helyszíni vásárlás és webes rendelés közös kezelése, ami valós üzleti használatot céloz.  
-Ha lenne még két hét, elsőként az akadálymentességi mélyítést, a mobil admin nézet optimalizálását és a dokumentációs screenshot csomag véglegesítését fejlesztenénk tovább.  
-A legnagyobb nyitott tétel jelenleg a teljes képernyőfotó-készlet és a rövid user-journey videó elkészítése.
+## Rövid szöveges értékelés
+Erősségnek érzem, hogy a vásárlói és admin felület ugyanarra az adatmodellre épül, így a készlet- és rendeléskezelés konzisztens.  
+Külön előny, hogy a webes és helyszíni vásárlás folyamata egy rendszerben kezelhető.  
+További fejlesztési irányként az akadálymentesség és a mobil admin nézet finomhangolását emelném ki.
+
+## Zaro ertekeles
+A projekt legerosebb resze, hogy a vasarloi oldal es az adminisztracios felulet ugyanarra a termek- es rendeleslogikara epul. Tovabbi fejleszteskent a valodi online fizetesi integracio, automatikus emailkuldes es NAV-kompatibilis szamlazo bekotese lenne a kovetkezo lepes.

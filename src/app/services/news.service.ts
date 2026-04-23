@@ -11,7 +11,7 @@ export class NewsService {
   private newsCollection = collection(db, 'news');
 
   addNews(item: NewsItem) {
-    // Uj hirt mentek, es rogton idobelyeget is adok hozza.
+    // Uj hir mentese idobelyeggel.
     return addDoc(this.newsCollection, {
       ...item,
       createdAt: Date.now(),
@@ -20,7 +20,7 @@ export class NewsService {
   }
 
   updateNews(newsId: string, item: Partial<NewsItem>) {
-    // Szerkesztesnel csak a valtozott mezoket kuldom, plusz frissitem az updatedAt mezot.
+    // Szerkesztesnel csak a valtozott mezok mennek, plusz frissul az updatedAt mezo.
     const newsRef = doc(db, 'news', newsId);
     return updateDoc(newsRef, {
       ...item,
@@ -64,7 +64,7 @@ export class NewsService {
     next: (items: NewsItem[]) => void,
     error?: (err: unknown) => void
   ) {
-    // Admin listahoz minden hirt visszaadok idorendben.
+    // Admin listahoz minden hir idorendben jelenik meg.
     const newsQuery = query(this.newsCollection, orderBy('createdAt', 'desc'));
 
     return onSnapshot(

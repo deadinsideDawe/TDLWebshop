@@ -1,0 +1,93 @@
+<div class="page-container contact-page">
+  <section class="contact-hero">
+    <div>
+      <span class="section-kicker">Kapcsolat</span>
+      <h1>Segítünk a megfelelő épületgépészeti megoldás kiválasztásában</h1>
+      <p>
+        Termékkel, rendeléssel, szállítással vagy ajánlatkéréssel kapcsolatban is írhatsz.
+        A kitöltött adatokból előkészítünk egy e-mailt, amit azonnal el tudsz küldeni.
+      </p>
+      <div class="contact-actions">
+        <a class="btn" href="tel:+3612345678">Telefonálok</a>
+        <a class="btn contact-secondary" href="mailto:info@tdlwebshop.hu">E-mailt írok</a>
+      </div>
+    </div>
+
+    <aside class="contact-info-card card">
+      <h2>TDL Webshop</h2>
+      <div class="contact-info-list">
+        <span>+36 1 234 5678</span>
+        <span>info@tdlwebshop.hu</span>
+        <span>Hétfő - péntek: 8:00 - 16:00</span>
+        <span>Épületgépészeti webshop és szakmai támogatás</span>
+      </div>
+    </aside>
+  </section>
+
+  <section class="contact-grid">
+    <form class="contact-form card">
+      <div>
+        <span class="section-kicker">Üzenet</span>
+        <h2>Írd meg, miben segíthetünk</h2>
+      </div>
+
+      <div class="form-row">
+        <label>
+          Név
+          <input type="text" name="name" [(ngModel)]="name" placeholder="Teljes név">
+        </label>
+
+        <label>
+          E-mail
+          <input type="email" name="email" [(ngModel)]="email" placeholder="pelda@email.hu">
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label>
+          Telefonszám
+          <input type="tel" name="phone" [(ngModel)]="phone" placeholder="+36 ...">
+        </label>
+
+        <label>
+          Téma
+          <select name="topic" [(ngModel)]="topic">
+            <option *ngFor="let item of topics" [value]="item">{{ item }}</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Üzenet
+        <textarea name="message" [(ngModel)]="message" rows="7" placeholder="Írd le röviden a kérdésed vagy az ajánlatkérés részleteit..."></textarea>
+      </label>
+
+      <p class="contact-error" *ngIf="formError">{{ formError }}</p>
+
+      <div class="contact-form-actions">
+        <a class="btn" [href]="mailHref" (click)="validateBeforeSend($event)">Üzenet küldése</a>
+        <a class="contact-text-link" routerLink="/products">Termékek böngészése</a>
+      </div>
+    </form>
+
+    <aside class="contact-side">
+      <article class="contact-mini-card card">
+        <span>01</span>
+        <h3>Ajánlatkérés</h3>
+        <p>Nagyobb rendelés vagy szerelői csomag esetén írd meg az igényt, és segítünk összeállítani.</p>
+      </article>
+
+      <article class="contact-mini-card card">
+        <span>02</span>
+        <h3>Rendelési segítség</h3>
+        <p>Ha elakadtál a kosárnál, fizetésnél vagy szállításnál, jelezd a rendelési adatokkal.</p>
+      </article>
+
+      <article class="contact-mini-card card">
+        <span>03</span>
+        <h3>Szakmai tanácsadás</h3>
+        <p>Fűtés, víz, klíma és szellőzés témában segítünk a megfelelő termékkör kiválasztásában.</p>
+      </article>
+    </aside>
+  </section>
+</div>

@@ -8,11 +8,13 @@ import { Product } from '../../app/models/product.model';
 import { OrderService } from '../../app/services/order.service';
 import { Order } from '../../app/models/order.model';
 import { ToastService } from '../../app/services/toast.service';
+import { WishlistService } from '../../app/services/wishlist.service';
 import { normalizeErrorMessage } from '../../app/utils/error-message';
 import { getProductPricing } from '../../app/utils/product-pricing';
 
 interface ProductItem {
   id: number;
+  key?: string;
   firestoreId?: string;
   name: string;
   price: number;
@@ -34,6 +36,38 @@ interface ProductItem {
   saleStartsAt?: number;
   saleEndsAt?: number;
   createdAt?: number;
+}
+
+interface InstallerPackageRole {
+  label: string;
+  quantity: number;
+  categories: string[];
+  keywords: string[];
+}
+
+interface InstallerPackageDefinition {
+  id: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  roles: InstallerPackageRole[];
+}
+
+interface InstallerPackageItem {
+  label: string;
+  quantity: number;
+  product: ProductItem | null;
+}
+
+interface InstallerPackageView {
+  id: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  items: InstallerPackageItem[];
+  availableCount: number;
+  missingCount: number;
+  total: number;
 }
 
 @Component({
@@ -63,6 +97,57 @@ export class Products implements OnInit, OnDestroy {
 
   categories = ['Fűtés', 'Hűtés', 'Víz', 'Szellőzés', 'Szerelvények', 'Lakossági megoldások'];
   stockOptions = ['Készleten', 'Szállítható'];
+  selectedInstallerPackageId = 'futes';
+  installerPackageDefinitions: InstallerPackageDefinition[] = [
+    {
+      id: 'futes',
+      name: 'Fűtési szerelőcsomag',
+      subtitle: 'Radiátor és kazánházi alapanyagok',
+      description: 'Gyors kezdőcsomag radiátoros vagy kisebb fűtési munkákhoz.',
+      roles: [
+        { label: 'Radiátor szelep vagy csatlakozó', quantity: 4, categories: ['futes'], keywords: ['radiator', 'szelep', 'csatlakozo'] },
+        { label: 'Fűtési termosztát', quantity: 1, categories: ['futes', 'lakossagimegoldasok'], keywords: ['termosztat'] },
+        { label: 'Elzáró vagy golyóscsap', quantity: 2, categories: ['futes', 'szerelvenyek'], keywords: ['golyoscsap', 'elzaro', 'csap'] },
+        { label: 'Tömítés vagy szerelési kiegészítő', quantity: 2, categories: ['szerelvenyek', 'viz'], keywords: ['tomito', 'menet', 'szalag'] }
+      ]
+    },
+    {
+      id: 'viz',
+      name: 'Vízszerelési csomag',
+      subtitle: 'Ivóvíz, szűrés és kötés',
+      description: 'Alap csomag kisebb vízhálózati javításhoz és bekötéshez.',
+      roles: [
+        { label: 'Ivóvizes elzáró', quantity: 2, categories: ['viz', 'szerelvenyek'], keywords: ['ivoviz', 'golyoscsap', 'elzaro'] },
+        { label: 'Szűrő elem', quantity: 1, categories: ['viz', 'lakossagimegoldasok'], keywords: ['szuro', 'vizszuro'] },
+        { label: 'Nyomásmérő vagy nyomáscsökkentő', quantity: 1, categories: ['viz', 'lakossagimegoldasok'], keywords: ['nyomas', 'nyomasmero'] },
+        { label: 'Tömítőanyag', quantity: 2, categories: ['viz', 'szerelvenyek'], keywords: ['tomito', 'teflon', 'menet'] }
+      ]
+    },
+    {
+      id: 'szellozes',
+      name: 'Szellőzési csomag',
+      subtitle: 'Légtechnikai szereléshez',
+      description: 'Ajánlott összeállítás légcsatornás és átvezetéses munkákhoz.',
+      roles: [
+        { label: 'Légcsatorna elem', quantity: 3, categories: ['szellozes', 'hutes'], keywords: ['legcsatorna', 'legtechnikai'] },
+        { label: 'Befúvó vagy anemosztát', quantity: 2, categories: ['szellozes'], keywords: ['anemosztat', 'befuvo'] },
+        { label: 'Visszacsapó zsalu', quantity: 1, categories: ['szellozes'], keywords: ['visszacsapo', 'zsalu'] },
+        { label: 'Rugalmas cső', quantity: 1, categories: ['szellozes'], keywords: ['rugalmas', 'cso'] }
+      ]
+    },
+    {
+      id: 'hutes',
+      name: 'Hűtés/klíma csomag',
+      subtitle: 'Split klíma és fan-coil alapok',
+      description: 'Kiegészítő csomag klímás és hűtési körös munkákhoz.',
+      roles: [
+        { label: 'Klíma rézcső vagy csőpár', quantity: 1, categories: ['hutes'], keywords: ['klima', 'rezcso'] },
+        { label: 'Kondenzvíz elvezetés', quantity: 1, categories: ['hutes'], keywords: ['kondenzviz'] },
+        { label: 'Hűtési kör elzáró', quantity: 2, categories: ['hutes', 'szerelvenyek'], keywords: ['golyoscsap', 'elzaro'] },
+        { label: 'Fan-coil szelep', quantity: 1, categories: ['hutes', 'futes'], keywords: ['fan-coil', 'termosztatikus', 'szelep'] }
+      ]
+    }
+  ];
   private reservedByProductKey = new Map<string, number>();
   private soldByProductKey = new Map<string, number>();
 
@@ -76,6 +161,7 @@ export class Products implements OnInit, OnDestroy {
     private productService: ProductService,
     private orderService: OrderService,
     private toastService: ToastService,
+    private wishlistService: WishlistService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
@@ -183,6 +269,31 @@ export class Products implements OnInit, OnDestroy {
     this.toastService.success('Termék a kosárban', product.name);
   }
 
+  toggleWishlist(product: ProductItem): void {
+    const added = this.wishlistService.toggleWishlist({
+      id: product.id,
+      key: product.key,
+      firestoreId: product.firestoreId,
+      name: product.name,
+      sku: product.sku,
+      category: product.category,
+      price: product.price,
+      image: product.image,
+      stock: product.stock,
+      stockQuantity: product.stockQuantity,
+      shortDescription: product.shortDescription
+    });
+
+    this.toastService.success(
+      added ? 'Termék elmentve' : 'Termék eltávolítva',
+      product.name
+    );
+  }
+
+  isInWishlist(product: ProductItem): boolean {
+    return this.wishlistService.isInWishlist(product);
+  }
+
   openProductDetails(product: ProductItem): void {
     this.selectedProduct = product;
     this.selectedProductImage = product.images[0] || product.image;
@@ -212,6 +323,63 @@ export class Products implements OnInit, OnDestroy {
   goToCart(): void {
     this.closeCartPreview();
     void this.router.navigate(['/cart']);
+  }
+
+  selectInstallerPackage(packageId: string): void {
+    this.selectedInstallerPackageId = packageId;
+  }
+
+  get installerPackageTabs(): Array<{ id: string; name: string }> {
+    return this.installerPackageDefinitions.map(item => ({ id: item.id, name: item.name }));
+  }
+
+  get activeInstallerPackage(): InstallerPackageView {
+    const definition =
+      this.installerPackageDefinitions.find(item => item.id === this.selectedInstallerPackageId) ||
+      this.installerPackageDefinitions[0];
+    const usedProductKeys = new Set<string>();
+    const items = definition.roles.map(role => {
+      const product = this.findPackageProduct(role, usedProductKeys);
+      if (product) {
+        usedProductKeys.add(product.key || product.firestoreId || product.sku || product.name);
+      }
+
+      return {
+        label: role.label,
+        quantity: role.quantity,
+        product
+      };
+    });
+
+    return {
+      id: definition.id,
+      name: definition.name,
+      subtitle: definition.subtitle,
+      description: definition.description,
+      items,
+      availableCount: items.filter(item => !!item.product).length,
+      missingCount: items.filter(item => !item.product).length,
+      total: items.reduce((sum, item) => sum + (item.product ? item.product.price * item.quantity : 0), 0)
+    };
+  }
+
+  canAddInstallerPackage(packageView = this.activeInstallerPackage): boolean {
+    return packageView.items.some(item => !!item.product);
+  }
+
+  addInstallerPackageToCart(packageView = this.activeInstallerPackage): void {
+    const availableItems = packageView.items.filter(item => !!item.product) as Array<InstallerPackageItem & { product: ProductItem }>;
+
+    if (availableItems.length === 0) {
+      this.toastService.error('A csomag nem tehető kosárba', 'Nincs elérhető termék a kiválasztott csomaghoz.');
+      return;
+    }
+
+    for (const item of availableItems) {
+      this.cartService.addToCart(item.product, item.quantity);
+    }
+
+    this.toastService.success('Szerelői csomag a kosárban', packageView.name);
   }
 
   getStockState(product: ProductItem): 'in-stock' | 'low-stock' | 'out-stock' {
@@ -366,6 +534,7 @@ export class Products implements OnInit, OnDestroy {
 
     return {
       id: index + 1,
+      key: product.id || product.sku || product.name,
       firestoreId: product.id,
       name: product.name,
       price: pricing.finalPrice,
@@ -673,6 +842,59 @@ export class Products implements OnInit, OnDestroy {
     }
 
     return baseProducts;
+  }
+
+  private findPackageProduct(role: InstallerPackageRole, usedProductKeys: Set<string>): ProductItem | null {
+    const candidates = this.products
+      .filter(product => this.canAddToCart(product))
+      .filter(product => product.stockQuantity >= role.quantity)
+      .filter(product => !usedProductKeys.has(product.key || product.firestoreId || product.sku || product.name))
+      .map(product => ({
+        product,
+        score: this.getPackageProductScore(product, role)
+      }))
+      .filter(item => item.score > 0)
+      .sort((left, right) => {
+        if (right.score !== left.score) {
+          return right.score - left.score;
+        }
+
+        return right.product.stockQuantity - left.product.stockQuantity;
+      });
+
+    return candidates[0]?.product || null;
+  }
+
+  private getPackageProductScore(product: ProductItem, role: InstallerPackageRole): number {
+    const normalizedCategory = this.normalizeCategory(product.category);
+    const text = this.normalizeSearchText([
+      product.name,
+      product.category,
+      product.shortDescription,
+      product.description,
+      product.sku
+    ].join(' '));
+    let score = 0;
+
+    if (role.categories.some(category => normalizedCategory.includes(category) || category.includes(normalizedCategory))) {
+      score += 4;
+    }
+
+    for (const keyword of role.keywords) {
+      if (text.includes(this.normalizeSearchText(keyword))) {
+        score += 3;
+      }
+    }
+
+    if (product.isTopProduct) {
+      score += 1;
+    }
+
+    if (product.stockQuantity >= role.quantity) {
+      score += 1;
+    }
+
+    return score;
   }
 }
 

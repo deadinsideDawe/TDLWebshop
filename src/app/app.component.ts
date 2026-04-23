@@ -5,6 +5,7 @@ import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ThemeService } from './services/theme.service';
 import { CartService } from './services/cart.service';
 import { AuthService } from './services/auth.service';
+import { WishlistService } from './services/wishlist.service';
 import { ToastContainer } from './components/toast-container/toast-container';
 import { ShopAssistantComponent } from './components/shop-assistant/shop-assistant';
 
@@ -20,17 +21,23 @@ export class AppComponent {
   menuOpen = false;
   searchTerm = '';
   cartCount = 0;
+  wishlistCount = 0;
   headerLogo = 'tdl-header-logo.svg';
 
   constructor(
     public themeService: ThemeService,
     public authService: AuthService,
     private cartService: CartService,
+    private wishlistService: WishlistService,
     private router: Router
   ) {
     // Kosar darabszamot realtime frissitjuk a service streambol.
     this.cartService.cart$.subscribe(items => {
       this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    });
+
+    this.wishlistService.wishlist$.subscribe(items => {
+      this.wishlistCount = items.length;
     });
   }
 
@@ -66,7 +73,8 @@ export class AppComponent {
   }
 
   canShowMyOrdersByEmail(email?: string | null): boolean {
-    return !!email && !this.authService.isAdminEmail(email);
+    // Role alapú adminnál nem elég az email-listát nézni, ezért a teljes admin állapotot kérdezzük.
+    return !!email && !this.authService.isCurrentUserAdmin();
   }
 
   canShowMyOrders(): boolean {

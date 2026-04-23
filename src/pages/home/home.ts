@@ -1,10 +1,13 @@
 ﻿import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProductService } from '../../app/services/product.service';
 import { Product } from '../../app/models/product.model';
 import { CartService } from '../../app/services/cart.service';
+import { WishlistService } from '../../app/services/wishlist.service';
 import { NewsService } from '../../app/services/news.service';
+import { NewsletterService } from '../../app/services/newsletter.service';
 import { NewsItem } from '../../app/models/news.model';
 import { getProductPricing } from '../../app/utils/product-pricing';
 
@@ -68,20 +71,20 @@ interface TrustItem {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
 export class Home implements OnInit, OnDestroy {
-  heroTitle = 'Épületgépészeti termékek egy helyen';
-  heroText = 'Fűtés • Hűtés • Víz • Szellőzés • Szerelvények. Válogasson raktárról elérhető termékek közül, valós készletinformációval és gyors rendelési folyamattal.';
-  heroButton = 'Termékek böngészése';
+  heroTitle = 'Épületgépészet egy helyen';
+  heroText = 'Minőségi termékek fűtéshez, vízhez, klímához és szereléshez. Raktári készlet, gyors rendelés és szakmai fókusz egy modern webshopban.';
+  heroButton = 'Termékek megtekintése';
   heroSecondaryButton = 'Akciós ajánlatok';
   heroImage = 'tdl-header-logo.svg';
 
   heroTags: HeroTag[] = [
     { label: 'Fűtés', query: 'Futes' },
-    { label: 'Hűtés', query: 'Hutes' },
+    { label: 'Klíma', query: 'Hutes' },
     { label: 'Víz', query: 'Viz' },
     { label: 'Szellőzés', query: 'Szellozes' },
     { label: 'Szerelvények', query: 'Szerelvenyek' },
@@ -89,18 +92,19 @@ export class Home implements OnInit, OnDestroy {
   ];
 
   categories: HomeCategory[] = [
-    { label: 'Fűtés', query: 'Futes', description: 'Kazánok, radiátorok, fűtési szerelvények.', image: this.createCategoryImage('#9BE000', 'flame') },
-    { label: 'Hűtés', query: 'Hutes', description: 'HVAC elemek és hűtéstechnikai komponensek.', image: this.createCategoryImage('#38BDF8', 'snow') },
-    { label: 'Vízszerelés', query: 'Viz', description: 'Csövek, idomok és vízszerelési megoldások.', image: this.createCategoryImage('#0EA5E9', 'drop') },
-    { label: 'Szellőzés', query: 'Szellozes', description: 'Légtechnikai és szellőzési rendszerelemek.', image: this.createCategoryImage('#84CC16', 'fan') },
-    { label: 'Szerelvények', query: 'Szerelvenyek', description: 'Szelepek, csatlakozók, gépészeti alkatrészek.', image: this.createCategoryImage('#F97316', 'wrench') },
-    { label: 'Lakossági megoldások', query: 'Lakossagi megoldasok', description: 'Otthoni fűtés-hűtés-víz megoldások egy helyen.', image: this.createCategoryImage('#119DFF', 'house') }
+    { label: 'Fűtés', query: 'Futes', description: 'Kazánok, radiátorok, fűtési szerelvények.', image: this.createCategoryImage('#ef4444', 'flame') },
+    { label: 'Vízszerelés', query: 'Viz', description: 'Csaptelepek, csövek, idomok.', image: this.createCategoryImage('#2563eb', 'drop') },
+    { label: 'Klíma', query: 'Hutes', description: 'Klíma és hűtéstechnikai elemek.', image: this.createCategoryImage('#3b82f6', 'snow') },
+    { label: 'Gáz', query: 'Gaz', description: 'Gázszerelési és biztonsági elemek.', image: this.createCategoryImage('#ef4444', 'flame') },
+    { label: 'Szellőzés', query: 'Szellozes', description: 'Légtechnikai és szellőzési rendszerelemek.', image: this.createCategoryImage('#3b82f6', 'fan') },
+    { label: 'Szerelési anyagok', query: 'Szerelvenyek', description: 'Szelepek, csatlakozók, alkatrészek.', image: this.createCategoryImage('#dc2626', 'wrench') }
   ];
 
   metrics: HomeMetric[] = [
-    { value: 'Gyors', label: 'online rendelés leadása' },
-    { value: 'Valós', label: 'készlet és rendeléskezelés' },
-    { value: 'TDL', label: 'szakmai kínálat épületgépészethez' }
+    { value: 'Gyors szállítás', label: '1-2 munkanap' },
+    { value: 'Raktárról azonnal', label: 'több ezer termék' },
+    { value: 'Szakértői támogatás', label: 'segítünk választani' },
+    { value: 'Minőségi garancia', label: 'csak bevált márkák' }
   ];
 
   featuredProducts: FeaturedProduct[] = [];
@@ -114,34 +118,38 @@ export class Home implements OnInit, OnDestroy {
       title: 'Heti ajánlatok',
       subtitle: 'Kiemelt fűtési és hűtési termékek kedvezménnyel.',
       badge: '-15%',
-      accent: '#119DFF',
+      accent: '#3b82f6',
       queryParams: { promo: 'discount15' }
     },
     {
       title: 'TOP termékek',
       subtitle: 'A leggyakrabban vásárolt termékek a kínálatból.',
       badge: 'TOP TERMÉK',
-      accent: '#9BE000',
+      accent: '#2563eb',
       queryParams: { promo: 'top' }
     },
     {
       title: 'Újdonságok',
       subtitle: 'Újonnan felkerült termékek és friss kínálat.',
       badge: 'ÚJDONSÁG',
-      accent: '#F97316',
+      accent: '#ef4444',
       queryParams: { promo: 'new' }
     }
   ];
 
   trustItems: TrustItem[] = [
-    { icon: 'TRUCK', title: 'Gyors kiszállítás', text: 'Országos szállítás áttekinthető rendelési folyamattal.' },
-    { icon: 'BOX', title: 'Megbízható készletinformáció', text: 'Az admin felület valós készletet és foglalásokat kezel.' },
-    { icon: 'HVAC', title: 'Épületgépészeti fókusz', text: 'A kínálat fűtés, hűtés, víz és szellőzés területére koncentrál.' },
-    { icon: 'CHAT', title: 'Segítőkész ügyfélszolgálat', text: 'Kérdés esetén gyorsan elérhető segítséget biztosítunk.' }
+    { icon: 'SZ', title: 'Gyors kiszállítás', text: 'Rendelésed 1-2 munkanapon belül megérkezik.' },
+    { icon: 'RK', title: 'Széles választék', text: 'Fűtés, víz, klíma és szerelési termékek egy helyen.' },
+    { icon: 'MG', title: 'Minőségi garancia', text: 'Bevált, megbízható márkák termékei.' },
+    { icon: 'ST', title: 'Szakértői segítség', text: 'Kérdésed van? Segítünk a választásban.' }
   ];
 
   newsItems: NewsItem[] = [];
   activeNewsIndex = 0;
+  newsletterEmail = '';
+  newsletterMessage = '';
+  newsletterError = '';
+  newsletterSaving = false;
   // Ez kezeli az automata hírváltást 5 másodpercenként.
   private newsRotationTimer?: ReturnType<typeof setInterval>;
 
@@ -152,7 +160,9 @@ export class Home implements OnInit, OnDestroy {
     private router: Router,
     private productService: ProductService,
     private cartService: CartService,
+    private wishlistService: WishlistService,
     private newsService: NewsService,
+    private newsletterService: NewsletterService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
@@ -175,7 +185,7 @@ export class Home implements OnInit, OnDestroy {
 
     this.unsubscribeNews = this.newsService.getActiveNewsStream(items => {
       this.ngZone.run(() => {
-        // Ha változnak a hírek, újraindítom a forgást az első elemtől.
+    // Hirlista valtozasakor a forgás az elso elemtol indul ujra.
         this.newsItems = items;
         this.activeNewsIndex = 0;
         this.setupNewsRotation();
@@ -239,6 +249,32 @@ export class Home implements OnInit, OnDestroy {
     });
   }
 
+  toggleFeaturedWishlist(product: FeaturedProduct): void {
+    this.wishlistService.toggleWishlist({
+      id: this.toCartId(product.firestoreId || product.sku || product.name),
+      key: product.firestoreId || product.sku || product.name,
+      firestoreId: product.firestoreId,
+      name: product.name,
+      sku: product.sku,
+      category: product.category,
+      price: product.price,
+      image: product.image,
+      stock: product.stock,
+      stockQuantity: product.stockQuantity,
+      shortDescription: product.shortDescription
+    });
+  }
+
+  isFeaturedInWishlist(product: FeaturedProduct): boolean {
+    return this.wishlistService.isInWishlist({
+      id: this.toCartId(product.firestoreId || product.sku || product.name),
+      key: product.firestoreId || product.sku || product.name,
+      firestoreId: product.firestoreId,
+      sku: product.sku,
+      name: product.name
+    });
+  }
+
   async goToProducts(queryParams: Record<string, string> = {}): Promise<void> {
     await this.router.navigate(['/products'], { queryParams });
   }
@@ -276,7 +312,7 @@ export class Home implements OnInit, OnDestroy {
   }
 
   async openNewsTarget(news: NewsItem): Promise<void> {
-    // Admin beállítása alapján ide irányítom a usert (termékek / kategória / promó).
+    // Admin beallitas alapjan celzott navigacio: termekek / kategoria / promo.
     const type = news.targetType || 'none';
     const value = (news.targetValue || '').trim();
 
@@ -295,8 +331,31 @@ export class Home implements OnInit, OnDestroy {
     }
   }
 
+  async subscribeNewsletter(): Promise<void> {
+    const email = this.newsletterEmail.trim();
+    this.newsletterMessage = '';
+    this.newsletterError = '';
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      this.newsletterError = 'Adj meg egy érvényes e-mail címet.';
+      return;
+    }
+
+    this.newsletterSaving = true;
+
+    try {
+      await this.newsletterService.subscribe(email);
+      this.newsletterEmail = '';
+      this.newsletterMessage = 'Sikeres feliratkozás. Köszönjük!';
+    } catch {
+      this.newsletterError = 'A feliratkozás most nem sikerült. Próbáld újra később.';
+    } finally {
+      this.newsletterSaving = false;
+    }
+  }
+
   private setupNewsRotation(): void {
-    // Először leállítom a régi timert, hogy ne fusson több egyszerre.
+    // A regi timer leall, hogy ne fusson tobb forgatas egyszerre.
     if (this.newsRotationTimer) {
       clearInterval(this.newsRotationTimer);
       this.newsRotationTimer = undefined;
@@ -392,7 +451,7 @@ export class Home implements OnInit, OnDestroy {
       }
     }
 
-    if (selected.length < 4) {
+    if (selected.length < 6) {
       for (const product of products) {
         const id = product.firestoreId || product.name;
         if (!usedIds.has(id)) {
@@ -400,7 +459,7 @@ export class Home implements OnInit, OnDestroy {
           selected.push(product);
         }
 
-        if (selected.length >= 4) {
+        if (selected.length >= 6) {
           break;
         }
       }

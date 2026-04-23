@@ -61,6 +61,56 @@
       <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
     </div>
 
+    <section class="installer-package-panel" *ngIf="!loading && products.length > 0">
+      <div class="installer-package-head">
+        <div>
+          <p class="package-kicker">Szerelői/profi mód</p>
+          <h2>{{ activeInstallerPackage.name }}</h2>
+          <p class="package-subtitle">{{ activeInstallerPackage.subtitle }}</p>
+          <p>{{ activeInstallerPackage.description }}</p>
+        </div>
+        <strong>{{ activeInstallerPackage.total }} Ft</strong>
+      </div>
+
+      <div class="package-tabs">
+        <button
+          type="button"
+          *ngFor="let package of installerPackageTabs"
+          [class.active]="package.id === selectedInstallerPackageId"
+          (click)="selectInstallerPackage(package.id)"
+        >
+          {{ package.name }}
+        </button>
+      </div>
+
+      <div class="package-items">
+        <article class="package-item" *ngFor="let line of activeInstallerPackage.items">
+          <span>{{ line.quantity }} db</span>
+          <div>
+            <strong>{{ line.product?.name || line.label }}</strong>
+            <p>{{ line.product ? line.label + ' - ' + line.product.price + ' Ft/db' : 'Ehhez a szerephez nincs elérhető termék.' }}</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="package-footer">
+        <span>
+          {{ activeInstallerPackage.availableCount }} / {{ activeInstallerPackage.items.length }} csomagelem elérhető
+          <ng-container *ngIf="activeInstallerPackage.missingCount > 0">
+            - {{ activeInstallerPackage.missingCount }} hiányzik
+          </ng-container>
+        </span>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="!canAddInstallerPackage(activeInstallerPackage)"
+          (click)="addInstallerPackageToCart(activeInstallerPackage)"
+        >
+          Teljes csomag kosárba
+        </button>
+      </div>
+    </section>
+
     <div class="empty-products card" *ngIf="!loading && filteredProducts.length === 0">
       Nincs a szűrőknek megfelelő termék.
     </div>
@@ -81,7 +131,18 @@
           <p class="original-price" *ngIf="item.hasDiscount">{{ item.originalPrice }} Ft</p>
           <p class="price">{{ item.price }} Ft</p>
         </div>
-        <p class="stock">{{ item.stock }}</p>
+        <div class="product-stock-row">
+          <p class="stock">{{ item.stock }}</p>
+          <button
+            class="favorite-btn"
+            type="button"
+            [class.active]="isInWishlist(item)"
+            (click)="toggleWishlist(item)"
+            aria-label="Kívánságlistához adás"
+          >
+            {{ isInWishlist(item) ? '♥' : '♡' }}
+          </button>
+        </div>
         <p class="stock-quantity">Raktárkészlet: {{ item.stockQuantity }} db</p>
         <p class="reserved-stock" *ngIf="getReservedQuantity(item) > 0">
           Foglalás alatt: {{ getReservedQuantity(item) }} db

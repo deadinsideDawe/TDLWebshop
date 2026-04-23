@@ -1,80 +1,60 @@
 <div class="page-container home-page">
   <section class="hero">
     <div class="hero-copy">
-      <span class="hero-kicker">Épületgépészeti webshop</span>
+      <span class="hero-kicker">Épületgépészet egy helyen</span>
       <h1>{{ heroTitle }}</h1>
       <p>{{ heroText }}</p>
 
-      <div class="hero-tags">
-        <button
-          type="button"
-          *ngFor="let tag of heroTags"
-          (click)="goToProducts({ category: tag.query })"
-        >
-          {{ tag.label }}
-        </button>
-      </div>
-
       <div class="hero-actions">
         <button class="btn hero-link" type="button" (click)="goToProducts()">{{ heroButton }}</button>
-        <button class="hero-secondary-link" type="button" (click)="goToProducts({ promo: 'discount15' })">
-          {{ heroSecondaryButton }}
+        <button class="hero-secondary-link" type="button" (click)="goToProducts({ promo: 'top' })">
+          Ajánlatkérés
         </button>
-      </div>
-
-      <div class="hero-metrics">
-        <div class="metric-item" *ngFor="let metric of metrics">
-          <strong>{{ metric.value }}</strong>
-          <span>{{ metric.label }}</span>
-        </div>
       </div>
     </div>
 
     <div class="hero-visual card">
       <div class="hero-grid"></div>
-      <img [src]="heroImage" alt="TDL webshop hero">
-
-      <div class="hero-news card" [class.clickable-news]="activeNews && hasNewsTarget(activeNews)">
-        <span class="hero-news-kicker">Aktuális hírek</span>
-
-        <ng-container *ngIf="activeNews as news; else noNewsBlock">
-          <h3>{{ news.title }}</h3>
-          <p>{{ news.content }}</p>
-          <span class="hero-news-label" *ngIf="news.label">{{ news.label }}</span>
-          <button
-            class="btn hero-news-link"
-            type="button"
-            *ngIf="hasNewsTarget(news)"
-            (click)="openNewsTarget(news)"
-          >
-            Megnézem
-          </button>
-        </ng-container>
-
-        <ng-template #noNewsBlock>
-          <h3>Nincsenek még hírek</h3>
-          <p>Az admin panelről tudsz új hírt hozzáadni, ami itt automatikusan megjelenik.</p>
-        </ng-template>
-
+      <div class="hero-pipes"></div>
+      <article class="hero-news-stage" *ngIf="activeNews as news; else heroLogoFallback">
+        <span class="hero-news-kicker">{{ news.label || 'Aktuális hír' }}</span>
+        <h2>{{ news.title }}</h2>
+        <p>{{ news.content }}</p>
+        <button class="btn hero-news-action" type="button" *ngIf="hasNewsTarget(news)" (click)="openNewsTarget(news)">
+          Megnézem
+        </button>
         <div class="hero-news-dots" *ngIf="newsItems.length > 1">
           <button
             type="button"
-            class="news-dot"
             *ngFor="let item of newsItems; let index = index"
             [class.active]="index === activeNewsIndex"
             (click)="goToNews(index)"
-            [attr.aria-label]="'Hír ' + (index + 1)"
+            aria-label="Hír kiválasztása"
           ></button>
         </div>
-      </div>
+      </article>
+      <ng-template #heroLogoFallback>
+        <button class="hero-logo-button" type="button" (click)="goToProducts()">
+          <img [src]="heroImage" alt="TDL webshop hero">
+        </button>
+      </ng-template>
     </div>
   </section>
 
+  <section class="benefit-strip">
+    <article class="metric-item" *ngFor="let metric of metrics">
+      <strong>{{ metric.value }}</strong>
+      <span>{{ metric.label }}</span>
+    </article>
+  </section>
+
   <section class="home-section">
-    <div class="section-heading">
-      <span class="section-kicker">Kategóriák</span>
-      <h2>Főbb épületgépészeti kategóriák</h2>
-      <p>Hat fő termékkategória, gyors áttekintéssel és egykattintásos szűréssel.</p>
+    <div class="section-heading section-heading-row">
+      <div>
+        <span class="section-kicker">Kategóriák</span>
+        <h2>Főbb épületgépészeti kategóriák</h2>
+      </div>
+      <button class="minimal-link" type="button" (click)="goToProducts()">Összes kategória</button>
     </div>
 
     <div class="category-showcase">
@@ -94,10 +74,12 @@
   </section>
 
   <section class="home-section">
-    <div class="section-heading">
-      <span class="section-kicker">Kiemelt termékek</span>
-      <h2>Népszerű termékek a kínálatból</h2>
-      <p>Valós készletinformációval megjelenített termékek. A Részletek gomb felugró ablakot nyit.</p>
+    <div class="section-heading section-heading-row">
+      <div>
+        <span class="section-kicker">Kiemelt termékek</span>
+        <h2>Népszerű termékek a kínálatból</h2>
+      </div>
+      <button class="minimal-link" type="button" (click)="goToProducts({ promo: 'top' })">Összes kiemelt termék</button>
     </div>
 
     <div class="card home-loading" *ngIf="featuredLoading">Termékek betöltése...</div>
@@ -108,10 +90,10 @@
     <div class="featured-grid" *ngIf="featuredProducts.length > 0">
       <article class="featured-card card" *ngFor="let product of featuredProducts">
         <span class="featured-badge">{{ product.badge }}</span>
-        <div style="position:absolute;top:16px;right:16px;z-index:1;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-          <span class="promo-badge" style="color:#38bdf8;" *ngIf="product.isTopProduct || product.badge === 'TOP TERMÉK'">TOP</span>
-          <span class="promo-badge" style="color:#bef264;" *ngIf="product.isWeeklyDeal">Heti ajánlat</span>
-          <span class="promo-badge" style="color:#f8fafc;" *ngIf="product.hasDiscount">-{{ product.discountPercent }}%</span>
+        <div class="featured-promo-stack">
+          <span class="promo-badge top-promo" *ngIf="product.isTopProduct || product.badge === 'TOP TERMÉK'">TOP</span>
+          <span class="promo-badge deal-promo" *ngIf="product.isWeeklyDeal">Heti ajánlat</span>
+          <span class="promo-badge discount-promo" *ngIf="product.hasDiscount">-{{ product.discountPercent }}%</span>
         </div>
         <img [src]="product.image" [alt]="product.name">
         <p class="featured-category">{{ product.category }}</p>
@@ -121,7 +103,18 @@
           <p class="featured-original-price" *ngIf="product.hasDiscount">{{ product.originalPrice }} Ft</p>
           <p class="featured-price">{{ product.price }} Ft</p>
         </div>
-        <span class="featured-stock" [class]="product.stockClass">{{ product.stockLabel }}</span>
+        <div class="featured-stock-row">
+          <span class="featured-stock" [class]="product.stockClass">{{ product.stockLabel }}</span>
+          <button
+            class="featured-favorite-inline"
+            type="button"
+            [class.active]="isFeaturedInWishlist(product)"
+            (click)="toggleFeaturedWishlist(product)"
+            aria-label="Kívánságlistához adás"
+          >
+            {{ isFeaturedInWishlist(product) ? '♥' : '♡' }}
+          </button>
+        </div>
         <div class="featured-actions">
           <button class="btn featured-link" type="button" (click)="openFeaturedDetails(product)">Részletek</button>
           <button class="btn btn-secondary" type="button" [disabled]="!canAddToCart(product)" (click)="addFeaturedToCart(product)">
@@ -132,35 +125,7 @@
     </div>
   </section>
 
-  <section class="home-section">
-    <div class="section-heading">
-      <span class="section-kicker">Ajánlatok</span>
-      <h2>Heti ajánlatok, top termékek és újdonságok</h2>
-      <p>Az aktuális akciók és kiemelt termékcsoportok gyors eléréséhez.</p>
-    </div>
-
-    <div class="promo-grid">
-      <button
-        type="button"
-        class="promo-card card"
-        *ngFor="let promo of promoBanners"
-        [style.--promo-accent]="promo.accent"
-        (click)="goToProducts(promo.queryParams)"
-      >
-        <span class="promo-badge">{{ promo.badge }}</span>
-        <h3>{{ promo.title }}</h3>
-        <p>{{ promo.subtitle }}</p>
-      </button>
-    </div>
-  </section>
-
-  <section class="home-section trust-section card">
-    <div class="section-heading">
-      <span class="section-kicker">Miért minket válasszon?</span>
-      <h2>Megbízható vásárlási élmény</h2>
-      <p>Átlátható folyamat, valós készletadatok és gyors ügyintézés minden rendelésnél.</p>
-    </div>
-
+  <section class="home-section trust-section">
     <div class="trust-grid">
       <article class="trust-card" *ngFor="let item of trustItems">
         <span class="trust-icon">{{ item.icon }}</span>
@@ -168,6 +133,24 @@
         <p>{{ item.text }}</p>
       </article>
     </div>
+  </section>
+
+  <section class="newsletter-band">
+    <div>
+      <span class="newsletter-icon">✉</span>
+      <div>
+        <h2>Iratkozz fel hírlevelünkre!</h2>
+        <p>Értesülj elsőként akcióinkról és újdonságainkról.</p>
+      </div>
+    </div>
+    <form class="newsletter-form" (submit)="$event.preventDefault(); subscribeNewsletter()">
+      <input type="email" [(ngModel)]="newsletterEmail" name="newsletterEmail" placeholder="E-mail cím megadása..." aria-label="Hírlevél e-mail cím">
+      <button class="btn" type="submit" [disabled]="newsletterSaving">
+        {{ newsletterSaving ? 'Mentés...' : 'Feliratkozom' }}
+      </button>
+      <p class="newsletter-message" *ngIf="newsletterMessage">{{ newsletterMessage }}</p>
+      <p class="newsletter-error" *ngIf="newsletterError">{{ newsletterError }}</p>
+    </form>
   </section>
 </div>
 
@@ -219,6 +202,13 @@
           (click)="addFeaturedToCart(item)"
         >
           {{ canAddToCart(item) ? 'Kosárba' : 'Nincs készleten' }}
+        </button>
+        <button
+          class="btn modal-wishlist-btn"
+          type="button"
+          (click)="toggleFeaturedWishlist(item)"
+        >
+          {{ isFeaturedInWishlist(item) ? 'Eltávolítás a kívánságlistából' : 'Kívánságlistára teszem' }}
         </button>
       </div>
     </div>

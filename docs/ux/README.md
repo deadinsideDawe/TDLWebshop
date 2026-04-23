@@ -1,6 +1,6 @@
 # GUI/UX dokumentáció - TDL Épületgépészeti Webshop
 
-Ez a mappa a szakdolgozati GUI/UX értékeléshez kért strukturált dokumentációs csomagot tartalmazza.
+Ez a mappa tartalmazza a GUI/UX beadáshoz kért teljes dokumentációs csomagot.
 
 ## Tartalom
 - [pageflow.png](C:/Users/Dell/webshop/docs/ux/pageflow.png)
@@ -12,16 +12,16 @@ Ez a mappa a szakdolgozati GUI/UX értékeléshez kért strukturált dokumentác
 - [screenshots/](C:/Users/Dell/webshop/docs/ux/screenshots)
 - [mockups/](C:/Users/Dell/webshop/docs/ux/mockups)
 - [inspirations/](C:/Users/Dell/webshop/docs/ux/inspirations)
+- [EDIT_GUIDE.md](C:/Users/Dell/webshop/docs/ux/EDIT_GUIDE.md)
 
 ## Jelölések a pageflow-ban
 - `▶` belépési pont
 - `♦` modális dialógus
 - `🔒` csak bejelentkezett felhasználónak elérhető képernyő
 
-## Megjegyzés
-A `pageflow.mmd` a szerkeszthető forrás. A `pageflow.png` ennek exportált változata.
-
-A `screenshots/` mappa a beadási fájlnév-sémához van előkészítve. Végleges beadáshoz minden egyedi képernyőről valós képernyőkép szükséges.
+## Rövid megjegyzés
+A `pageflow.mmd` a szerkeszthető forrásfájl.  
+A `pageflow.png` ennek az exportált változata.
 
 ## Beadási checklist
 - [x] pageflow.png + szerkeszthető forrás
@@ -33,3 +33,6 @@ A `screenshots/` mappa a beadási fájlnév-sémához van előkészítve. Végle
 - [ ] (Ajánlott) screen recording vagy GIF a fő journey-ről
 - [ ] (Opcionális) mockup / Figma link
 - [ ] (Opcionális) inspirations
+
+## Projekt megjegyzes
+A UX cel egy olyan epuletegepeszeti webshop kialakitasa volt, ahol a vasarlo gyorsan talal termeket, az admin pedig egy helyen latja a rendeleseket, keszletet es uzleti jelzeseket. A legerosebb felulet az admin dashboard es a termeklista, mert ezek nem csak latvanyosak, hanem valos munkafolyamatokat is tamogatnak.

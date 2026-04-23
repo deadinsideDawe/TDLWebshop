@@ -1,4 +1,3 @@
-/* Admin tab navigacio. */
 .admin-tabs {
   display: flex;
   gap: 10px;
@@ -11,7 +10,7 @@
   text-decoration: none;
   color: var(--text);
   padding: 10px 14px;
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--background-soft);
   font-weight: 700;
 }
@@ -21,7 +20,6 @@
   color: #fff;
 }
 
-/* Fo admin layout (ket oszlop, vagy egy oszlop sectiontol fuggoen). */
 .admin-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -32,7 +30,6 @@
   grid-template-columns: 1fr;
 }
 
-/* Termekkezeles/form stilusok. */
 .admin-form,
 .admin-info {
   padding: 24px;
@@ -123,7 +120,6 @@
   gap: 8px;
 }
 
-/* Dashboard attekintes kartya racs. */
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -132,8 +128,8 @@
 }
 
 .overview-card {
-  padding: 16px;
-  border-radius: 16px;
+  padding: 18px;
+  border-radius: 10px;
   background: var(--background-soft);
   border: 1px solid var(--border);
   display: grid;
@@ -255,7 +251,7 @@
 
 .highlight-card {
   padding: 16px;
-  border-radius: 16px;
+  border-radius: 10px;
 }
 
 .mini-list {
@@ -280,7 +276,7 @@
 
 .section-summary-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
   margin: 12px 0 16px;
 }
@@ -335,7 +331,7 @@
 .stock-chart-card,
 .product-admin-card {
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 10px;
   background: var(--background-soft);
   border: 1px solid var(--border);
 }
@@ -383,6 +379,52 @@
 .stock-low {
   color: #c0392b;
 }
+
+.smart-stock-panel {
+  display: grid;
+  gap: 12px;
+  margin: 8px 0 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.smart-stock-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.smart-stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.smart-stock-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--background-soft);
+}
+
+.smart-stock-metrics {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.smart-stock-metrics strong {
+  color: var(--primary);
+}
+
+.smart-critical { border-color: rgba(220, 38, 38, 0.55); }
+
+.smart-warning { border-color: rgba(245, 158, 11, 0.55); }
 
 .stock-bar {
   display: flex;
@@ -444,14 +486,14 @@
 
 .order-card {
   padding: 16px;
-  border-radius: 16px;
+  border-radius: 10px;
   background: var(--background-soft);
   border: 1px solid var(--border);
 }
 
 .user-card {
   padding: 16px;
-  border-radius: 16px;
+  border-radius: 10px;
   background: var(--background-soft);
   border: 1px solid var(--border);
 }
@@ -562,6 +604,10 @@
   min-width: 130px;
 }
 
+.compact-action-btn {
+  min-width: 108px;
+}
+
 .product-admin-actions {
   display: flex;
   flex-wrap: wrap;
@@ -626,7 +672,9 @@
 }
 
 .add-line-grid {
-  grid-template-columns: minmax(0, 1fr) minmax(120px, 180px) minmax(180px, 260px);
+  grid-template-columns: minmax(0, 1fr) 180px auto;
+  align-items: end;
+  column-gap: 14px;
 }
 
 .profile-preset-grid {
@@ -636,6 +684,21 @@
 .local-sale-grid .btn {
   width: 100%;
   min-width: 0;
+}
+
+.profile-preset-grid .btn,
+.add-line-grid .btn {
+  align-self: end;
+  justify-self: start;
+  width: auto;
+  min-width: 0;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+
+.add-line-grid .btn {
+  white-space: nowrap;
+  min-width: 140px;
 }
 
 .checkbox-line {
@@ -693,7 +756,6 @@
   gap: 12px;
 }
 
-/* Alacsony keszlet figyelmezteto popup. */
 .low-stock-backdrop {
   position: fixed;
   inset: 0;

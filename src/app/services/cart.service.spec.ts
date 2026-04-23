@@ -44,6 +44,23 @@ describe('CartService', () => {
     expect(service.getItems()[0].quantity).toBe(2);
   });
 
+  it('can add multiple pieces in one cart update', () => {
+    const service = new CartService();
+    service.addToCart({ id: 1, name: 'Szelep', price: 1000, image: 'x' }, 4);
+
+    expect(service.getItems().length).toBe(1);
+    expect(service.getItems()[0].quantity).toBe(4);
+  });
+
+  it('uses Firestore id as the stable product key', () => {
+    const service = new CartService();
+    service.addToCart({ id: 1, firestoreId: 'product-a', name: 'Szelep', price: 1000, image: 'x' });
+    service.addToCart({ id: 99, firestoreId: 'product-a', name: 'Szelep', price: 1000, image: 'x' });
+
+    expect(service.getItems().length).toBe(1);
+    expect(service.getItems()[0].quantity).toBe(2);
+  });
+
   it('calculates total by quantity', () => {
     const service = new CartService();
     service.addToCart({ id: 1, name: 'A', price: 1000, image: 'x' });

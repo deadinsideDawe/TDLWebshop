@@ -9,10 +9,11 @@ describe('Checkout coupon logic', () => {
       { user$: authSubject.asObservable(), getUser: () => null, login: async () => undefined, register: async () => undefined } as never,
       { getTotal: () => subtotal, getItems: () => [] } as never,
       { navigate: async () => true } as never,
-      { addOrder: async () => ({ id: 'o1' }), queueOrderConfirmationEmail: async () => undefined } as never,
+      { addOrder: async () => ({ id: 'o1' }) } as never,
       { attachOrderToUser: async () => undefined } as never,
       { upsertProfileForUser: async () => undefined, upsertGuestProfileByEmail: async () => undefined } as never,
-      { success: () => undefined, error: () => undefined, info: () => undefined } as never
+      { success: () => undefined, error: () => undefined, info: () => undefined } as never,
+      { capture: () => undefined } as never
     );
   }
 
