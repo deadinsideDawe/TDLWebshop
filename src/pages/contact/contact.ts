@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { isValidEmail, isValidOptionalPhone } from '../../app/utils/form-validators';
 
 @Component({
   selector: 'app-contact',
@@ -44,7 +45,8 @@ export class Contact {
 
   canSend(): boolean {
     return this.name.trim().length >= 2
-      && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.email.trim())
+      && isValidEmail(this.email)
+      && isValidOptionalPhone(this.phone)
       && this.message.trim().length >= 10;
   }
 
@@ -56,6 +58,6 @@ export class Contact {
     }
 
     event.preventDefault();
-    this.formError = 'Kérlek add meg a neved, egy érvényes e-mail címet és legalább 10 karakteres üzenetet.';
+    this.formError = 'Kérlek add meg a neved, egy érvényes e-mail címet, helyes telefonszámot és legalább 10 karakteres üzenetet.';
   }
 }

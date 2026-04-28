@@ -1,0 +1,7 @@
+name,price,category,image,stock,stockQuantity,sku,brand,shortDescription,description,isWeeklyDeal,isTopProduct,salePercent,saleStartsAt,saleEndsAt
+Minta fűtési termék,0,Fűtés,products/minta-futes.jpg,Keszleten,0,TDL-FUT-XXX,Márka,"Rövid leírás","Hosszú leírás",false,false,0,0,0
+Minta hűtési termék,0,Hűtés,products/minta-hutes.jpg,Keszleten,0,TDL-HUT-XXX,Márka,"Rövid leírás","Hosszú leírás",false,false,0,0,0
+Minta vízszerelési termék,0,Víz,products/minta-viz.jpg,Keszleten,0,TDL-VIZ-XXX,Márka,"Rövid leírás","Hosszú leírás",false,false,0,0,0
+Minta szellőzési termék,0,Szellőzés,products/minta-szellozes.jpg,Keszleten,0,TDL-SZL-XXX,Márka,"Rövid leírás","Hosszú leírás",false,false,0,0,0
+Minta szerelvény,0,Szerelvények,products/minta-szerelveny.jpg,Keszleten,0,TDL-SZER-XXX,Márka,"Rövid leírás","Hosszú leírás",false,false,0,0,0
+Minta lakossági megoldás,0,Lakossági megoldások,products/minta-lakossagi.jpg,Keszleten,0,TDL-LAK-XXX,Márka,"Rövid leírás","Hosszú leírás",false,false,0,0,0

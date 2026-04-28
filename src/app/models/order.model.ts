@@ -29,6 +29,8 @@ export interface Order {
     id: string;
     label: string;
     fee: number;
+    dueDays?: number;
+    dueAt?: number;
   };
   business?: {
     isBusinessBuyer: boolean;

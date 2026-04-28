@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../app/services/auth.service';
 import { ToastService } from '../../app/services/toast.service';
-import { normalizeErrorMessage } from '../../app/utils/error-message';
+import { normalizeErrorMessage, getErrorCode } from '../../app/utils/error-message';
 
 @Component({
   selector: 'app-login',
@@ -42,11 +42,11 @@ export class Login {
     try {
       await this.auth.login(this.email, this.password);
 
-      // Adminra célzott belépésnel customer userrel ne engedjük tovább.
-      if (this.requiresAdmin && !this.auth.isCurrentUserAdmin()) {
+      // Belső felületre célzott belépésnél customer userrel ne engedjük tovább.
+      if (this.requiresAdmin && !this.auth.isCurrentUserStaff()) {
         await this.auth.logout();
-        this.errorMessage = 'Ehhez az admin oldalhoz nincs jogosultsagod.';
-        this.toastService.error('Nincs admin jogosultság', this.errorMessage);
+        this.errorMessage = 'Ehhez a belső felülethez nincs jogosultságod.';
+        this.toastService.error('Nincs belső jogosultság', this.errorMessage);
         return;
       }
 
@@ -55,7 +55,9 @@ export class Login {
       const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
       await this.router.navigateByUrl(redirectTo);
     } catch (error) {
-      this.errorMessage = normalizeErrorMessage(error, 'Valami hiba történt. Próbáld újra.');
+      this.errorMessage = getErrorCode(error) === 'auth/user-disabled'
+        ? 'A profilod le van tiltva. Kérlek vedd fel a kapcsolatot az adminisztrátorral.'
+        : normalizeErrorMessage(error, 'Valami hiba történt. Próbáld újra.');
       this.toastService.error('Belépés sikertelen', this.errorMessage);
     } finally {
       this.loading = false;

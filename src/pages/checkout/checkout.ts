@@ -11,6 +11,7 @@ import { ToastService } from '../../app/services/toast.service';
 import { MonitoringService } from '../../app/services/monitoring.service';
 import { Subscription } from 'rxjs';
 import { normalizeErrorMessage, getErrorCode } from '../../app/utils/error-message';
+import { isValidEmail, isValidPhone } from '../../app/utils/form-validators';
 
 interface OrderSuccessSummary {
   orderId: string;
@@ -99,6 +100,7 @@ export class Checkout {
   pickupDateTime = '';
 
   private authSubscription?: Subscription;
+  private hasLoadedCheckoutProfile = false;
   // Szállítási/fizetési opciók + kupon szabályok.
   shippingMethods = [
     { id: 'standard', label: 'Házhozszállítás (2-4 munkanap)', fee: 1990, eta: '2-4 munkanap' },
@@ -186,9 +188,10 @@ export class Checkout {
     private toastService: ToastService,
     private monitoringService: MonitoringService
   ) {
-    // Ha már be van jelentkezve a user, átemeljük az emailt a checkoutba.
+    // Bejelentkezett vasarlonal az emailt es a mentett profiladatokat is atemeljuk.
     this.authSubscription = this.authService.user$.subscribe(user => {
-      if (!user?.email) {
+      if (!user?.email || !user.uid) {
+        this.hasLoadedCheckoutProfile = false;
         return;
       }
 
@@ -196,11 +199,78 @@ export class Checkout {
       if (!this.customerEmail) {
         this.customerEmail = user.email;
       }
+
+      if (!this.hasLoadedCheckoutProfile) {
+        this.hasLoadedCheckoutProfile = true;
+        void this.loadCheckoutProfile(user.uid);
+      }
     });
   }
 
   ngOnDestroy(): void {
     this.authSubscription?.unsubscribe();
+  }
+
+  private async loadCheckoutProfile(userId: string): Promise<void> {
+    try {
+      const profile = await this.userService.getUserProfile(userId);
+      if (!profile) {
+        return;
+      }
+
+      if (!this.customerName && profile.displayName) {
+        this.customerName = profile.displayName;
+      }
+
+      if (!this.customerPhone && profile.phone) {
+        this.customerPhone = profile.phone;
+      }
+
+      if (profile.accountType === 'company') {
+        this.isBusinessBuyer = true;
+        if (!this.businessCompanyName && profile.companyName) {
+          this.businessCompanyName = profile.companyName;
+        }
+        if (!this.businessTaxNumber && profile.taxNumber) {
+          this.businessTaxNumber = profile.taxNumber;
+        }
+      }
+
+      const shipping = profile.shippingAddress;
+      if (shipping) {
+        if (!this.shippingZip && shipping.zip) {
+          this.shippingZip = shipping.zip;
+        }
+        if (!this.shippingCity && shipping.city) {
+          this.shippingCity = shipping.city;
+        }
+        if (!this.shippingAddress && shipping.address) {
+          this.shippingAddress = shipping.address;
+        }
+      }
+
+      const billing = profile.billingAddress;
+      if (billing) {
+        const hasTypedBillingData = !!(this.billingName || this.billingZip || this.billingCity || this.billingAddress);
+        if (!hasTypedBillingData) {
+          this.billingSameAsShipping = billing.sameAsShipping;
+        }
+        if (!this.billingName && billing.name) {
+          this.billingName = billing.name;
+        }
+        if (!this.billingZip && billing.zip) {
+          this.billingZip = billing.zip;
+        }
+        if (!this.billingCity && billing.city) {
+          this.billingCity = billing.city;
+        }
+        if (!this.billingAddress && billing.address) {
+          this.billingAddress = billing.address;
+        }
+      }
+    } catch (error) {
+      this.monitoringService.capture('checkout-profile-prefill-failed', error, { userId });
+    }
   }
 
   async submitAuth(): Promise<void> {
@@ -324,6 +394,12 @@ export class Checkout {
     this.orderLoading = true;
 
     try {
+      if (this.authService.isCurrentUserDisabled()) {
+        this.orderError = 'A profilod le van tiltva, ezért rendelést nem lehet leadni.';
+        this.toastService.error('Rendelés nem küldhető el', this.orderError);
+        return;
+      }
+
       const currentUser = this.authService.getUser();
       const shippingMethod = this.activeShippingMethod;
       const paymentMethod = this.activePaymentMethod;
@@ -335,7 +411,7 @@ export class Checkout {
       const shippingFee = shippingMethod.fee;
       const paymentFee = paymentMethod.fee;
       const coupon = this.coupon;
-      const discount = coupon?.discount || 0;
+      const discount = this.discount;
       const total = Math.max(0, subtotal + shippingFee + paymentFee - discount);
 
       const orderRef = await this.orderService.addOrder({
@@ -504,8 +580,6 @@ export class Checkout {
   private validateOrderForm(form: ReturnType<Checkout['getSanitizedForm']>): string[] {
     // Kliens oldali ellenőrzés az alap hibák kiszűréséhez.
     const errors: string[] = [];
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^[+\d][\d\s-]{6,}$/;
     const zipPattern = /^\d{4}$/;
     const taxPattern = /^[\d-]{8,15}$/;
 
@@ -513,12 +587,12 @@ export class Checkout {
       errors.push('A teljes név megadása kötelező.');
     }
 
-    if (!emailPattern.test(form.customerEmail)) {
+    if (!isValidEmail(form.customerEmail)) {
       errors.push('Adj meg érvényes email címet.');
     }
 
-    if (!phonePattern.test(form.customerPhone)) {
-      errors.push('Adj meg érvényes telefonszámot (legalább 7 karakter).');
+    if (!isValidPhone(form.customerPhone)) {
+      errors.push('Adj meg érvényes telefonszámot (8-15 számjegy, pl. +36 30 123 4567).');
     }
 
     if (this.isBusinessBuyer) {
@@ -603,7 +677,15 @@ export class Checkout {
   }
 
   get discount(): number {
-    return this.coupon?.discount || 0;
+    return (this.coupon?.discount || 0) + this.businessBuyerDiscount;
+  }
+
+  get businessBuyerDiscount(): number {
+    if (!this.isBusinessBuyer) {
+      return 0;
+    }
+
+    return Math.round(this.subtotal * 0.1);
   }
 
   get grandTotal(): number {

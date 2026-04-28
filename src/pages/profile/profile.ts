@@ -9,8 +9,10 @@ import { UserService } from '../../app/services/user.service';
 import { ToastService } from '../../app/services/toast.service';
 import { Order } from '../../app/models/order.model';
 import { UserProfile } from '../../app/models/user-profile.model';
+import { isValidOptionalPhone } from '../../app/utils/form-validators';
 
 type ProfileTab = 'profile' | 'orders';
+type OrderStepState = 'done' | 'active' | 'pending' | 'cancelled';
 
 @Component({
   selector: 'app-profile',
@@ -30,6 +32,11 @@ export class Profile implements OnInit, OnDestroy {
   ordersLoading = false;
   ordersError = '';
   selectedOrder: Order | null = null;
+  readonly orderSteps = [
+    { id: 'uj', label: 'Rögzítve' },
+    { id: 'feldolgozas alatt', label: 'Feldolgozás alatt' },
+    { id: 'teljesitve', label: 'Teljesítve' }
+  ];
 
   email = '';
   displayName = '';
@@ -125,6 +132,13 @@ export class Profile implements OnInit, OnDestroy {
     this.profileError = '';
     this.saveMessage = '';
 
+    if (!isValidOptionalPhone(this.phone)) {
+      this.saving = false;
+      this.profileError = 'Adj meg érvényes telefonszámot (8-15 számjegy, pl. +36 30 123 4567).';
+      this.toastService.error('Hibás telefonszám', this.profileError);
+      return;
+    }
+
     try {
       await this.userService.updateUserProfile(currentUser.uid, {
         accountType: this.accountType,
@@ -191,15 +205,15 @@ export class Profile implements OnInit, OnDestroy {
 
   getStatusLabel(status: string): string {
     if (status === 'uj') {
-      return 'Uj';
+      return 'Új';
     }
 
     if (status === 'feldolgozas alatt') {
-      return 'Feldolgozas alatt';
+      return 'Feldolgozás alatt';
     }
 
     if (status === 'teljesitve') {
-      return 'Teljesitve';
+      return 'Teljesítve';
     }
 
     if (status === 'lemondva') {
@@ -207,6 +221,46 @@ export class Profile implements OnInit, OnDestroy {
     }
 
     return status || 'Ismeretlen';
+  }
+
+  getOrderStepState(order: Order, stepId: string): OrderStepState {
+    if (order.status === 'lemondva') {
+      return 'cancelled';
+    }
+
+    const stepIndexByStatus: Record<string, number> = {
+      uj: 0,
+      'feldolgozas alatt': 1,
+      teljesitve: 2
+    };
+    const currentIndex = stepIndexByStatus[order.status] ?? 0;
+    const stepIndex = stepIndexByStatus[stepId] ?? 0;
+
+    if (stepIndex < currentIndex) {
+      return 'done';
+    }
+
+    if (stepIndex === currentIndex) {
+      return 'active';
+    }
+
+    return 'pending';
+  }
+
+  getTrackingText(order: Order): string {
+    if (order.status === 'feldolgozas alatt') {
+      return 'A rendelés feldolgozás alatt van, hamarosan frissül a következő állapot.';
+    }
+
+    if (order.status === 'teljesitve') {
+      return 'A rendelés teljesítve lett.';
+    }
+
+    if (order.status === 'lemondva') {
+      return 'A rendelés lemondva, további feldolgozás nem történik.';
+    }
+
+    return 'A rendelés rögzítve lett, feldolgozásra vár.';
   }
 
   formatDate(timestamp?: number): string {

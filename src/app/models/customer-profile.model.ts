@@ -7,6 +7,10 @@ export interface CustomerProfile {
   phone: string;
   companyName?: string;
   taxNumber?: string;
+  disabled?: boolean;
+  paymentTermDays?: number;
+  paymentTermApproved?: boolean;
+  note?: string;
   source?: 'web-user' | 'web-guest' | 'admin-local';
   isGuest?: boolean;
   createdAt: number;

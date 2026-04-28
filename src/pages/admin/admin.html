@@ -1,15 +1,20 @@
 ﻿<!-- Admin oldal: tabos felület (áttekintés, készlet, termékek, rendelések, felhasználók). -->
 <div class="page-container">
   <div class="admin-tabs card">
-    <a routerLink="/admin" [queryParams]="{ section: 'overview' }" [class.active]="isSection('overview')">Áttekintés</a>
-    <a routerLink="/admin" [queryParams]="{ section: 'inventory' }" [class.active]="isSection('inventory')">Készlet</a>
-    <a routerLink="/admin" [queryParams]="{ section: 'products' }" [class.active]="isSection('products')">Termékek</a>
-    <a routerLink="/admin" [queryParams]="{ section: 'orders' }" [class.active]="isSection('orders')">Rendelések</a>
-    <a routerLink="/admin" [queryParams]="{ section: 'users' }" [class.active]="isSection('users')">Felhasználók</a>
+    <a *ngIf="canUseAdminOnlyArea()" routerLink="/admin" [queryParams]="{ section: 'overview' }" [class.active]="isSection('overview')">Áttekintés</a>
+    <a *ngIf="canUseAdminOnlyArea()" routerLink="/admin" [queryParams]="{ section: 'notifications' }" [class.active]="isSection('notifications')">
+      Értesítések
+      <span class="tab-badge" *ngIf="pendingPaymentTermProfiles.length > 0">{{ pendingPaymentTermProfiles.length }}</span>
+    </a>
+    <a *ngIf="canViewInventory()" routerLink="/admin" [queryParams]="{ section: 'inventory' }" [class.active]="isSection('inventory')">Készlet</a>
+    <a *ngIf="canManageProducts()" routerLink="/admin" [queryParams]="{ section: 'products' }" [class.active]="isSection('products')">Termékek</a>
+    <a *ngIf="canRecordSales()" routerLink="/admin" [queryParams]="{ section: 'orders' }" [class.active]="isSection('orders')">Rendelések</a>
+    <a *ngIf="canUseAdminOnlyArea()" routerLink="/admin" [queryParams]="{ section: 'users' }" [class.active]="isSection('users')">Felhasználók</a>
+    <a routerLink="/admin" [queryParams]="{ section: 'account' }" [class.active]="isSection('account')">Saját adatok</a>
   </div>
 
   <!-- Fő admin layout (bal: tartalom, jobb: oldalsáv/segéd panelek). -->
-  <div class="admin-layout" [class.single-column]="isSection('products') || isSection('inventory') || isSection('orders') || isSection('users')">
+  <div class="admin-layout" [class.single-column]="isSection('products') || isSection('inventory') || isSection('orders') || isSection('users') || isSection('notifications') || isSection('account')">
     <section class="card admin-form" *ngIf="isSection('products'); else sectionIntro">
       <h1>Termékkezelés</h1>
       <p class="info-text" *ngIf="editingProductId">Termék szerkesztési mód aktív.</p>
@@ -88,7 +93,7 @@
       <p class="success-box" *ngIf="successMessage">{{ successMessage }}</p>
       <p class="error-box" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-      <div class="seed-actions">
+      <div class="seed-actions" *ngIf="canUseAdminOnlyArea()">
         <button
           class="btn seed-btn"
           (click)="seedStarterProducts()"
@@ -197,6 +202,7 @@
           <div class="product-admin-actions">
             <button class="btn edit-btn" (click)="startEditProduct(product)">Szerkesztés</button>
             <button
+              *ngIf="canUseAdminOnlyArea()"
               class="btn delete-btn"
               (click)="requestDeleteProduct(product)"
               [disabled]="deletingProductId === product.id"
@@ -226,6 +232,8 @@
         <h1 *ngIf="isSection('inventory')">Készletkezelés</h1>
         <h1 *ngIf="isSection('orders')">Rendeléskezelés</h1>
         <h1 *ngIf="isSection('users')">Felhasználók kezelése</h1>
+        <h1 *ngIf="isSection('notifications')">Értesítések</h1>
+        <h1 *ngIf="isSection('account')">Saját adatok</h1>
 
         <p class="auth-note" *ngIf="auth.user$ | async as user; else introLoginWarning">
           Bejelentkezve: <strong>{{ user.email }}</strong>
@@ -571,6 +579,85 @@
             <li>Rendelések és költés</li>
           </ul>
         </div>
+
+        <div class="intro-block" *ngIf="isSection('notifications') && canUseAdminOnlyArea()">
+          <p>Itt jelennek meg azok a mentett vásárlók, akiknél 10 napnál hosszabb fizetési határidő vár admin jóváhagyásra.</p>
+
+          <div class="section-summary-strip compact-summary">
+            <div class="summary-pill">
+              <span>Jóváhagyandó</span>
+              <strong>{{ pendingPaymentTermProfiles.length }}</strong>
+            </div>
+            <div class="summary-pill">
+              <span>Mentett vásárlók</span>
+              <strong>{{ localSaleProfiles.length }}</strong>
+            </div>
+          </div>
+
+          <div class="mini-list" *ngIf="pendingPaymentTermProfiles.length > 0; else noPendingPaymentTerms">
+            <div class="mini-row notification-row" *ngFor="let profile of pendingPaymentTermProfiles">
+              <div>
+                <strong>{{ profile.name }}</strong>
+                <span>{{ profile.email || 'Nincs email' }} · {{ profile.type === 'company' ? 'Cég / EV' : 'Magánszemély' }}</span>
+                <span>Kért határidő: {{ profile.paymentTermDays || 10 }} nap</span>
+              </div>
+              <div class="product-admin-actions">
+                <button class="btn btn-secondary compact-action-btn" type="button" (click)="approvePaymentTerm(profile)">
+                  Jóváhagyás
+                </button>
+                <button class="btn delete-btn compact-action-btn" type="button" (click)="resetPaymentTerm(profile)">
+                  10 napra állítás
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noPendingPaymentTerms>
+            <p class="info-text">Jelenleg nincs jóváhagyandó fizetési határidő kérés.</p>
+          </ng-template>
+        </div>
+
+        <div class="intro-block" *ngIf="isSection('account')">
+          <p>A belső felhasználó saját adatai és jogosultsági szintje.</p>
+
+          <div class="overview-grid account-grid">
+            <div class="overview-card">
+              <span>Email</span>
+              <strong>{{ auth.getUser()?.email || currentStaffProfile?.email || '-' }}</strong>
+            </div>
+            <div class="overview-card">
+              <span>Szerepkör</span>
+              <strong>{{ currentStaffRoleLabel }}</strong>
+            </div>
+            <div class="overview-card">
+              <span>Név</span>
+              <strong>{{ currentStaffProfile?.displayName || '-' }}</strong>
+            </div>
+            <div class="overview-card">
+              <span>Telefon</span>
+              <strong>{{ currentStaffProfile?.phone || '-' }}</strong>
+            </div>
+          </div>
+
+          <div class="mini-list">
+            <div class="mini-row">
+              <strong>Termékkezelés</strong>
+              <span>{{ canManageProducts() ? 'Engedélyezve' : 'Nem engedélyezett' }}</span>
+            </div>
+            <div class="mini-row">
+              <strong>Készlet megtekintése</strong>
+              <span>{{ canViewInventory() ? 'Engedélyezve' : 'Nem engedélyezett' }}</span>
+            </div>
+            <div class="mini-row">
+              <strong>Helyszíni vásárlás</strong>
+              <span>{{ canRecordSales() ? 'Engedélyezve' : 'Nem engedélyezett' }}</span>
+            </div>
+            <div class="mini-row">
+              <strong>Fizetési határidő jóváhagyás</strong>
+              <span>{{ canApprovePaymentTerms() ? 'Engedélyezve' : 'Csak admin' }}</span>
+            </div>
+          </div>
+        </div>
       </section>
     </ng-template>
 
@@ -580,7 +667,9 @@
       <h3 *ngIf="isSection('products')">Terméklista</h3>
       <h3 *ngIf="isSection('orders')">Rendelések listája</h3>
       <h3 *ngIf="isSection('users')">Felhasználók listája</h3>
-      <p class="info-text">Az admin panel admin jogosultságú felhasználókkal érhető el.</p>
+      <h3 *ngIf="isSection('notifications')">Jóváhagyások</h3>
+      <h3 *ngIf="isSection('account')">Fiók</h3>
+      <p class="info-text">A belső panel admin és dolgozó jogosultságú felhasználókkal érhető el.</p>
 
       <div *ngIf="isSection('overview')" class="sidebar-low-stock">
         <h4>Alacsony készlet figyelő</h4>
@@ -623,29 +712,26 @@
           <h4>Helyszíni vásárlás rögzítése</h4>
           <p class="info-text">Admin itt tud gyorsan vásárlást rögzíteni, majd PDF bizonylatot letölteni.</p>
 
-          <div class="local-sale-grid profile-preset-grid">
-            <div class="field-group">
-              <label>Mentett vásárló/cég profil</label>
-              <select [(ngModel)]="selectedLocalSaleProfileId" (ngModelChange)="applySelectedLocalSaleProfile()">
-                <option value="">Új vásárló/cég adatok</option>
-                <option *ngFor="let profile of localSaleProfiles" [value]="profile.id">
-                  {{ profile.type === 'company' ? 'Cég' : 'Vásárló' }} - {{ profile.name }}
-                  <span *ngIf="profile.taxNumber"> ({{ profile.taxNumber }})</span>
-                  <span *ngIf="profile.isGuest"> [Webes vendég]</span>
-                </option>
-              </select>
+          <div class="profile-picker-panel">
+            <div>
+              <span class="section-kicker">Mentett vásárlók</span>
+              <strong>{{ selectedLocalSaleProfile?.name || 'Nincs kiválasztott vásárló' }}</strong>
+              <p *ngIf="selectedLocalSaleProfile">
+                {{ selectedLocalSaleProfile.email || 'Nincs email' }} · {{ selectedLocalSaleProfile.phone || 'Nincs telefon' }}
+                <span class="guest-badge" *ngIf="selectedLocalSaleProfile.isGuest">WEBES VENDÉG</span>
+                <span class="blocked-badge" *ngIf="selectedLocalSaleProfile.disabled">LETILTVA</span>
+              </p>
+              <p *ngIf="!selectedLocalSaleProfile">Válassz mentett vásárlót egy gombbal, vagy töltsd ki lent kézzel az új adatokat.</p>
             </div>
-            <button class="btn edit-btn" type="button" (click)="saveLocalSaleProfile()" [disabled]="localSaleProfileActionLoading">
-              {{ localSaleProfileActionLoading ? 'Mentés...' : 'Vásárló/Cég mentése' }}
-            </button>
+            <div class="profile-picker-actions">
+              <button class="btn edit-btn" type="button" (click)="openLocalSaleProfilePicker()" [disabled]="localSaleProfilesLoading">
+                Mentett vásárló kiválasztása
+              </button>
+              <button class="btn" type="button" (click)="clearSelectedLocalSaleProfile()" *ngIf="selectedLocalSaleProfileId">
+                Új vásárló
+              </button>
+            </div>
           </div>
-          <p class="info-text" *ngIf="selectedLocalSaleProfileId && localSaleProfiles.length > 0">
-            Kiválasztva:
-            <strong>
-              {{ (localSaleProfiles.find(p => p.id === selectedLocalSaleProfileId)?.name) || 'Ismeretlen profil' }}
-            </strong>
-            <span class="guest-badge" *ngIf="localSaleProfiles.find(p => p.id === selectedLocalSaleProfileId)?.isGuest">WEBES VENDÉG</span>
-          </p>
           <p class="info-text" *ngIf="localSaleProfilesLoading">Mentett vásárló/cég lista betöltése...</p>
           <p class="error-box" *ngIf="localSaleProfilesError">{{ localSaleProfilesError }}</p>
 
@@ -656,23 +742,41 @@
             </div>
             <div class="field-group">
               <label>Email</label>
-              <input [(ngModel)]="localSaleCustomerEmail" placeholder="Email (opcionális)">
+              <input type="email" [(ngModel)]="localSaleCustomerEmail" placeholder="Email (opcionális)">
             </div>
             <div class="field-group">
               <label>Telefonszám</label>
-              <input [(ngModel)]="localSaleCustomerPhone" placeholder="Telefonszám (opcionális)">
+              <input type="tel" inputmode="tel" [(ngModel)]="localSaleCustomerPhone" placeholder="+36 30 123 4567">
             </div>
             <div class="field-group">
               <label>Fizetési mód</label>
               <select [(ngModel)]="localSalePaymentMethod">
                 <option value="cash">Készpénz</option>
                 <option value="card">Bankkártya</option>
+                <option value="transfer">Átutalás</option>
               </select>
             </div>
+          </div>
+          <div class="local-sale-grid" *ngIf="localSalePaymentMethod === 'transfer'">
+            <div class="field-group">
+              <label>Fizetési határidő (nap)</label>
+              <input type="number" min="1" max="60" [(ngModel)]="localSalePaymentDeadlineDays">
+            </div>
+            <p class="payment-term-warning" *ngIf="localSalePaymentDeadlineWarning">
+              {{ localSalePaymentDeadlineWarning }}
+            </p>
           </div>
           <label class="checkbox-line">
             <input type="checkbox" [(ngModel)]="localSaleIsBusinessBuyer">
             Céges vagy szerelői vásárlás (adószámmal)
+          </label>
+          <label class="checkbox-line save-customer-line" *ngIf="!selectedLocalSaleProfileId">
+            <input type="checkbox" [(ngModel)]="localSaleSaveCustomerForLater">
+            Vásárló/cég mentése későbbre is
+          </label>
+          <label class="checkbox-line save-customer-line" *ngIf="selectedLocalSaleProfileId">
+            <input type="checkbox" [(ngModel)]="localSaleSaveCustomerForLater">
+            Kiválasztott vásárló/cég adatainak frissítése a mentéskor
           </label>
           <div class="local-sale-grid" *ngIf="localSaleIsBusinessBuyer">
             <div class="field-group">
@@ -688,12 +792,40 @@
           <div class="local-sale-grid add-line-grid">
             <div class="field-group">
               <label>Termék</label>
-              <select [(ngModel)]="localSaleSelectedProductId">
-                <option value="">Termék kiválasztása</option>
-                <option *ngFor="let product of products" [value]="product.id">
-                  {{ product.name }} - {{ product.price }} Ft (szabad: {{ getAvailableStockForProduct(product.id || '') }} db)
-                </option>
-              </select>
+              <div class="product-search-box">
+                <input
+                  type="search"
+                  [(ngModel)]="localSaleProductSearch"
+                  (ngModelChange)="onLocalSaleProductSearchChange()"
+                  (focus)="openLocalSaleProductSearch()"
+                  (blur)="closeLocalSaleProductSearch()"
+                  placeholder="Kezdj el gépelni: név, cikkszám, kategória..."
+                  autocomplete="off">
+
+                <div class="product-search-dropdown" *ngIf="localSaleProductSearchOpen">
+                  <button
+                    class="product-search-option"
+                    type="button"
+                    *ngFor="let product of filteredLocalSaleProducts"
+                    (mousedown)="chooseLocalSaleProduct(product)"
+                  >
+                    <span>
+                      <strong>{{ product.name }}</strong>
+                      <small>{{ product.sku || 'Nincs cikkszám' }} · {{ product.category || 'Nincs kategória' }}</small>
+                    </span>
+                    <span>
+                      <strong>{{ product.price }} Ft</strong>
+                      <small>Szabad: {{ getAvailableStockForProduct(product.id || '') }} db</small>
+                    </span>
+                  </button>
+                  <p class="muted-line search-empty" *ngIf="filteredLocalSaleProducts.length === 0">
+                    Nincs találat erre a keresésre.
+                  </p>
+                </div>
+              </div>
+              <small class="selected-product-line" *ngIf="localSaleSelectedProductId">
+                Kiválasztva: {{ selectedLocalSaleProductLabel }}
+              </small>
             </div>
             <div class="field-group">
               <label>Mennyiség</label>
@@ -720,7 +852,12 @@
           </div>
 
           <div class="local-sale-footer">
-            <strong>Végösszeg: {{ localSaleSubtotal }} Ft</strong>
+            <div class="local-sale-total-box">
+              <strong>Végösszeg: {{ localSaleTotal }} Ft</strong>
+              <span *ngIf="localSaleDiscountAmount > 0">
+                {{ getLocalSaleDiscountLabel() }}: -{{ localSaleDiscountAmount }} Ft
+              </span>
+            </div>
             <button class="btn btn-secondary" type="button" (click)="submitLocalSale()" [disabled]="localSaleLoading">
               {{ localSaleLoading ? 'Mentés folyamatban...' : 'Helyszíni vásárlás mentése + PDF' }}
             </button>
@@ -839,24 +976,26 @@
 
       <div *ngIf="isSection('users')">
         <section class="local-sale-card">
-          <h4>Új felhasználó / cég hozzáadása</h4>
+          <h4>Új profil létrehozása</h4>
+          <p class="info-text">Vásárlónál a kapcsolattartási és számlázási adatok a fontosak, dolgozónál pedig külön beállíthatók a jogosultságok.</p>
           <div class="local-sale-grid">
             <div class="field-group">
               <label>Email</label>
-              <input [(ngModel)]="createUserEmail" placeholder="email@példa.hu">
+              <input type="email" [(ngModel)]="createUserEmail" placeholder="email@példa.hu">
             </div>
             <div class="field-group">
               <label>Megjelenített név</label>
               <input [(ngModel)]="createUserDisplayName" placeholder="Név / Cégnév">
             </div>
             <div class="field-group">
-              <label>Szerepkör</label>
-              <select [(ngModel)]="createUserRole">
+              <label>Profil típusa</label>
+              <select [(ngModel)]="createUserRole" (ngModelChange)="onCreateUserRoleChange()">
                 <option value="customer">Vásárló</option>
+                <option value="employee">Dolgozó</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
-            <div class="field-group">
+            <div class="field-group" *ngIf="isCustomerRole(createUserRole)">
               <label>Típus</label>
               <select [(ngModel)]="createUserAccountType">
                 <option value="private">Magánszemély</option>
@@ -867,13 +1006,13 @@
           <div class="local-sale-grid">
             <div class="field-group">
               <label>Telefon</label>
-              <input [(ngModel)]="createUserPhone" placeholder="+36...">
+              <input type="tel" inputmode="tel" [(ngModel)]="createUserPhone" placeholder="+36 30 123 4567">
             </div>
-            <div class="field-group">
+            <div class="field-group" *ngIf="isCustomerRole(createUserRole) && createUserAccountType === 'company'">
               <label>Cégnév</label>
               <input [(ngModel)]="createUserCompanyName" placeholder="Cég neve">
             </div>
-            <div class="field-group">
+            <div class="field-group" *ngIf="isCustomerRole(createUserRole) && createUserAccountType === 'company'">
               <label>Adószám</label>
               <input [(ngModel)]="createUserTaxNumber" placeholder="12345678-1-42">
             </div>
@@ -882,8 +1021,30 @@
               <input [(ngModel)]="createUserNote" placeholder="Belső megjegyzés">
             </div>
           </div>
+          <div class="local-sale-grid employee-permissions-grid" *ngIf="createUserRole === 'employee'">
+            <label class="checkbox-line">
+              <input type="checkbox" [(ngModel)]="createUserCanRecordSales">
+              Helyszíni vásárlás rögzítése
+            </label>
+            <label class="checkbox-line">
+              <input type="checkbox" [(ngModel)]="createUserCanViewInventory">
+              Készlet megtekintése
+            </label>
+            <label class="checkbox-line">
+              <input type="checkbox" [(ngModel)]="createUserCanManageProducts">
+              Termékek feltöltése és szerkesztése
+            </label>
+            <label class="checkbox-line">
+              <input type="checkbox" [(ngModel)]="createUserCanManageCustomers">
+              Vásárlók felvétele és szerkesztése
+            </label>
+            <label class="checkbox-line">
+              <input type="checkbox" [(ngModel)]="createUserCanDisableCustomers">
+              Vásárlók tiltása/visszaállítása
+            </label>
+          </div>
           <button class="btn btn-secondary" type="button" (click)="createAdminManagedUser()" [disabled]="creatingUser">
-            {{ creatingUser ? 'Létrehozás...' : 'Felhasználó/Cég létrehozása' }}
+            {{ creatingUser ? 'Létrehozás...' : 'Profil létrehozása' }}
           </button>
         </section>
 
@@ -895,6 +1056,10 @@
           <div class="summary-pill">
             <span>Adminok</span>
             <strong>{{ userSummaries.filter(user => user.role === 'admin').length }}</strong>
+          </div>
+            <div class="summary-pill">
+            <span>Dolgozók</span>
+            <strong>{{ userSummaries.filter(user => user.role === 'employee').length }}</strong>
           </div>
           <div class="summary-pill">
             <span>Aktív vásárlók</span>
@@ -911,7 +1076,7 @@
               <div>
                 <strong>{{ user.email }}</strong>
                 <p>
-                  Szerepkör: {{ user.role === 'admin' ? 'Admin' : 'Vásárló' }}
+                  Szerepkör: {{ getUserRoleLabel(user.role) }}
                   <span *ngIf="user.disabled">- Letiltva</span>
                 </p>
               </div>
@@ -924,6 +1089,13 @@
               <span *ngIf="user.latestOrderAt">Utolsó rendelés: {{ formatDate(user.latestOrderAt) }}</span>
               <span>Összes költés: {{ user.totalSpent }} Ft</span>
             </div>
+            <div class="user-stats employee-permission-tags" *ngIf="user.role === 'employee'">
+              <span [class.permission-on]="user.employeePermissions.canRecordSales">Helyszíni rögzítés</span>
+              <span [class.permission-on]="user.employeePermissions.canViewInventory">Készlet</span>
+              <span [class.permission-on]="user.employeePermissions.canManageProducts">Termékkezelés</span>
+              <span [class.permission-on]="user.employeePermissions.canManageCustomers">Vásárlók kezelése</span>
+              <span [class.permission-on]="user.employeePermissions.canDisableCustomers">Tiltás</span>
+            </div>
 
             <div class="user-actions">
               <label class="status-editor user-role-editor">
@@ -932,8 +1104,9 @@
                   [ngModel]="user.role"
                   (ngModelChange)="updateUserRole(user, $event)"
                   [disabled]="userActionLoadingId === user.id"
-                >
+                  >
                   <option value="customer">Vásárló</option>
+                  <option value="employee">Dolgozó</option>
                   <option value="admin">Admin</option>
                 </select>
               </label>
@@ -1051,6 +1224,180 @@
   </section>
 </div>
 
+<div class="low-stock-backdrop" *ngIf="localSaleProfilePickerOpen" (click)="closeLocalSaleProfilePicker()">
+  <section class="low-stock-modal card customer-picker-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeLocalSaleProfilePicker()">X</button>
+    <h3>Mentett vásárló kiválasztása</h3>
+    <p class="info-text">Kereshetsz névre, emailre, telefonszámra, cégnévre vagy adószámra.</p>
+
+    <div class="field-group customer-search-field">
+      <label>Keresés</label>
+      <input [(ngModel)]="localSaleProfileSearch" placeholder="pl. Kis Péter, info@..., adószám">
+    </div>
+
+    <div class="customer-picker-list" *ngIf="filteredLocalSaleProfiles.length > 0; else noSavedCustomers">
+      <article
+        class="customer-picker-item"
+        [class.disabled-customer]="profile.disabled"
+        *ngFor="let profile of filteredLocalSaleProfiles"
+      >
+        <span class="customer-main-cell">
+          <strong>{{ profile.name }}</strong>
+          <small>
+            {{ profile.type === 'company' ? 'Cég' : 'Vásárló' }}
+            <span *ngIf="profile.isGuest"> · Webes vendég</span>
+            <span class="blocked-badge" *ngIf="profile.disabled">Letiltva</span>
+          </small>
+        </span>
+        <span>
+          <small>{{ profile.email || 'Nincs email' }}</small>
+          <small>{{ profile.phone || 'Nincs telefon' }}</small>
+          <small>Összes költés: {{ getCustomerProfileTotalSpent(profile) }} Ft</small>
+          <small>Kedvezmény: {{ getCustomerProfileDiscountLabel(profile) }}</small>
+        </span>
+        <span class="customer-company-cell">
+          <ng-container *ngIf="profile.type === 'company'; else privateCustomerSpacer">
+          <small>{{ profile.companyName || '-' }}</small>
+          <small>{{ profile.taxNumber || '-' }}</small>
+          </ng-container>
+          <ng-template #privateCustomerSpacer>
+            <small>&nbsp;</small>
+            <small>&nbsp;</small>
+          </ng-template>
+        </span>
+        <span class="customer-picker-actions-row">
+          <button class="btn edit-btn" type="button" (click)="chooseLocalSaleProfile(profile)">
+            Kiválasztás
+          </button>
+              <button class="btn details-btn" type="button" (click)="openCustomerProfileEditor(profile)">
+                Szerkesztés
+              </button>
+          <button class="btn details-btn" type="button" (click)="openCustomerHistory(profile)">
+            Vásárlások
+          </button>
+          <button
+            class="btn"
+            [class.delete-btn]="!profile.disabled"
+            [class.reactivate-btn]="profile.disabled"
+            type="button"
+            (click)="toggleCustomerProfileDisabled(profile)"
+            [disabled]="customerProfileEditorSaving || !canDisableCustomers()"
+          >
+            {{ profile.disabled ? 'Visszaállítás' : 'Tiltás' }}
+          </button>
+          <button
+            *ngIf="canUseAdminOnlyArea()"
+            class="btn delete-btn"
+            type="button"
+            (click)="deleteCustomerProfile(profile)"
+            [disabled]="customerProfileDeletingId === profile.id"
+          >
+            {{ customerProfileDeletingId === profile.id ? 'Törlés...' : 'Törlés' }}
+          </button>
+        </span>
+      </article>
+    </div>
+
+    <ng-template #noSavedCustomers>
+      <p class="info-text">Nincs találat a mentett vásárlók között.</p>
+    </ng-template>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="customerProfileEditorOpen" (click)="closeCustomerProfileEditor()">
+  <section class="low-stock-modal card customer-editor-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeCustomerProfileEditor()">X</button>
+    <h3>Mentett vásárló szerkesztése</h3>
+
+    <div class="local-sale-grid">
+      <div class="field-group">
+        <label>Típus</label>
+        <select [(ngModel)]="customerProfileEditorType">
+          <option value="private">Magánszemély</option>
+          <option value="company">Cég / EV</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Név</label>
+        <input [(ngModel)]="customerProfileEditorName">
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="customerProfileEditorEmail">
+      </div>
+      <div class="field-group">
+        <label>Telefon</label>
+        <input type="tel" inputmode="tel" [(ngModel)]="customerProfileEditorPhone">
+      </div>
+    </div>
+
+    <div class="local-sale-grid" *ngIf="customerProfileEditorType === 'company'">
+      <div class="field-group">
+        <label>Cégnév</label>
+        <input [(ngModel)]="customerProfileEditorCompanyName">
+      </div>
+      <div class="field-group">
+        <label>Adószám</label>
+        <input [(ngModel)]="customerProfileEditorTaxNumber">
+      </div>
+    </div>
+
+    <div class="local-sale-grid">
+      <div class="field-group">
+        <label>Alap fizetési határidő (nap)</label>
+        <input type="number" min="1" max="60" [(ngModel)]="customerProfileEditorPaymentTermDays">
+      </div>
+      <label class="checkbox-line customer-disabled-toggle">
+        <input type="checkbox" [(ngModel)]="customerProfileEditorDisabled">
+        Vásárló letiltása
+      </label>
+    </div>
+
+    <div class="field-group">
+      <label>Belső megjegyzés</label>
+      <textarea class="local-sale-note" [(ngModel)]="customerProfileEditorNote" placeholder="pl. utalásos fizetésnél elmaradás"></textarea>
+    </div>
+
+    <p class="payment-term-warning" *ngIf="customerProfileEditorPaymentTermDays > 10">
+      10 napnál hosszabb fizetési határidőhöz kérjük keresd fel az admint jóváhagyásért.
+    </p>
+
+    <div class="product-admin-actions">
+      <button class="btn cancel-btn" type="button" (click)="closeCustomerProfileEditor()">Mégsem</button>
+      <button class="btn btn-secondary" type="button" (click)="saveCustomerProfileEditor()" [disabled]="customerProfileEditorSaving">
+        {{ customerProfileEditorSaving ? 'Mentés...' : 'Mentés' }}
+      </button>
+    </div>
+  </section>
+</div>
+
+<div class="low-stock-backdrop" *ngIf="customerHistoryOpen && selectedCustomerHistoryProfile" (click)="closeCustomerHistory()">
+  <section class="low-stock-modal card order-details-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="closeCustomerHistory()">X</button>
+    <h3>Korábbi vásárlások</h3>
+    <p class="info-text">
+      {{ selectedCustomerHistoryProfile.name }} -
+      összes teljesített költés: {{ getCustomerProfileTotalSpent(selectedCustomerHistoryProfile) }} Ft -
+      kedvezmény: {{ getCustomerProfileDiscountLabel(selectedCustomerHistoryProfile) }}
+    </p>
+
+    <div class="order-detail-items" *ngIf="getCustomerProfileOrders(selectedCustomerHistoryProfile).length > 0; else noCustomerHistory">
+      <div class="order-detail-row customer-history-row" *ngFor="let order of getCustomerProfileOrders(selectedCustomerHistoryProfile)">
+        <span>
+          <strong>{{ order.id || 'Rendelés' }}</strong>
+          <small>{{ formatDate(order.createdAt) }} · {{ getSalesChannelLabel(order.salesChannel) }} · {{ getOrderStatusLabel(order.status) }}</small>
+        </span>
+        <span>{{ getOrderItemCount(order) }} db tétel</span>
+        <strong>{{ order.total }} Ft</strong>
+      </div>
+    </div>
+
+    <ng-template #noCustomerHistory>
+      <p class="info-text">Ehhez a mentett vásárlóhoz még nincs webes vagy helyszíni rendelés.</p>
+    </ng-template>
+  </section>
+</div>
+
 <div class="low-stock-backdrop" *ngIf="orderDetailsOpen && selectedOrderDetails" (click)="closeOrderDetails()">
   <section class="low-stock-modal card order-details-modal" (click)="$event.stopPropagation()">
     <button class="modal-close" type="button" (click)="closeOrderDetails()">X</button>
@@ -1140,7 +1487,7 @@
     <div class="local-sale-grid">
       <div class="field-group">
         <label>Email</label>
-        <input [(ngModel)]="userEditorEmail">
+        <input type="email" [(ngModel)]="userEditorEmail">
       </div>
       <div class="field-group">
         <label>Megjelenített név</label>
@@ -1148,12 +1495,13 @@
       </div>
       <div class="field-group">
         <label>Szerepkör</label>
-        <select [(ngModel)]="userEditorRole">
+        <select [(ngModel)]="userEditorRole" (ngModelChange)="onUserEditorRoleChange()">
           <option value="customer">Vásárló</option>
+          <option value="employee">Dolgozó</option>
           <option value="admin">Admin</option>
         </select>
       </div>
-      <div class="field-group">
+      <div class="field-group" *ngIf="isCustomerRole(userEditorRole)">
         <label>Típus</label>
         <select [(ngModel)]="userEditorAccountType">
           <option value="private">Magánszemély</option>
@@ -1165,13 +1513,13 @@
     <div class="local-sale-grid">
       <div class="field-group">
         <label>Telefon</label>
-        <input [(ngModel)]="userEditorPhone">
+        <input type="tel" inputmode="tel" [(ngModel)]="userEditorPhone">
       </div>
-      <div class="field-group">
+      <div class="field-group" *ngIf="isCustomerRole(userEditorRole) && userEditorAccountType === 'company'">
         <label>Cégnév</label>
         <input [(ngModel)]="userEditorCompanyName">
       </div>
-      <div class="field-group">
+      <div class="field-group" *ngIf="isCustomerRole(userEditorRole) && userEditorAccountType === 'company'">
         <label>Adószám</label>
         <input [(ngModel)]="userEditorTaxNumber">
       </div>
@@ -1185,6 +1533,29 @@
       <input type="checkbox" [(ngModel)]="userEditorDisabled">
       Fiók letiltva
     </label>
+
+    <div class="local-sale-grid employee-permissions-grid" *ngIf="userEditorRole === 'employee'">
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="userEditorCanRecordSales">
+        Helyszíni vásárlás rögzítése
+      </label>
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="userEditorCanViewInventory">
+        Készlet megtekintése
+      </label>
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="userEditorCanManageProducts">
+        Termékek feltöltése és szerkesztése
+      </label>
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="userEditorCanManageCustomers">
+        Vásárlók felvétele és szerkesztése
+      </label>
+      <label class="checkbox-line">
+        <input type="checkbox" [(ngModel)]="userEditorCanDisableCustomers">
+        Vásárlók tiltása/visszaállítása
+      </label>
+    </div>
 
     <div class="product-admin-actions">
       <button class="btn cancel-btn" type="button" (click)="closeUserDetails()">Mégsem</button>

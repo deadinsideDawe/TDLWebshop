@@ -44,11 +44,11 @@
           </div>
           <div class="field-group">
             <label>Email cím</label>
-            <input [(ngModel)]="customerEmail" placeholder="Email cím">
+            <input type="email" [(ngModel)]="customerEmail" placeholder="Email cím">
           </div>
           <div class="field-group">
             <label>Telefonszám</label>
-            <input [(ngModel)]="customerPhone" placeholder="Telefonszám">
+            <input type="tel" inputmode="tel" [(ngModel)]="customerPhone" placeholder="+36 30 123 4567">
           </div>
         </div>
         <label class="checkbox-line">
@@ -176,6 +176,9 @@
         <p class="info-pill">Használható kuponok: DEMO500, TDL10, WELCOME2000, SHIPFREE</p>
         <p class="success-text" *ngIf="coupon?.valid">
           Aktív kupon: {{ coupon?.code }} - Kedvezmény: {{ coupon?.discount }} Ft
+        </p>
+        <p class="success-text" *ngIf="businessBuyerDiscount > 0">
+          Céges nagyker kedvezmény: -{{ businessBuyerDiscount }} Ft
         </p>
         <p class="error-text" *ngIf="coupon && !coupon.valid">{{ coupon.reason }}</p>
       </div>

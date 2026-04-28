@@ -21,6 +21,7 @@ import { CartItem } from '../../app/services/cart.service';
 import { ToastService } from '../../app/services/toast.service';
 import { ClientLogItem, MonitoringService } from '../../app/services/monitoring.service';
 import { normalizeErrorMessage, getErrorCode } from '../../app/utils/error-message';
+import { isValidEmail, isValidOptionalPhone, isValidPhone } from '../../app/utils/form-validators';
 import { Subscription } from 'rxjs';
 
 interface StockChartItem {
@@ -66,10 +67,13 @@ interface BusinessReport {
   topProducts: TopProductReportItem[];
 }
 
+type AdminSection = 'overview' | 'inventory' | 'products' | 'orders' | 'users' | 'notifications' | 'account';
+type AdminRole = 'admin' | 'employee' | 'customer';
+
 interface AdminUserView {
   id: string;
   email: string;
-  role: 'admin' | 'customer';
+  role: AdminRole;
   accountType: 'private' | 'company';
   displayName: string;
   phone: string;
@@ -77,6 +81,7 @@ interface AdminUserView {
   taxNumber: string;
   note: string;
   disabled: boolean;
+  employeePermissions: NonNullable<UserProfile['employeePermissions']>;
   createdAt: number;
   lastLoginAt?: number;
   latestOrderAt?: number;
@@ -110,8 +115,8 @@ interface AdminClientLogView {
   styleUrls: ['./admin.css']
 })
 export class Admin implements OnInit, OnDestroy {
-  // Aktiv admin resz (overview/inventory/products/orders/users).
-  activeSection: 'overview' | 'inventory' | 'products' | 'orders' | 'users' = 'overview';
+  // Aktiv admin resz (overview/inventory/products/orders/users/notifications/account).
+  activeSection: AdminSection = 'overview';
   editingProductId: string | null = null;
   productName = '';
   productPrice: number | null = null;
@@ -195,22 +200,32 @@ export class Admin implements OnInit, OnDestroy {
   userDetailsSaving = false;
   userEditorEmail = '';
   userEditorDisplayName = '';
-  userEditorRole: 'admin' | 'customer' = 'customer';
+  userEditorRole: AdminRole = 'customer';
   userEditorAccountType: 'private' | 'company' = 'private';
   userEditorPhone = '';
   userEditorCompanyName = '';
   userEditorTaxNumber = '';
   userEditorNote = '';
   userEditorDisabled = false;
+  userEditorCanRecordSales = true;
+  userEditorCanViewInventory = true;
+  userEditorCanManageProducts = true;
+  userEditorCanManageCustomers = true;
+  userEditorCanDisableCustomers = true;
   creatingUser = false;
   createUserEmail = '';
   createUserDisplayName = '';
-  createUserRole: 'admin' | 'customer' = 'customer';
+  createUserRole: AdminRole = 'customer';
   createUserAccountType: 'private' | 'company' = 'private';
   createUserPhone = '';
   createUserCompanyName = '';
   createUserTaxNumber = '';
   createUserNote = '';
+  createUserCanRecordSales = true;
+  createUserCanViewInventory = true;
+  createUserCanManageProducts = true;
+  createUserCanManageCustomers = true;
+  createUserCanDisableCustomers = true;
   stockChart: StockChartItem[] = [];
   lowStockAlerts: StockChartItem[] = [];
   smartStockSuggestions: SmartStockSuggestion[] = [];
@@ -226,7 +241,10 @@ export class Admin implements OnInit, OnDestroy {
   localSaleTaxNumber = '';
   localSaleComment = '';
   localSalePaymentMethod = 'cash';
+  localSalePaymentDeadlineDays = 10;
   localSaleSelectedProductId = '';
+  localSaleProductSearch = '';
+  localSaleProductSearchOpen = false;
   localSaleQuantity = 1;
   localSaleLines: LocalSaleLine[] = [];
   localSaleLoading = false;
@@ -237,6 +255,24 @@ export class Admin implements OnInit, OnDestroy {
   localSaleProfilesLoading = true;
   localSaleProfilesError = '';
   localSaleProfileActionLoading = false;
+  localSaleProfilePickerOpen = false;
+  localSaleProfileSearch = '';
+  localSaleSaveCustomerForLater = false;
+  customerProfileEditorOpen = false;
+  customerProfileEditorSaving = false;
+  customerProfileDeletingId: string | null = null;
+  customerProfileEditorId = '';
+  customerProfileEditorType: 'private' | 'company' = 'private';
+  customerProfileEditorName = '';
+  customerProfileEditorEmail = '';
+  customerProfileEditorPhone = '';
+  customerProfileEditorCompanyName = '';
+  customerProfileEditorTaxNumber = '';
+  customerProfileEditorDisabled = false;
+  customerProfileEditorPaymentTermDays = 10;
+  customerProfileEditorNote = '';
+  customerHistoryOpen = false;
+  selectedCustomerHistoryProfile: CustomerProfile | null = null;
   orderListView: 'active' | 'completed' | 'local' = 'active';
   recentClientLogs: AdminClientLogView[] = [];
   logsLoading = true;
@@ -272,9 +308,9 @@ export class Admin implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Admin bejelentkezésnél ujraengedem az alacsony készlet popupot.
     this.authSubscription = this.auth.user$.subscribe(user => {
-      const isAdmin = !!user?.email && this.auth.isCurrentUserAdmin();
+      const isStaff = !!user?.email && this.auth.isCurrentUserStaff();
 
-      if (!isAdmin) {
+      if (!isStaff) {
         this.lastAdminUserId = '';
         this.hasShownLowStockWarning = false;
         return;
@@ -296,11 +332,13 @@ export class Admin implements OnInit, OnDestroy {
     this.route.queryParamMap.subscribe(params => {
       const section = params.get('section');
 
-      if (section === 'inventory' || section === 'products' || section === 'orders' || section === 'overview' || section === 'users') {
+      if (this.isValidAdminSection(section)) {
         this.activeSection = section;
       } else {
         this.activeSection = 'overview';
       }
+
+      this.ensureSectionAllowedForRole();
     });
 
     // Vedo timeout, hogy ne maradjon vegtelen loader ha a stream lassu.
@@ -332,67 +370,82 @@ export class Admin implements OnInit, OnDestroy {
       }
     );
 
-    // Realtime rendeles lista.
-    this.unsubscribeOrders = this.orderService.getOrdersStream(
-      orders => {
-        this.ngZone.run(() => {
-          this.orders = orders;
-          this.ordersLoading = false;
-          this.ordersError = '';
-          this.rebuildDashboard();
-          this.cdr.detectChanges();
-        });
-      },
-      error => {
-        this.ngZone.run(() => {
-          console.error(error);
-          this.ordersLoading = false;
-          this.ordersError = 'A rendelések betöltése nem sikerült.';
-          this.cdr.detectChanges();
-        });
-      }
-    );
+    // Rendeléslista csak annak nyílik meg, aki rögzíthet rendelést vagy admin.
+    if (this.canRecordSales()) {
+      this.unsubscribeOrders = this.orderService.getOrdersStream(
+        orders => {
+          this.ngZone.run(() => {
+            this.orders = orders;
+            this.ordersLoading = false;
+            this.ordersError = '';
+            this.rebuildDashboard();
+            this.cdr.detectChanges();
+          });
+        },
+        error => {
+          this.ngZone.run(() => {
+            console.error(error);
+            this.ordersLoading = false;
+            this.ordersError = 'A rendelések betöltése nem sikerült.';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+    } else {
+      this.orders = [];
+      this.ordersLoading = false;
+    }
 
-    // Realtime felhasznalo lista.
-    this.unsubscribeUsers = this.userService.getUsersStream(
-      users => {
-        this.ngZone.run(() => {
-          this.users = users;
-          this.usersLoading = false;
-          this.usersError = '';
-          this.rebuildDashboard();
-          this.cdr.detectChanges();
-        });
-      },
-      error => {
-        this.ngZone.run(() => {
-          console.error(error);
-          this.usersLoading = false;
-          this.usersError = 'A felhasználók betöltése nem sikerült.';
-          this.cdr.detectChanges();
-        });
-      }
-    );
+    // A teljes felhasználólista admin-only adat, dolgozónál nem nyitunk rá streamet.
+    if (this.auth.isCurrentUserAdmin()) {
+      this.unsubscribeUsers = this.userService.getUsersStream(
+        users => {
+          this.ngZone.run(() => {
+            this.users = users;
+            this.usersLoading = false;
+            this.usersError = '';
+            this.rebuildDashboard();
+            this.cdr.detectChanges();
+          });
+        },
+        error => {
+          this.ngZone.run(() => {
+            console.error(error);
+            this.usersLoading = false;
+            this.usersError = 'A felhasználók betöltése nem sikerült.';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+    } else {
+      this.users = [];
+      this.usersLoading = false;
+    }
 
-    // Realtime mentett vásárló/cég lista helyszini ertekesiteshez.
-    this.unsubscribeLocalSaleProfiles = this.customerDirectoryService.getProfilesStream(
-      profiles => {
-        this.ngZone.run(() => {
-          this.localSaleProfiles = profiles;
-          this.localSaleProfilesLoading = false;
-          this.localSaleProfilesError = '';
-          this.cdr.detectChanges();
-        });
-      },
-      error => {
-        this.ngZone.run(() => {
-          console.error(error);
-          this.localSaleProfilesLoading = false;
-          this.localSaleProfilesError = 'A mentett vásárló/cég lista betöltése nem sikerült.';
-          this.cdr.detectChanges();
-        });
-      }
-    );
+    // Mentett vásárló/cég lista csak rendelésrögzítéshez vagy vásárlókezeléshez kell.
+    if (this.canRecordSales() || this.canManageCustomers()) {
+      this.unsubscribeLocalSaleProfiles = this.customerDirectoryService.getProfilesStream(
+        profiles => {
+          this.ngZone.run(() => {
+            this.localSaleProfiles = profiles;
+            this.localSaleProfilesLoading = false;
+            this.localSaleProfilesError = '';
+            this.cdr.detectChanges();
+          });
+        },
+        error => {
+          this.ngZone.run(() => {
+            console.error(error);
+            this.localSaleProfilesLoading = false;
+            this.localSaleProfilesError = 'A mentett vásárló/cég lista betöltése nem sikerült.';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+    } else {
+      this.localSaleProfiles = [];
+      this.localSaleProfilesLoading = false;
+    }
 
     this.unsubscribeNews = this.newsService.getAllNewsStream(
       items => {
@@ -414,44 +467,52 @@ export class Admin implements OnInit, OnDestroy {
       }
     );
 
-    this.unsubscribeNewsletter = this.newsletterService.getSubscribersStream(
-      items => {
-        this.ngZone.run(() => {
-          this.newsletterSubscribers = items;
-          this.newsletterLoading = false;
-          this.newsletterError = '';
-          this.cdr.detectChanges();
-        });
-      },
-      error => {
-        this.ngZone.run(() => {
-          console.error(error);
-          this.newsletterLoading = false;
-          this.newsletterError = 'A hírlevél feliratkozók betöltése nem sikerült.';
-          this.cdr.detectChanges();
-        });
-      }
-    );
+    if (this.auth.isCurrentUserAdmin()) {
+      this.unsubscribeNewsletter = this.newsletterService.getSubscribersStream(
+        items => {
+          this.ngZone.run(() => {
+            this.newsletterSubscribers = items;
+            this.newsletterLoading = false;
+            this.newsletterError = '';
+            this.cdr.detectChanges();
+          });
+        },
+        error => {
+          this.ngZone.run(() => {
+            console.error(error);
+            this.newsletterLoading = false;
+            this.newsletterError = 'A hírlevél feliratkozók betöltése nem sikerült.';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+    } else {
+      this.newsletterLoading = false;
+    }
 
     // Kliens oldali hibalog stream (admin diagnosztika).
-    this.unsubscribeLogs = this.monitoringService.getRecentLogsStream(
-      items => {
-        this.ngZone.run(() => {
-          this.recentClientLogs = items.map(item => this.mapClientLog(item));
-          this.logsLoading = false;
-          this.logsError = '';
-          this.cdr.detectChanges();
-        });
-      },
-      error => {
-        this.ngZone.run(() => {
-          console.error(error);
-          this.logsLoading = false;
-          this.logsError = 'A kliens hibalogok betöltése nem sikerült.';
-          this.cdr.detectChanges();
-        });
-      }
-    );
+    if (this.auth.isCurrentUserAdmin()) {
+      this.unsubscribeLogs = this.monitoringService.getRecentLogsStream(
+        items => {
+          this.ngZone.run(() => {
+            this.recentClientLogs = items.map(item => this.mapClientLog(item));
+            this.logsLoading = false;
+            this.logsError = '';
+            this.cdr.detectChanges();
+          });
+        },
+        error => {
+          this.ngZone.run(() => {
+            console.error(error);
+            this.logsLoading = false;
+            this.logsError = 'A kliens hibalogok betöltése nem sikerült.';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+    } else {
+      this.logsLoading = false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -490,13 +551,198 @@ export class Admin implements OnInit, OnDestroy {
     this.authSubscription?.unsubscribe();
   }
 
+  canUseStaffArea(): boolean {
+    return this.auth.isCurrentUserStaff();
+  }
+
+  canUseAdminOnlyArea(): boolean {
+    return this.auth.isCurrentUserAdmin();
+  }
+
+  canRecordSales(): boolean {
+    return this.auth.isCurrentUserAdmin() || this.getCurrentEmployeePermissions().canRecordSales;
+  }
+
+  canViewInventory(): boolean {
+    return this.auth.isCurrentUserAdmin() || this.getCurrentEmployeePermissions().canViewInventory;
+  }
+
+  canManageProducts(): boolean {
+    return this.auth.isCurrentUserAdmin() || this.getCurrentEmployeePermissions().canManageProducts;
+  }
+
+  canManageCustomers(): boolean {
+    return this.auth.isCurrentUserAdmin() || this.getCurrentEmployeePermissions().canManageCustomers;
+  }
+
+  canDisableCustomers(): boolean {
+    return this.auth.isCurrentUserAdmin() || this.getCurrentEmployeePermissions().canDisableCustomers;
+  }
+
+  canApprovePaymentTerms(): boolean {
+    return this.auth.canApprovePaymentTerms();
+  }
+
+  isCustomerRole(role: AdminRole): boolean {
+    return role === 'customer';
+  }
+
+  isEmployeeRole(role: AdminRole): boolean {
+    return role === 'employee';
+  }
+
+  get currentStaffProfile(): UserProfile | null {
+    return this.auth.getProfile();
+  }
+
+  get currentStaffRoleLabel(): string {
+    if (this.auth.isCurrentUserAdmin()) {
+      return 'Admin';
+    }
+
+    if (this.auth.isCurrentUserEmployee()) {
+      return 'Dolgozó';
+    }
+
+    return 'Vásárló';
+  }
+
+  private getCurrentEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    if (!this.auth.isCurrentUserEmployee()) {
+      return this.getEmptyEmployeePermissions();
+    }
+
+    return {
+      ...this.getDefaultEmployeePermissions(),
+      ...(this.auth.getProfile()?.employeePermissions || {})
+    };
+  }
+
+  private getCreateEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    return {
+      canRecordSales: this.createUserCanRecordSales,
+      canViewInventory: this.createUserCanViewInventory,
+      canManageProducts: this.createUserCanManageProducts,
+      canManageCustomers: this.createUserCanManageCustomers,
+      canDisableCustomers: this.createUserCanDisableCustomers
+    };
+  }
+
+  private getEditorEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    return {
+      canRecordSales: this.userEditorCanRecordSales,
+      canViewInventory: this.userEditorCanViewInventory,
+      canManageProducts: this.userEditorCanManageProducts,
+      canManageCustomers: this.userEditorCanManageCustomers,
+      canDisableCustomers: this.userEditorCanDisableCustomers
+    };
+  }
+
+  private getDefaultEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    return {
+      canRecordSales: true,
+      canViewInventory: true,
+      canManageProducts: true,
+      canManageCustomers: true,
+      canDisableCustomers: true
+    };
+  }
+
+  private getEmptyEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    return {
+      canRecordSales: false,
+      canViewInventory: false,
+      canManageProducts: false,
+      canManageCustomers: false,
+      canDisableCustomers: false
+    };
+  }
+
+  onCreateUserRoleChange(): void {
+    if (this.createUserRole === 'employee') {
+      this.createUserAccountType = 'private';
+      this.createUserCompanyName = '';
+      this.createUserTaxNumber = '';
+      return;
+    }
+
+    if (this.createUserRole === 'admin') {
+      this.createUserAccountType = 'private';
+      this.createUserCompanyName = '';
+      this.createUserTaxNumber = '';
+      this.createUserCanRecordSales = true;
+      this.createUserCanViewInventory = true;
+      this.createUserCanManageProducts = true;
+      this.createUserCanManageCustomers = true;
+      this.createUserCanDisableCustomers = true;
+    }
+  }
+
+  onUserEditorRoleChange(): void {
+    if (this.userEditorRole === 'employee') {
+      this.userEditorAccountType = 'private';
+      this.userEditorCompanyName = '';
+      this.userEditorTaxNumber = '';
+      return;
+    }
+
+    if (this.userEditorRole === 'admin') {
+      this.userEditorAccountType = 'private';
+      this.userEditorCompanyName = '';
+      this.userEditorTaxNumber = '';
+      this.userEditorCanRecordSales = true;
+      this.userEditorCanViewInventory = true;
+      this.userEditorCanManageProducts = true;
+      this.userEditorCanManageCustomers = true;
+      this.userEditorCanDisableCustomers = true;
+    }
+  }
+
+  get pendingPaymentTermProfiles(): CustomerProfile[] {
+    return this.localSaleProfiles
+      .filter(profile => this.normalizePaymentTermDays(profile.paymentTermDays) > 10 && profile.paymentTermApproved !== true)
+      .sort((left, right) => this.normalizePaymentTermDays(right.paymentTermDays) - this.normalizePaymentTermDays(left.paymentTermDays));
+  }
+
+  private isValidAdminSection(section: string | null): section is AdminSection {
+    return section === 'inventory'
+      || section === 'products'
+      || section === 'orders'
+      || section === 'overview'
+      || section === 'users'
+      || section === 'notifications'
+      || section === 'account';
+  }
+
+  private ensureSectionAllowedForRole(): void {
+    if (this.auth.isCurrentUserAdmin()) {
+      return;
+    }
+
+    if (this.activeSection === 'overview' || this.activeSection === 'users' || this.activeSection === 'notifications') {
+      this.activeSection = 'orders';
+    }
+
+    if (this.activeSection === 'orders' && !this.canRecordSales()) {
+      this.activeSection = this.canViewInventory() ? 'inventory' : 'account';
+    }
+
+    if (this.activeSection === 'inventory' && !this.canViewInventory()) {
+      this.activeSection = this.canRecordSales() ? 'orders' : 'account';
+    }
+
+    if (this.activeSection === 'products' && !this.canManageProducts()) {
+      this.activeSection = this.canRecordSales() ? 'orders' : 'account';
+    }
+  }
+
   async saveProduct(): Promise<void> {
     // Termék mentes (uj vagy szerkesztes mod, editingProductId alapjan).
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.auth.isCurrentUserAdmin()) {
-      this.errorMessage = 'Ehhez a felülethez admin jogosultság kell.';
+    if (!this.canManageProducts()) {
+      this.errorMessage = 'Ehhez a felülethez belső jogosultság kell.';
       return;
     }
 
@@ -671,8 +917,8 @@ export class Admin implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.auth.isCurrentUserAdmin()) {
-      this.errorMessage = 'Ehhez a művelethez admin jogosultság kell.';
+    if (!this.canManageProducts()) {
+      this.errorMessage = 'Ehhez a művelethez belső jogosultság kell.';
       return;
     }
 
@@ -712,8 +958,8 @@ export class Admin implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.auth.isCurrentUserAdmin()) {
-      this.errorMessage = 'Ehhez a művelethez admin jogosultság kell.';
+    if (!this.canManageProducts()) {
+      this.errorMessage = 'Ehhez a művelethez belső jogosultság kell.';
       return;
     }
 
@@ -1266,6 +1512,10 @@ export class Admin implements OnInit, OnDestroy {
     this.localSaleSuccess = '';
 
     if (!this.localSaleSelectedProductId) {
+      this.selectLocalSaleProductFromSearch();
+    }
+
+    if (!this.localSaleSelectedProductId) {
       this.localSaleError = 'Válassz terméket a helyszíni vásárláshoz.';
       return;
     }
@@ -1300,10 +1550,117 @@ export class Admin implements OnInit, OnDestroy {
     }
 
     this.localSaleQuantity = 1;
+    this.localSaleSelectedProductId = '';
+    this.localSaleProductSearch = '';
+    this.localSaleProductSearchOpen = false;
+  }
+
+  openLocalSaleProductSearch(): void {
+    this.localSaleProductSearchOpen = true;
+  }
+
+  closeLocalSaleProductSearch(): void {
+    setTimeout(() => {
+      this.localSaleProductSearchOpen = false;
+      this.cdr.detectChanges();
+    }, 120);
+  }
+
+  onLocalSaleProductSearchChange(): void {
+    this.localSaleSelectedProductId = '';
+    this.localSaleProductSearchOpen = true;
+  }
+
+  chooseLocalSaleProduct(product: Product): void {
+    if (!product.id) {
+      return;
+    }
+
+    this.localSaleSelectedProductId = product.id;
+    this.localSaleProductSearch = this.getLocalSaleProductLabel(product);
+    this.localSaleProductSearchOpen = false;
+    this.localSaleError = '';
+  }
+
+  get filteredLocalSaleProducts(): Product[] {
+    const term = this.localSaleProductSearch.trim().toLowerCase();
+    const source = term
+      ? this.products.filter(product => {
+          const haystack = [
+            product.name,
+            product.sku,
+            product.category,
+            product.brand
+          ].join(' ').toLowerCase();
+
+          return haystack.includes(term);
+        })
+      : this.products;
+
+    return source.slice(0, 12);
+  }
+
+  get selectedLocalSaleProductLabel(): string {
+    const product = this.products.find(item => item.id === this.localSaleSelectedProductId);
+    return product ? this.getLocalSaleProductLabel(product) : '';
+  }
+
+  private selectLocalSaleProductFromSearch(): void {
+    const term = this.localSaleProductSearch.trim().toLowerCase();
+    if (!term) {
+      return;
+    }
+
+    const exactMatch = this.products.find(product =>
+      (product.name || '').toLowerCase() === term ||
+      (product.sku || '').toLowerCase() === term ||
+      this.getLocalSaleProductLabel(product).toLowerCase() === term
+    );
+
+    if (exactMatch?.id) {
+      this.chooseLocalSaleProduct(exactMatch);
+      return;
+    }
+
+    if (this.filteredLocalSaleProducts.length === 1) {
+      this.chooseLocalSaleProduct(this.filteredLocalSaleProducts[0]);
+    }
+  }
+
+  private getLocalSaleProductLabel(product: Product): string {
+    const sku = product.sku ? ` (${product.sku})` : '';
+    return `${product.name}${sku} - ${product.price} Ft`;
   }
 
   removeLocalSaleLine(productId: string): void {
     this.localSaleLines = this.localSaleLines.filter(line => line.productId !== productId);
+  }
+
+  openLocalSaleProfilePicker(): void {
+    this.localSaleProfilePickerOpen = true;
+    this.localSaleProfileSearch = '';
+  }
+
+  closeLocalSaleProfilePicker(): void {
+    this.localSaleProfilePickerOpen = false;
+  }
+
+  chooseLocalSaleProfile(profile: CustomerProfile): void {
+    if (!profile.id) {
+      return;
+    }
+
+    this.selectedLocalSaleProfileId = profile.id;
+    this.applyLocalSaleProfile(profile);
+    if (profile.disabled) {
+      this.localSaleError = 'A kiválasztott vásárló le van tiltva, helyszíni vásárlás nem rögzíthető.';
+    }
+    this.closeLocalSaleProfilePicker();
+  }
+
+  clearSelectedLocalSaleProfile(): void {
+    this.selectedLocalSaleProfileId = '';
+    this.localSaleSaveCustomerForLater = false;
   }
 
   applySelectedLocalSaleProfile(): void {
@@ -1317,12 +1674,242 @@ export class Admin implements OnInit, OnDestroy {
       return;
     }
 
+    this.applyLocalSaleProfile(profile);
+  }
+
+  get selectedLocalSaleProfile(): CustomerProfile | undefined {
+    if (!this.selectedLocalSaleProfileId) {
+      return undefined;
+    }
+
+    return this.localSaleProfiles.find(profile => profile.id === this.selectedLocalSaleProfileId);
+  }
+
+  get filteredLocalSaleProfiles(): CustomerProfile[] {
+    const term = this.localSaleProfileSearch.trim().toLowerCase();
+    if (!term) {
+      return this.localSaleProfiles.slice(0, 40);
+    }
+
+    return this.localSaleProfiles.filter(profile => {
+      const haystack = [
+        profile.name,
+        profile.email,
+        profile.phone,
+        profile.companyName,
+        profile.taxNumber,
+        profile.type === 'company' ? 'cég' : 'vásárló',
+        profile.isGuest ? 'webes vendég' : ''
+      ].join(' ').toLowerCase();
+
+      return haystack.includes(term);
+    }).slice(0, 40);
+  }
+
+  private applyLocalSaleProfile(profile: CustomerProfile): void {
     this.localSaleCustomerName = profile.name || 'Helyszíni vásárló';
     this.localSaleCustomerEmail = profile.email || 'helyszini@tdlwebshop.hu';
     this.localSaleCustomerPhone = profile.phone || '-';
     this.localSaleIsBusinessBuyer = profile.type === 'company';
     this.localSaleCompanyName = profile.companyName || '';
     this.localSaleTaxNumber = profile.taxNumber || '';
+    this.localSalePaymentDeadlineDays = this.normalizePaymentTermDays(profile.paymentTermDays);
+    this.localSaleSaveCustomerForLater = false;
+    this.localSaleSuccess = profile.disabled
+      ? ''
+      : `Betöltött profil: ${this.localSaleCustomerName}`;
+  }
+
+  openCustomerProfileEditor(profile: CustomerProfile): void {
+    if (!profile.id) {
+      return;
+    }
+
+    this.customerProfileEditorId = profile.id;
+    this.customerProfileEditorType = profile.type || 'private';
+    this.customerProfileEditorName = profile.name || '';
+    this.customerProfileEditorEmail = profile.email || '';
+    this.customerProfileEditorPhone = profile.phone || '';
+    this.customerProfileEditorCompanyName = profile.companyName || '';
+    this.customerProfileEditorTaxNumber = profile.taxNumber || '';
+    this.customerProfileEditorDisabled = !!profile.disabled;
+    this.customerProfileEditorPaymentTermDays = this.normalizePaymentTermDays(profile.paymentTermDays);
+    this.customerProfileEditorNote = profile.note || '';
+    this.customerProfileEditorOpen = true;
+  }
+
+  closeCustomerProfileEditor(): void {
+    this.customerProfileEditorOpen = false;
+    this.customerProfileEditorId = '';
+    this.customerProfileEditorSaving = false;
+  }
+
+  async saveCustomerProfileEditor(): Promise<void> {
+    this.localSaleError = '';
+    this.localSaleSuccess = '';
+
+    if (!this.customerProfileEditorId) {
+      return;
+    }
+
+    const email = this.customerProfileEditorEmail.trim().toLowerCase();
+    const phone = this.customerProfileEditorPhone.trim();
+
+    if (!this.customerProfileEditorName.trim()) {
+      this.localSaleError = 'A vásárló neve kötelező.';
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      this.localSaleError = 'Adj meg érvényes email címet.';
+      return;
+    }
+
+    if (!isValidPhone(phone)) {
+      this.localSaleError = 'Adj meg érvényes telefonszámot (8-15 számjegy).';
+      return;
+    }
+
+    if (this.customerProfileEditorType === 'company' && !this.customerProfileEditorTaxNumber.trim()) {
+      this.localSaleError = 'Céges vásárlónál az adószám kötelező.';
+      return;
+    }
+
+    this.customerProfileEditorSaving = true;
+
+    try {
+      await this.customerDirectoryService.updateProfile(this.customerProfileEditorId, {
+        type: this.customerProfileEditorType,
+        name: this.customerProfileEditorName.trim(),
+        email,
+        phone,
+        companyName: this.customerProfileEditorType === 'company' ? this.customerProfileEditorCompanyName.trim() : '',
+        taxNumber: this.customerProfileEditorType === 'company' ? this.customerProfileEditorTaxNumber.trim() : '',
+        disabled: this.customerProfileEditorDisabled,
+        paymentTermDays: this.normalizePaymentTermDays(this.customerProfileEditorPaymentTermDays),
+        paymentTermApproved: this.normalizePaymentTermDays(this.customerProfileEditorPaymentTermDays) <= 10,
+        note: this.customerProfileEditorNote.trim()
+      });
+      await this.syncRegisteredUserDisabledByEmail(email, this.customerProfileEditorDisabled);
+
+      if (this.selectedLocalSaleProfileId === this.customerProfileEditorId) {
+        const profile = this.localSaleProfiles.find(item => item.id === this.customerProfileEditorId);
+        if (profile) {
+          this.applyLocalSaleProfile({
+            ...profile,
+            type: this.customerProfileEditorType,
+            name: this.customerProfileEditorName.trim(),
+            email,
+            phone,
+            companyName: this.customerProfileEditorCompanyName.trim(),
+            taxNumber: this.customerProfileEditorTaxNumber.trim(),
+            disabled: this.customerProfileEditorDisabled,
+            paymentTermDays: this.normalizePaymentTermDays(this.customerProfileEditorPaymentTermDays),
+            paymentTermApproved: this.normalizePaymentTermDays(this.customerProfileEditorPaymentTermDays) <= 10,
+            note: this.customerProfileEditorNote.trim()
+          });
+        }
+      }
+
+      this.localSaleSuccess = 'Mentett vásárló/cég adatai frissítve.';
+      this.toastService.success('Mentett vásárló frissítve');
+      this.closeCustomerProfileEditor();
+    } catch (error) {
+      console.error(error);
+      this.localSaleError = normalizeErrorMessage(error, 'A mentett vásárló/cég frissítése nem sikerült.');
+      this.toastService.error('Profil frissítése sikertelen', this.localSaleError);
+    } finally {
+      this.customerProfileEditorSaving = false;
+    }
+  }
+
+  async approvePaymentTerm(profile: CustomerProfile): Promise<void> {
+    if (!profile.id || !this.canApprovePaymentTerms()) {
+      return;
+    }
+
+    try {
+      await this.customerDirectoryService.updateProfile(profile.id, { paymentTermApproved: true });
+      this.toastService.success('Fizetési határidő jóváhagyva', profile.name);
+    } catch (error) {
+      console.error(error);
+      this.localSaleError = normalizeErrorMessage(error, 'A fizetési határidő jóváhagyása nem sikerült.');
+      this.toastService.error('Jóváhagyás sikertelen', this.localSaleError);
+    }
+  }
+
+  async resetPaymentTerm(profile: CustomerProfile): Promise<void> {
+    if (!profile.id || !this.canApprovePaymentTerms()) {
+      return;
+    }
+
+    try {
+      await this.customerDirectoryService.updateProfile(profile.id, {
+        paymentTermDays: 10,
+        paymentTermApproved: true
+      });
+      this.toastService.success('Fizetési határidő visszaállítva', profile.name);
+    } catch (error) {
+      console.error(error);
+      this.localSaleError = normalizeErrorMessage(error, 'A fizetési határidő visszaállítása nem sikerült.');
+      this.toastService.error('Módosítás sikertelen', this.localSaleError);
+    }
+  }
+
+  async toggleCustomerProfileDisabled(profile: CustomerProfile): Promise<void> {
+    if (!profile.id) {
+      return;
+    }
+
+    if (!this.canDisableCustomers()) {
+      this.localSaleError = 'Vásárló tiltásához külön dolgozói jogosultság kell.';
+      return;
+    }
+
+    const disabled = !profile.disabled;
+    this.customerProfileEditorSaving = true;
+
+    try {
+      await this.customerDirectoryService.updateProfile(profile.id, { disabled });
+      await this.syncRegisteredUserDisabledByEmail(profile.email, disabled);
+      if (this.selectedLocalSaleProfileId === profile.id && disabled) {
+        this.localSaleError = 'A kiválasztott vásárló le van tiltva, helyszíni vásárlás nem rögzíthető.';
+      }
+      this.toastService.success(disabled ? 'Vásárló letiltva' : 'Vásárló visszaállítva', profile.name);
+    } catch (error) {
+      console.error(error);
+      this.localSaleError = normalizeErrorMessage(error, 'A vásárló státuszának módosítása nem sikerült.');
+      this.toastService.error('Státusz mentése sikertelen', this.localSaleError);
+    } finally {
+      this.customerProfileEditorSaving = false;
+    }
+  }
+
+  async deleteCustomerProfile(profile: CustomerProfile): Promise<void> {
+    if (!profile.id) {
+      return;
+    }
+
+    const accepted = confirm(`Biztosan törlöd a mentett vásárlót/céget: ${profile.name}?`);
+    if (!accepted) {
+      return;
+    }
+
+    this.customerProfileDeletingId = profile.id;
+
+    try {
+      await this.customerDirectoryService.deleteProfile(profile.id);
+      if (this.selectedLocalSaleProfileId === profile.id) {
+        this.clearSelectedLocalSaleProfile();
+      }
+      this.toastService.success('Mentett vásárló törölve', profile.name);
+    } catch (error) {
+      console.error(error);
+      this.localSaleError = normalizeErrorMessage(error, 'A mentett vásárló/cég törlése nem sikerült.');
+      this.toastService.error('Profil törlése sikertelen', this.localSaleError);
+    } finally {
+      this.customerProfileDeletingId = null;
+    }
   }
 
   async saveLocalSaleProfile(): Promise<void> {
@@ -1330,8 +1917,8 @@ export class Admin implements OnInit, OnDestroy {
     this.localSaleError = '';
     this.localSaleSuccess = '';
 
-    if (!this.auth.isCurrentUserAdmin()) {
-      this.localSaleError = 'Ehhez a művelethez admin jogosultság kell.';
+    if (!this.canManageCustomers()) {
+      this.localSaleError = 'Ehhez a művelethez belső jogosultság kell.';
       return;
     }
 
@@ -1340,33 +1927,29 @@ export class Admin implements OnInit, OnDestroy {
       return;
     }
 
+    if (!isValidEmail(this.getLocalSaleEmail())) {
+      this.localSaleError = 'Adj meg érvényes email címet a vásárló mentéséhez.';
+      return;
+    }
+
+    if (!isValidPhone(this.getLocalSalePhone())) {
+      this.localSaleError = 'Adj meg érvényes telefonszámot (8-15 számjegy, pl. +36 30 123 4567).';
+      return;
+    }
+
     if (this.localSaleIsBusinessBuyer && !this.localSaleTaxNumber.trim()) {
       this.localSaleError = 'Céges mentéshez az adószám kötelező.';
       return;
     }
 
-    this.localSaleProfileActionLoading = true;
-
     try {
-      const profilePayload = {
-        type: this.localSaleIsBusinessBuyer ? 'company' as const : 'private' as const,
-        name: this.localSaleCustomerName.trim(),
-        email: this.localSaleCustomerEmail.trim().toLowerCase() || 'helyszini@tdlwebshop.hu',
-        phone: this.localSaleCustomerPhone.trim() || '-',
-        companyName: this.localSaleIsBusinessBuyer ? this.localSaleCompanyName.trim() : '',
-        taxNumber: this.localSaleIsBusinessBuyer ? this.localSaleTaxNumber.trim() : ''
-      };
-
-      if (this.selectedLocalSaleProfileId) {
-        await this.customerDirectoryService.updateProfile(this.selectedLocalSaleProfileId, profilePayload);
-        this.localSaleSuccess = 'Vásárló/cég adatai sikeresen frissítve.';
-        this.toastService.success('Vásárló profil frissítve');
-      } else {
-        const newId = await this.customerDirectoryService.createProfile(profilePayload);
-        this.selectedLocalSaleProfileId = newId;
-        this.localSaleSuccess = 'Vásárló/cég sikeresen elmentve a törzslistába.';
-        this.toastService.success('Vásárló profil mentve');
-      }
+      this.localSaleProfileActionLoading = true;
+      const hadSelectedProfile = !!this.selectedLocalSaleProfileId;
+      await this.saveLocalSaleCustomerProfileFromCurrentForm();
+      this.localSaleSuccess = hadSelectedProfile
+        ? 'Vásárló/cég adatai sikeresen frissítve.'
+        : 'Vásárló/cég sikeresen elmentve a törzslistába.';
+      this.toastService.success('Vásárló profil mentve');
     } catch (error) {
       console.error(error);
       this.localSaleError = normalizeErrorMessage(error, 'A vásárló/cég mentése nem sikerült.');
@@ -1376,8 +1959,197 @@ export class Admin implements OnInit, OnDestroy {
     }
   }
 
+  private async saveLocalSaleCustomerProfileFromCurrentForm(): Promise<void> {
+    const profilePayload = {
+      type: this.localSaleIsBusinessBuyer ? 'company' as const : 'private' as const,
+      name: this.localSaleCustomerName.trim(),
+      email: this.getLocalSaleEmail(),
+      phone: this.getLocalSalePhone(),
+      companyName: this.localSaleIsBusinessBuyer ? this.localSaleCompanyName.trim() : '',
+      taxNumber: this.localSaleIsBusinessBuyer ? this.localSaleTaxNumber.trim() : '',
+      disabled: this.selectedLocalSaleProfile?.disabled || false,
+      paymentTermDays: this.getLocalSalePaymentDeadlineDays(),
+      paymentTermApproved: this.getLocalSalePaymentDeadlineDays() <= 10,
+      note: this.selectedLocalSaleProfile?.note || ''
+    };
+
+    if (this.selectedLocalSaleProfileId) {
+      await this.customerDirectoryService.updateProfile(this.selectedLocalSaleProfileId, profilePayload);
+      return;
+    }
+
+    const newId = await this.customerDirectoryService.createProfile(profilePayload);
+    this.selectedLocalSaleProfileId = newId;
+  }
+
+  private getLocalSaleEmail(): string {
+    return this.localSaleCustomerEmail.trim().toLowerCase() || 'helyszini@tdlwebshop.hu';
+  }
+
+  private getLocalSalePhone(): string {
+    return this.localSaleCustomerPhone.trim() || '+36 1 234 5678';
+  }
+
+  private getBlockedLocalSaleProfile(): CustomerProfile | undefined {
+    const selectedProfile = this.selectedLocalSaleProfile;
+    if (selectedProfile?.disabled) {
+      return selectedProfile;
+    }
+
+    const email = this.getLocalSaleEmail();
+    return this.localSaleProfiles.find(profile => profile.disabled && profile.email?.toLowerCase() === email);
+  }
+
+  private normalizePaymentTermDays(value: number | undefined | null): number {
+    const parsed = Math.floor(Number(value) || 10);
+    return Math.max(1, Math.min(60, parsed));
+  }
+
+  getLocalSalePaymentDeadlineDays(): number {
+    return this.normalizePaymentTermDays(this.localSalePaymentDeadlineDays);
+  }
+
+  get localSalePaymentDeadlineWarning(): string {
+    if (this.localSalePaymentMethod !== 'transfer' || this.getLocalSalePaymentDeadlineDays() <= 10) {
+      return '';
+    }
+
+    return '10 napnál hosszabb fizetési határidőhöz kérjük keresd fel az admint jóváhagyásért.';
+  }
+
+  getLocalSalePaymentLabel(): string {
+    if (this.localSalePaymentMethod === 'card') {
+      return 'Bankkártyás fizetés';
+    }
+
+    if (this.localSalePaymentMethod === 'transfer') {
+      return `Átutalás (${this.getLocalSalePaymentDeadlineDays()} napos fizetési határidő)`;
+    }
+
+    return 'Készpénzes fizetés';
+  }
+
+  private getLocalSalePaymentDueAt(): number | undefined {
+    if (this.localSalePaymentMethod !== 'transfer') {
+      return undefined;
+    }
+
+    return Date.now() + this.getLocalSalePaymentDeadlineDays() * 24 * 60 * 60 * 1000;
+  }
+
+  private async syncRegisteredUserDisabledByEmail(email: string | undefined, disabled: boolean): Promise<void> {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    if (!normalizedEmail) {
+      return;
+    }
+
+    const user = this.users.find(item => item.email?.toLowerCase() === normalizedEmail);
+    if (!user?.id) {
+      return;
+    }
+
+    await this.userService.updateUserProfile(user.id, { disabled });
+  }
+
   get localSaleSubtotal(): number {
     return this.localSaleLines.reduce((sum, line) => sum + line.price * line.quantity, 0);
+  }
+
+  get localSaleDiscountPercent(): number {
+    if (this.localSaleIsBusinessBuyer) {
+      return 10;
+    }
+
+    const email = this.getLocalSaleEmail();
+    return this.getLoyaltyDiscountPercentByEmail(email);
+  }
+
+  get localSaleDiscountAmount(): number {
+    return Math.round((this.localSaleSubtotal * this.localSaleDiscountPercent) / 100);
+  }
+
+  get localSaleTotal(): number {
+    return Math.max(0, this.localSaleSubtotal - this.localSaleDiscountAmount);
+  }
+
+  getLocalSaleDiscountLabel(): string {
+    if (this.localSaleDiscountPercent <= 0) {
+      return '';
+    }
+
+    return this.localSaleIsBusinessBuyer
+      ? `Nagyker kedvezmény (${this.localSaleDiscountPercent}%)`
+      : `Törzsvásárlói kedvezmény (${this.localSaleDiscountPercent}%)`;
+  }
+
+  getCustomerProfileOrders(profile: CustomerProfile | null | undefined): Order[] {
+    const email = (profile?.email || '').trim().toLowerCase();
+    if (!email) {
+      return [];
+    }
+
+    return this.orders
+      .filter(order => (order.customerEmail || '').trim().toLowerCase() === email)
+      .sort((left, right) => (right.createdAt || 0) - (left.createdAt || 0));
+  }
+
+  getCustomerProfileTotalSpent(profile: CustomerProfile | null | undefined): number {
+    return this.getCustomerProfileOrders(profile)
+      .filter(order => order.status === 'teljesitve' || order.salesChannel === 'local-admin')
+      .reduce((sum, order) => sum + Math.max(0, Number(order.total) || 0), 0);
+  }
+
+  getCustomerProfileDiscountPercent(profile: CustomerProfile | null | undefined): number {
+    if (profile?.type === 'company') {
+      return 10;
+    }
+
+    return this.getLoyaltyDiscountPercentByEmail(profile?.email || '');
+  }
+
+  getCustomerProfileDiscountLabel(profile: CustomerProfile | null | undefined): string {
+    const percent = this.getCustomerProfileDiscountPercent(profile);
+    if (percent <= 0) {
+      return 'Nincs kedvezmény';
+    }
+
+    return profile?.type === 'company'
+      ? `Nagyker ${percent}%`
+      : `Törzsvásárló ${percent}%`;
+  }
+
+  openCustomerHistory(profile: CustomerProfile): void {
+    this.selectedCustomerHistoryProfile = profile;
+    this.customerHistoryOpen = true;
+  }
+
+  closeCustomerHistory(): void {
+    this.customerHistoryOpen = false;
+    this.selectedCustomerHistoryProfile = null;
+  }
+
+  private getLoyaltyDiscountPercentByEmail(email: string): number {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    if (!normalizedEmail) {
+      return 0;
+    }
+
+    const totalSpent = this.orders
+      .filter(order =>
+        (order.customerEmail || '').trim().toLowerCase() === normalizedEmail
+        && (order.status === 'teljesitve' || order.salesChannel === 'local-admin')
+      )
+      .reduce((sum, order) => sum + Math.max(0, Number(order.total) || 0), 0);
+
+    if (totalSpent >= 250000) {
+      return 5;
+    }
+
+    if (totalSpent >= 100000) {
+      return 3;
+    }
+
+    return 0;
   }
 
   async submitLocalSale(): Promise<void> {
@@ -1386,13 +2158,29 @@ export class Admin implements OnInit, OnDestroy {
     this.localSaleError = '';
     this.localSaleSuccess = '';
 
-    if (!this.auth.isCurrentUserAdmin()) {
-      this.localSaleError = 'Ehhez a művelethez admin jogosultság kell.';
+    if (!this.canRecordSales()) {
+      this.localSaleError = 'Ehhez a művelethez belső jogosultság kell.';
       return;
     }
 
     if (this.localSaleLines.length === 0) {
       this.localSaleError = 'Adj hozzá legalább egy tételt a helyszíni vásárláshoz.';
+      return;
+    }
+
+    const blockedProfile = this.getBlockedLocalSaleProfile();
+    if (blockedProfile) {
+      this.localSaleError = `A vásárló le van tiltva: ${blockedProfile.name}. Helyszíni vásárlás nem rögzíthető.`;
+      return;
+    }
+
+    if (!isValidEmail(this.getLocalSaleEmail())) {
+      this.localSaleError = 'A helyszíni vásárláshoz adj meg érvényes email címet.';
+      return;
+    }
+
+    if (!isValidPhone(this.getLocalSalePhone())) {
+      this.localSaleError = 'A helyszíni vásárláshoz adj meg érvényes telefonszámot (8-15 számjegy).';
       return;
     }
 
@@ -1423,12 +2211,19 @@ export class Admin implements OnInit, OnDestroy {
       }));
 
       const subtotal = this.localSaleSubtotal;
-      const paymentLabel = this.localSalePaymentMethod === 'card' ? 'Bankkártyás fizetés' : 'Készpénzes fizetés';
+      const discount = this.localSaleDiscountAmount;
+      const total = this.localSaleTotal;
+      const paymentLabel = this.getLocalSalePaymentLabel();
+      const paymentDueAt = this.getLocalSalePaymentDueAt();
+
+      if (this.localSaleSaveCustomerForLater) {
+        await this.saveLocalSaleCustomerProfileFromCurrentForm();
+      }
 
       const orderRef = await this.orderService.createLocalSaleOrder({
         customerName: this.localSaleCustomerName.trim() || 'Helyszíni vásárló',
-        customerEmail: this.localSaleCustomerEmail.trim() || 'helyszini@tdlwebshop.hu',
-        customerPhone: this.localSaleCustomerPhone.trim() || '-',
+        customerEmail: this.getLocalSaleEmail(),
+        customerPhone: this.getLocalSalePhone(),
         shipping: {
           zip: '-',
           city: 'Helyszíni vásárlás',
@@ -1450,7 +2245,9 @@ export class Admin implements OnInit, OnDestroy {
         paymentMethod: {
           id: this.localSalePaymentMethod,
           label: paymentLabel,
-          fee: 0
+          fee: 0,
+          dueDays: this.localSalePaymentMethod === 'transfer' ? this.getLocalSalePaymentDeadlineDays() : undefined,
+          dueAt: paymentDueAt
         },
         business: {
           isBusinessBuyer: this.localSaleIsBusinessBuyer,
@@ -1464,13 +2261,13 @@ export class Admin implements OnInit, OnDestroy {
           subtotal,
           shippingFee: 0,
           paymentFee: 0,
-          discount: 0,
-          total: subtotal
+          discount,
+          total
         },
         couponCode: '',
-        comment: this.localSaleComment.trim() || 'Helyszíni admin rögzített vásárlás',
+        comment: this.localSaleComment.trim() || this.getLocalSaleDiscountLabel() || 'Helyszíni admin rögzített vásárlás',
         items,
-        total: subtotal,
+        total,
         status: 'teljesitve'
       });
 
@@ -1478,8 +2275,8 @@ export class Admin implements OnInit, OnDestroy {
       this.invoiceService.downloadInvoicePdf({
         id: orderRef.id,
         customerName: this.localSaleCustomerName.trim() || 'Helyszíni vásárló',
-        customerEmail: this.localSaleCustomerEmail.trim() || 'helyszini@tdlwebshop.hu',
-        customerPhone: this.localSaleCustomerPhone.trim() || '-',
+        customerEmail: this.getLocalSaleEmail(),
+        customerPhone: this.getLocalSalePhone(),
         shipping: {
           zip: '-',
           city: 'Helyszíni vásárlás',
@@ -1501,7 +2298,9 @@ export class Admin implements OnInit, OnDestroy {
         paymentMethod: {
           id: this.localSalePaymentMethod,
           label: paymentLabel,
-          fee: 0
+          fee: 0,
+          dueDays: this.localSalePaymentMethod === 'transfer' ? this.getLocalSalePaymentDeadlineDays() : undefined,
+          dueAt: paymentDueAt
         },
         business: {
           isBusinessBuyer: this.localSaleIsBusinessBuyer,
@@ -1512,9 +2311,16 @@ export class Admin implements OnInit, OnDestroy {
         },
         salesChannel: 'local-admin',
         couponCode: '',
-        comment: this.localSaleComment.trim() || 'Helyszíni admin rögzített vásárlás',
+        pricing: {
+          subtotal,
+          shippingFee: 0,
+          paymentFee: 0,
+          discount,
+          total
+        },
+        comment: this.localSaleComment.trim() || this.getLocalSaleDiscountLabel() || 'Helyszíni admin rögzített vásárlás',
         items,
-        total: subtotal,
+        total,
         status: 'teljesitve',
         invoiceNumber: invoiceData.invoiceNumber,
         invoicedAt: invoiceData.invoicedAt
@@ -1523,12 +2329,17 @@ export class Admin implements OnInit, OnDestroy {
         await this.customerDirectoryService.touchProfile(this.selectedLocalSaleProfileId);
       }
 
-      this.localSaleSuccess = `Helyszíni vásárlás sikeresen rögzítve (azonosító: ${orderRef.id}).`;
+      this.localSaleSuccess = this.localSaleSaveCustomerForLater
+        ? `Helyszíni vásárlás sikeresen rögzítve, a vásárló mentve későbbre is (azonosító: ${orderRef.id}).`
+        : `Helyszíni vásárlás sikeresen rögzítve (azonosító: ${orderRef.id}).`;
       this.toastService.success('Helyszíni vásárlás mentve', orderRef.id);
       this.localSaleLines = [];
       this.localSaleComment = '';
       this.localSaleSelectedProductId = '';
+      this.localSaleProductSearch = '';
+      this.localSaleProductSearchOpen = false;
       this.localSaleQuantity = 1;
+      this.localSaleSaveCustomerForLater = false;
     } catch (error) {
       console.error(error);
       const message = (error as { message?: string })?.message || '';
@@ -1537,8 +2348,17 @@ export class Admin implements OnInit, OnDestroy {
       } else if (message.startsWith('product-not-found:')) {
         this.localSaleError = `A termék már nem található: ${message.replace('product-not-found:', '')}`;
       } else {
-        this.localSaleError = normalizeErrorMessage(error, 'A helyszíni vásárlás mentése nem sikerült.');
+        const code = getErrorCode(error);
+        const fallback = 'A helyszíni vásárlás mentése nem sikerült.';
+        const normalized = normalizeErrorMessage(error, fallback);
+        this.localSaleError = code ? `${normalized} (${code})` : normalized;
       }
+      this.monitoringService.capture('admin-local-sale-save', error, {
+        customerEmail: this.getLocalSaleEmail(),
+        itemCount: this.localSaleLines.length,
+        total: this.localSaleTotal,
+        paymentMethod: this.localSalePaymentMethod
+      });
       this.toastService.error('Helyszíni vásárlás sikertelen', this.localSaleError);
     } finally {
       this.localSaleLoading = false;
@@ -1613,7 +2433,7 @@ export class Admin implements OnInit, OnDestroy {
     ].join('\n');
   }
 
-  isSection(section: 'overview' | 'inventory' | 'products' | 'orders' | 'users'): boolean {
+  isSection(section: AdminSection): boolean {
     return this.activeSection === section;
   }
 
@@ -1662,6 +2482,18 @@ export class Admin implements OnInit, OnDestroy {
     }
 
     return status || '-';
+  }
+
+  getUserRoleLabel(role?: AdminRole): string {
+    if (role === 'admin') {
+      return 'Admin';
+    }
+
+    if (role === 'employee') {
+      return 'Dolgozó';
+    }
+
+    return 'Vásárló';
   }
 
   getNewsTargetLabel(item: NewsItem): string {
@@ -1806,7 +2638,7 @@ export class Admin implements OnInit, OnDestroy {
     }
   }
 
-  async updateUserRole(user: AdminUserView, role: 'admin' | 'customer'): Promise<void> {
+  async updateUserRole(user: AdminUserView, role: AdminRole): Promise<void> {
     // User role váltás az admin panelrol.
     if (!user.id) {
       return;
@@ -1821,7 +2653,15 @@ export class Admin implements OnInit, OnDestroy {
     this.usersError = '';
 
     try {
-      await this.userService.updateUserProfile(user.id, { role });
+      await this.userService.updateUserProfile(user.id, {
+        role,
+        accountType: role === 'customer' ? user.accountType : 'private',
+        companyName: role === 'customer' && user.accountType === 'company' ? user.companyName : '',
+        taxNumber: role === 'customer' && user.accountType === 'company' ? user.taxNumber : '',
+        employeePermissions: role === 'employee'
+          ? (user.employeePermissions || this.getDefaultEmployeePermissions())
+          : this.getEmptyEmployeePermissions()
+      });
       this.toastService.success('Szerepkör frissítve', `${user.email} -> ${role}`);
     } catch (error) {
       console.error(error);
@@ -1869,6 +2709,15 @@ export class Admin implements OnInit, OnDestroy {
     this.userEditorTaxNumber = user.taxNumber;
     this.userEditorNote = user.note;
     this.userEditorDisabled = user.disabled;
+    const permissions = {
+      ...this.getDefaultEmployeePermissions(),
+      ...(user.employeePermissions || {})
+    };
+    this.userEditorCanRecordSales = permissions.canRecordSales;
+    this.userEditorCanViewInventory = permissions.canViewInventory;
+    this.userEditorCanManageProducts = permissions.canManageProducts;
+    this.userEditorCanManageCustomers = permissions.canManageCustomers;
+    this.userEditorCanDisableCustomers = permissions.canDisableCustomers;
     this.userDetailsOpen = true;
   }
 
@@ -1888,7 +2737,22 @@ export class Admin implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.userEditorAccountType === 'company' && !this.userEditorTaxNumber.trim()) {
+    if (!isValidEmail(email)) {
+      this.usersError = 'Adj meg érvényes email címet.';
+      return;
+    }
+
+    if (!this.userEditorDisplayName.trim()) {
+      this.usersError = 'A felhasználó neve kötelező.';
+      return;
+    }
+
+    if (!isValidOptionalPhone(this.userEditorPhone)) {
+      this.usersError = 'Adj meg érvényes telefonszámot (8-15 számjegy, pl. +36 30 123 4567).';
+      return;
+    }
+
+    if (this.userEditorRole === 'customer' && this.userEditorAccountType === 'company' && !this.userEditorTaxNumber.trim()) {
       this.usersError = 'Cég típus esetén az adószám kötelező.';
       return;
     }
@@ -1900,23 +2764,28 @@ export class Admin implements OnInit, OnDestroy {
       await this.userService.updateUserProfile(this.selectedUserDetails.id, {
         email,
         role: this.userEditorRole,
-        accountType: this.userEditorAccountType,
+        accountType: this.userEditorRole === 'customer' ? this.userEditorAccountType : 'private',
         displayName: this.userEditorDisplayName.trim(),
         phone: this.userEditorPhone.trim(),
-        companyName: this.userEditorAccountType === 'company' ? this.userEditorCompanyName.trim() : '',
-        taxNumber: this.userEditorAccountType === 'company' ? this.userEditorTaxNumber.trim() : '',
+        companyName: this.userEditorRole === 'customer' && this.userEditorAccountType === 'company' ? this.userEditorCompanyName.trim() : '',
+        taxNumber: this.userEditorRole === 'customer' && this.userEditorAccountType === 'company' ? this.userEditorTaxNumber.trim() : '',
         note: this.userEditorNote.trim(),
-        disabled: this.userEditorDisabled
+        disabled: this.userEditorDisabled,
+        employeePermissions: this.userEditorRole === 'employee'
+          ? this.getEditorEmployeePermissions()
+          : this.getEmptyEmployeePermissions()
       });
 
-      await this.customerDirectoryService.upsertAdminProfileByEmail({
-        type: this.userEditorAccountType,
-        name: this.userEditorDisplayName.trim() || email,
-        email,
-        phone: this.userEditorPhone.trim() || '-',
-        companyName: this.userEditorAccountType === 'company' ? this.userEditorCompanyName.trim() : '',
-        taxNumber: this.userEditorAccountType === 'company' ? this.userEditorTaxNumber.trim() : ''
-      });
+      if (this.userEditorRole === 'customer') {
+        await this.customerDirectoryService.upsertAdminProfileByEmail({
+          type: this.userEditorAccountType,
+          name: this.userEditorDisplayName.trim() || email,
+          email,
+          phone: this.userEditorPhone.trim() || '-',
+          companyName: this.userEditorAccountType === 'company' ? this.userEditorCompanyName.trim() : '',
+          taxNumber: this.userEditorAccountType === 'company' ? this.userEditorTaxNumber.trim() : ''
+        });
+      }
 
       this.toastService.success('Felhasználó mentve', email);
       this.closeUserDetails();
@@ -1936,8 +2805,36 @@ export class Admin implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.createUserAccountType === 'company' && !this.createUserTaxNumber.trim()) {
+    if (!isValidEmail(email)) {
+      this.usersError = 'Adj meg érvényes email címet az új felhasználóhoz/céghez.';
+      return;
+    }
+
+    if (!this.createUserDisplayName.trim()) {
+      this.usersError = 'A profil létrehozásához add meg a nevet vagy cégnevet.';
+      return;
+    }
+
+    if (!isValidPhone(this.createUserPhone)) {
+      this.usersError = 'Adj meg érvényes telefonszámot (8-15 számjegy, pl. +36 30 123 4567).';
+      return;
+    }
+
+    if (this.createUserRole === 'customer' && this.createUserAccountType === 'company' && !this.createUserTaxNumber.trim()) {
       this.usersError = 'Cég létrehozásához az adószám kötelező.';
+      return;
+    }
+
+    const employeePermissions = this.getCreateEmployeePermissions();
+    if (
+      this.createUserRole === 'employee'
+      && !employeePermissions.canRecordSales
+      && !employeePermissions.canViewInventory
+      && !employeePermissions.canManageProducts
+      && !employeePermissions.canManageCustomers
+      && !employeePermissions.canDisableCustomers
+    ) {
+      this.usersError = 'Dolgozó profilhoz legalább egy jogosultságot adj meg.';
       return;
     }
 
@@ -1949,22 +2846,27 @@ export class Admin implements OnInit, OnDestroy {
         email,
         role: this.createUserRole,
         disabled: false,
-        accountType: this.createUserAccountType,
+        accountType: this.createUserRole === 'customer' ? this.createUserAccountType : 'private',
         displayName: this.createUserDisplayName.trim(),
         phone: this.createUserPhone.trim(),
-        companyName: this.createUserAccountType === 'company' ? this.createUserCompanyName.trim() : '',
-        taxNumber: this.createUserAccountType === 'company' ? this.createUserTaxNumber.trim() : '',
-        note: this.createUserNote.trim()
+        companyName: this.createUserRole === 'customer' && this.createUserAccountType === 'company' ? this.createUserCompanyName.trim() : '',
+        taxNumber: this.createUserRole === 'customer' && this.createUserAccountType === 'company' ? this.createUserTaxNumber.trim() : '',
+        note: this.createUserNote.trim(),
+        employeePermissions: this.createUserRole === 'employee'
+          ? employeePermissions
+          : this.getEmptyEmployeePermissions()
       });
 
-      await this.customerDirectoryService.upsertAdminProfileByEmail({
-        type: this.createUserAccountType,
-        name: this.createUserDisplayName.trim() || email,
-        email,
-        phone: this.createUserPhone.trim() || '-',
-        companyName: this.createUserAccountType === 'company' ? this.createUserCompanyName.trim() : '',
-        taxNumber: this.createUserAccountType === 'company' ? this.createUserTaxNumber.trim() : ''
-      });
+      if (this.createUserRole === 'customer') {
+        await this.customerDirectoryService.upsertAdminProfileByEmail({
+          type: this.createUserAccountType,
+          name: this.createUserDisplayName.trim() || email,
+          email,
+          phone: this.createUserPhone.trim() || '-',
+          companyName: this.createUserAccountType === 'company' ? this.createUserCompanyName.trim() : '',
+          taxNumber: this.createUserAccountType === 'company' ? this.createUserTaxNumber.trim() : ''
+        });
+      }
 
       this.toastService.success('Új felhasználó/cég létrehozva', email);
       this.createUserEmail = '';
@@ -1975,6 +2877,11 @@ export class Admin implements OnInit, OnDestroy {
       this.createUserCompanyName = '';
       this.createUserTaxNumber = '';
       this.createUserNote = '';
+      this.createUserCanRecordSales = true;
+      this.createUserCanViewInventory = true;
+      this.createUserCanManageProducts = true;
+      this.createUserCanManageCustomers = true;
+      this.createUserCanDisableCustomers = true;
     } catch (error) {
       console.error(error);
       this.usersError = normalizeErrorMessage(error, 'Az új felhasználó/cég létrehozása nem sikerült.');
@@ -2052,6 +2959,10 @@ export class Admin implements OnInit, OnDestroy {
         taxNumber: user.taxNumber || '',
         note: user.note || '',
         disabled: !!user.disabled,
+        employeePermissions: {
+          ...this.getEmptyEmployeePermissions(),
+          ...(user.employeePermissions || {})
+        },
         createdAt: user.createdAt,
         lastLoginAt: user.lastLoginAt,
         latestOrderAt,

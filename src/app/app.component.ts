@@ -69,12 +69,12 @@ export class AppComponent {
   }
 
   isAdminUser(): boolean {
-    return this.authService.isCurrentUserAdmin();
+    return this.authService.isCurrentUserStaff();
   }
 
   canShowMyOrdersByEmail(email?: string | null): boolean {
     // Role alapú adminnál nem elég az email-listát nézni, ezért a teljes admin állapotot kérdezzük.
-    return !!email && !this.authService.isCurrentUserAdmin();
+    return !!email && !this.authService.isCurrentUserStaff();
   }
 
   canShowMyOrders(): boolean {

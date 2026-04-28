@@ -1,7 +1,11 @@
 <div class="page-container profile-page">
   <section class="card profile-header">
-    <h1>Profilom</h1>
-    <p>Itt kezelheted a felhasználói, szállítási, számlázási és céges adataidat, valamint a rendeléseidet.</p>
+    <div>
+      <span class="section-eyebrow">Saját fiók</span>
+      <h1>Profilom</h1>
+      <p>Itt kezelheted a felhasználói, szállítási, számlázási és céges adataidat, valamint követheted a rendeléseidet.</p>
+    </div>
+    <a routerLink="/products" class="btn btn-secondary profile-action">Vásárlás folytatása</a>
   </section>
 
   <section class="card empty-state" *ngIf="!(authService.user$ | async)">
@@ -30,7 +34,7 @@
         </div>
         <div class="field-group">
           <label>Telefonszám</label>
-          <input [(ngModel)]="phone" placeholder="Telefonszám">
+          <input type="tel" inputmode="tel" [(ngModel)]="phone" placeholder="+36 30 123 4567">
         </div>
       </div>
 
@@ -118,6 +122,13 @@
             {{ getStatusLabel(order.status) }}
           </span>
         </div>
+        <div class="order-stepper" [class.cancelled]="order.status === 'lemondva'">
+          <span class="order-step" *ngFor="let step of orderSteps" [ngClass]="getOrderStepState(order, step.id)">
+            <span class="step-dot"></span>
+            <span>{{ step.label }}</span>
+          </span>
+        </div>
+        <p class="tracking-text">{{ getTrackingText(order) }}</p>
         <p>Dátum: {{ formatDate(order.createdAt) }}</p>
         <p *ngIf="order.pickupAt">Átvétel időpontja: {{ formatDate(order.pickupAt) }}</p>
         <p>Termékek: {{ getOrderItemCount(order) }} db</p>
@@ -138,6 +149,13 @@
     <h3>Rendelés részletei</h3>
     <p><strong>Azonosító:</strong> {{ selectedOrder.id }}</p>
     <p><strong>Státusz:</strong> {{ getStatusLabel(selectedOrder.status) }}</p>
+    <div class="order-stepper modal-stepper" [class.cancelled]="selectedOrder.status === 'lemondva'">
+      <span class="order-step" *ngFor="let step of orderSteps" [ngClass]="getOrderStepState(selectedOrder, step.id)">
+        <span class="step-dot"></span>
+        <span>{{ step.label }}</span>
+      </span>
+    </div>
+    <p class="tracking-text">{{ getTrackingText(selectedOrder) }}</p>
     <p><strong>Dátum:</strong> {{ formatDate(selectedOrder.createdAt) }}</p>
     <p><strong>Átvétel időpontja:</strong> {{ selectedOrder.pickupAt ? formatDate(selectedOrder.pickupAt) : '-' }}</p>
     <p><strong>Szállítási mód:</strong> {{ selectedOrder.shippingMethod?.label || '-' }}</p>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { addDoc, collection, doc, onSnapshot, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { CustomerProfile } from '../models/customer-profile.model';
 
@@ -12,6 +12,10 @@ export class CustomerDirectoryService {
 
   async createProfile(profile: Omit<CustomerProfile, 'id' | 'createdAt' | 'lastUsedAt'>): Promise<string> {
     const ref = await addDoc(this.customerProfilesCollection, {
+      disabled: false,
+      paymentTermDays: 10,
+      paymentTermApproved: true,
+      note: '',
       ...profile,
       createdAt: Date.now(),
       lastUsedAt: Date.now()
@@ -38,6 +42,11 @@ export class CustomerDirectoryService {
     });
   }
 
+  async deleteProfile(id: string): Promise<void> {
+    const profileRef = doc(db, 'customerProfiles', id);
+    await deleteDoc(profileRef);
+  }
+
   async upsertProfileForUser(
     uid: string,
     email: string,
@@ -62,6 +71,10 @@ export class CustomerDirectoryService {
         phone: profile.phone,
         companyName: profile.companyName || '',
         taxNumber: profile.taxNumber || '',
+        disabled: false,
+        paymentTermDays: 10,
+        paymentTermApproved: true,
+        note: '',
         source: 'web-user',
         isGuest: false,
         createdAt: Date.now(),
@@ -93,6 +106,10 @@ export class CustomerDirectoryService {
         phone: profile.phone,
         companyName: profile.companyName || '',
         taxNumber: profile.taxNumber || '',
+        disabled: false,
+        paymentTermDays: 10,
+        paymentTermApproved: true,
+        note: '',
         source: 'web-guest',
         isGuest: true,
         createdAt: Date.now(),
@@ -126,6 +143,10 @@ export class CustomerDirectoryService {
         phone: profile.phone,
         companyName: profile.companyName || '',
         taxNumber: profile.taxNumber || '',
+        disabled: false,
+        paymentTermDays: 10,
+        paymentTermApproved: true,
+        note: '',
         source: 'admin-local',
         isGuest: false,
         createdAt: Date.now(),

@@ -82,51 +82,65 @@ export class InvoiceService {
     // Eles szamlazashoz NAV-kompatibilis szamlazo vagy szerveroldali integracio kell.
     const c: string[] = [];
 
-    c.push('q 0.96 0.97 0.99 rg 36 760 523 64 re f Q');
-    c.push('q 0.74 0.80 0.90 RG 1 w 36 760 523 64 re S Q');
-    c.push(this.drawText(50, 806, 'F2', 20, 'SZÁMLA'));
-    c.push(this.drawText(50, 786, 'F1', 11, `Számlaszám: ${data.invoiceNumber}`));
-    c.push(this.drawText(270, 786, 'F1', 11, `Kiállítás: ${data.issueDate}`));
-    c.push(this.drawText(50, 770, 'F1', 11, `Rendelés azonosító: ${data.orderId}`));
-    c.push(this.drawText(320, 770, 'F1', 11, `Csatorna: ${data.salesChannel}`));
+    c.push('q 0.03 0.05 0.10 rg 36 760 523 66 re f Q');
+    c.push('q 0.12 0.48 0.86 RG 1.4 w 36 760 523 66 re S Q');
+    c.push('q 0.92 0.10 0.12 RG 1.3 w 392 768 146 0 m 538 768 l S Q');
+    c.push('q 0.05 0.45 0.82 RG 4 w 54 783 24 0 360 arc S Q');
+    c.push('q 0.80 0.85 0.92 rg 55 788 32 14 re f Q');
+    c.push('q 0.05 0.45 0.82 rg 96 787 4 18 re f Q');
+    c.push(this.drawText(108, 797, 'F2', 22, 'TDL', '0.05 0.50 0.90 rg'));
+    c.push(this.drawText(168, 797, 'F2', 18, 'Webshop', '0.88 0.91 0.95 rg'));
+    c.push(this.drawText(438, 806, 'F2', 22, 'SZÁMLA', '1 1 1 rg'));
+    c.push(this.drawText(438, 787, 'F1', 10, `Számlaszám: ${data.invoiceNumber}`, '0.86 0.91 0.98 rg'));
+    c.push(this.drawText(438, 772, 'F1', 10, `Kiállítás: ${data.issueDate}`, '0.86 0.91 0.98 rg'));
 
-    c.push('q 0.92 0.94 0.97 rg 36 620 255 126 re f Q');
-    c.push('q 0.92 0.94 0.97 rg 304 620 255 126 re f Q');
-    c.push('q 0.78 0.82 0.90 RG 1 w 36 620 255 126 re S 304 620 255 126 re S Q');
+    c.push(this.drawText(50, 740, 'F1', 11, `Rendelés azonosító: ${this.truncate(data.orderId, 30)}`));
+    c.push(this.drawText(340, 740, 'F1', 11, `Csatorna: ${data.salesChannel}`));
 
-    c.push(this.drawText(48, 730, 'F2', 12, 'Kiállító'));
-    c.push(this.drawText(48, 712, 'F1', 11, `Név: ${data.issuerName}`));
-    c.push(this.drawText(48, 696, 'F1', 10, `Cím: ${data.issuerAddress}`));
-    c.push(this.drawText(48, 680, 'F1', 10, `Adószám: ${data.issuerTaxNumber}`));
+    c.push('q 0.92 0.94 0.97 rg 36 622 255 96 re f Q');
+    c.push('q 0.92 0.94 0.97 rg 304 622 255 96 re f Q');
+    c.push('q 0.78 0.82 0.90 RG 1 w 36 622 255 96 re S 304 622 255 96 re S Q');
 
-    c.push(this.drawText(316, 730, 'F2', 12, 'Vevő'));
-    c.push(this.drawText(316, 712, 'F1', 11, `Név: ${data.buyerName}`));
-    c.push(this.drawText(316, 696, 'F1', 10, `Cím: ${data.buyerAddress}`));
-    c.push(this.drawText(316, 680, 'F1', 10, `Email: ${data.buyerEmail}`));
-    c.push(this.drawText(316, 664, 'F1', 10, `Telefon: ${data.buyerPhone}`));
-    c.push(this.drawText(316, 648, 'F1', 10, `Cég: ${data.buyerCompany}`));
-    c.push(this.drawText(316, 632, 'F1', 10, `Vevő adószám: ${data.buyerTaxNumber}`));
+    c.push(this.drawText(48, 700, 'F2', 12, 'Kiállító'));
+    c.push(this.drawText(48, 682, 'F1', 11, `Név: ${data.issuerName}`));
+    c.push(this.drawText(48, 666, 'F1', 10, `Cím: ${this.truncate(data.issuerAddress, 37)}`));
+    c.push(this.drawText(48, 650, 'F1', 10, `Adószám: ${data.issuerTaxNumber}`));
 
-    c.push(this.drawText(48, 600, 'F1', 10, `Fizetés módja: ${data.paymentLabel}`));
-    c.push(this.drawText(290, 600, 'F1', 10, `Szállítás módja: ${data.shippingLabel}`));
+    c.push(this.drawText(316, 700, 'F2', 12, 'Vevő'));
+    c.push(this.drawText(316, 682, 'F1', 11, `Név: ${this.truncate(data.buyerName, 32)}`));
+    c.push(this.drawText(316, 666, 'F1', 10, `Cím: ${this.truncate(data.buyerAddress, 36)}`));
+    c.push(this.drawText(316, 650, 'F1', 10, `Email: ${this.truncate(data.buyerEmail, 34)}`));
+    c.push(this.drawText(316, 634, 'F1', 10, `Telefon: ${this.truncate(data.buyerPhone, 28)}`));
 
-    c.push('q 0.18 0.24 0.38 rg 36 566 523 24 re f Q');
-    c.push(this.drawText(48, 573, 'F2', 10, 'Megnevezés'));
-    c.push(this.drawText(320, 573, 'F2', 10, 'Menny.'));
-    c.push(this.drawText(382, 573, 'F2', 10, 'Egységár'));
-    c.push(this.drawText(460, 573, 'F2', 10, 'Bruttó'));
+    c.push(this.drawText(48, 598, 'F1', 10, `Fizetés módja: ${this.truncate(data.paymentLabel, 38)}`));
+    c.push(this.drawText(304, 598, 'F1', 10, `Szállítás módja: ${this.truncate(data.shippingLabel, 34)}`));
+    c.push(this.drawText(48, 580, 'F1', 10, `Cég: ${this.truncate(data.buyerCompany, 40)}`));
+    c.push(this.drawText(304, 580, 'F1', 10, `Vevő adószám: ${data.buyerTaxNumber}`));
 
-    let y = 552;
-    const visibleItems = data.items.slice(0, 18);
+    c.push('q 0.95 0.96 0.99 rg 322 506 237 66 re f Q');
+    c.push('q 0.78 0.82 0.90 RG 1 w 322 506 237 66 re S Q');
+    c.push(this.drawText(340, 552, 'F1', 11, `Nettó: ${this.formatFt(data.netTotal)} Ft`));
+    c.push(this.drawText(340, 535, 'F1', 11, `Áfa (27%): ${this.formatFt(data.vatTotal)} Ft`));
+    c.push(this.drawText(340, 516, 'F2', 12, `Fizetendő végösszeg: ${this.formatFt(data.grossTotal)} Ft`));
+
+    c.push('q 0.18 0.24 0.38 rg 36 458 523 24 re f Q');
+    c.push(this.drawText(48, 465, 'F2', 10, 'Megnevezés', '1 1 1 rg'));
+    c.push(this.drawText(318, 465, 'F2', 10, 'Menny.', '1 1 1 rg'));
+    c.push(this.drawText(382, 465, 'F2', 10, 'Egységár', '1 1 1 rg'));
+    c.push(this.drawText(462, 465, 'F2', 10, 'Bruttó', '1 1 1 rg'));
+
+    let y = 438;
+    const visibleItems = data.items.slice(0, 15);
     // A jelenlegi szakdolgozati PDF egyoldalas; hosszú rendelésnél jelzést teszünk,
     // hogy ne tűnjön úgy, mintha a fennmaradó tételek elvesztek volna.
     for (const item of visibleItems) {
-      c.push('q 0.92 0.94 0.97 rg 36 ' + (y - 6) + ' 523 20 re f Q');
+      const fill = visibleItems.indexOf(item) % 2 === 0 ? '0.92 0.94 0.97' : '0.97 0.98 0.99';
+      c.push(`q ${fill} rg 36 ${y - 7} 523 22 re f Q`);
       c.push(this.drawText(48, y, 'F1', 10, this.truncate(item.name, 38)));
       c.push(this.drawText(326, y, 'F1', 10, `${item.quantity} db`));
       c.push(this.drawText(380, y, 'F1', 10, `${this.formatFt(item.unitPrice)} Ft`));
       c.push(this.drawText(458, y, 'F1', 10, `${this.formatFt(item.gross)} Ft`));
-      y -= 22;
+      y -= 24;
     }
 
     if (data.items.length > visibleItems.length) {
@@ -134,14 +148,10 @@ export class InvoiceService {
       y -= 18;
     }
 
-    const summaryY = Math.max(120, y - 24);
-    c.push('q 0.95 0.96 0.99 rg 300 ' + summaryY + ' 259 90 re f Q');
-    c.push('q 0.78 0.82 0.90 RG 1 w 300 ' + summaryY + ' 259 90 re S Q');
-    c.push(this.drawText(314, summaryY + 64, 'F1', 11, `Nettó: ${this.formatFt(data.netTotal)} Ft`));
-    c.push(this.drawText(314, summaryY + 46, 'F1', 11, `Áfa (27%): ${this.formatFt(data.vatTotal)} Ft`));
-    c.push(this.drawText(314, summaryY + 24, 'F2', 13, `Fizetendő végösszeg: ${this.formatFt(data.grossTotal)} Ft`));
-
-    c.push(this.drawText(36, 60, 'F1', 9, 'Köszönjük a vásárlást! Ez a dokumentum webshop bizonylat.'));
+    c.push('q 0.74 0.80 0.90 RG 0.8 w 36 118 523 0 m 559 118 l S Q');
+    c.push(this.drawText(36, 96, 'F2', 10, 'Megjegyzés'));
+    c.push(this.drawText(36, 80, 'F1', 9, 'Köszönjük a vásárlást! Ez a dokumentum webshop bizonylat.'));
+    c.push(this.drawText(36, 48, 'F1', 8, 'A dokumentum szakdolgozati/demo rendszerben generált bizonylat.'));
     const stream = `${c.join('\n')}\n`;
 
     const objects: string[] = [];
@@ -173,10 +183,10 @@ export class InvoiceService {
     return new TextEncoder().encode(pdf);
   }
 
-  private drawText(x: number, y: number, font: 'F1' | 'F2', size: number, text: string): string {
+  private drawText(x: number, y: number, font: 'F1' | 'F2', size: number, text: string, color = '0 0 0 rg'): string {
     // PDF text parancs generalasa.
     const normalized = this.escapePdfText(this.stripDiacritics(text));
-    return `BT /${font} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${normalized}) Tj ET`;
+    return `BT ${color} /${font} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${normalized}) Tj ET`;
   }
 
   private truncate(value: string, maxLength: number): string {
@@ -196,3 +206,4 @@ export class InvoiceService {
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 }
+

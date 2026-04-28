@@ -1,14 +1,23 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, addDoc, collection, getDocs } from 'firebase/firestore';
 
+function getRequiredEnv(name) {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
+}
+
 const firebaseConfig = {
-  apiKey: 'AIzaSyDTaX-8EoWilze8NGy3y7NjeVsJM2vzUJQ',
-  authDomain: 'tdlwebshop.firebaseapp.com',
-  projectId: 'tdlwebshop',
-  storageBucket: 'tdlwebshop.firebasestorage.app',
-  messagingSenderId: '439314513167',
-  appId: '1:439314513167:web:7b43e61eb213a3b49e527a',
-  measurementId: 'G-C9XHXX7N80'
+  apiKey: getRequiredEnv('FIREBASE_API_KEY'),
+  authDomain: getRequiredEnv('FIREBASE_AUTH_DOMAIN'),
+  projectId: getRequiredEnv('FIREBASE_PROJECT_ID'),
+  storageBucket: getRequiredEnv('FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: getRequiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
+  appId: getRequiredEnv('FIREBASE_APP_ID'),
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID?.trim() || undefined
 };
 
 const app = initializeApp(firebaseConfig);

@@ -107,6 +107,18 @@ export class AuthService {
     return this.isAdminEmail(this.getUser()?.email) || this.getProfile()?.role === 'admin';
   }
 
+  isCurrentUserEmployee() {
+    return this.getProfile()?.role === 'employee';
+  }
+
+  isCurrentUserStaff() {
+    return this.isCurrentUserAdmin() || this.isCurrentUserEmployee();
+  }
+
+  canApprovePaymentTerms() {
+    return this.isCurrentUserAdmin();
+  }
+
   isCurrentUserDisabled() {
     return this.getProfile()?.disabled === true;
   }

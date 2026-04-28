@@ -2,7 +2,7 @@
 export interface UserProfile {
   id?: string;
   email: string;
-  role: 'admin' | 'customer';
+  role: 'admin' | 'employee' | 'customer';
   accountType?: 'private' | 'company';
   displayName?: string;
   phone?: string;
@@ -10,6 +10,13 @@ export interface UserProfile {
   taxNumber?: string;
   note?: string;
   disabled?: boolean;
+  employeePermissions?: {
+    canRecordSales: boolean;
+    canViewInventory: boolean;
+    canManageProducts: boolean;
+    canManageCustomers: boolean;
+    canDisableCustomers: boolean;
+  };
   createdAt: number;
   lastLoginAt?: number;
   orderCount?: number;

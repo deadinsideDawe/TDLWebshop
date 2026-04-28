@@ -28,6 +28,23 @@ export class UserService {
       return;
     }
 
+    const managedProfileQuery = query(this.usersCollection, where('email', '==', normalizedEmail), limit(1));
+    const managedProfileSnapshot = await getDocs(managedProfileQuery);
+    if (!managedProfileSnapshot.empty) {
+      const managedProfile = managedProfileSnapshot.docs[0].data() as UserProfile;
+      await setDoc(
+        userRef,
+        {
+          ...managedProfile,
+          email: normalizedEmail,
+          createdAt: managedProfile.createdAt || Date.now(),
+          lastLoginAt: Date.now()
+        },
+        { merge: true }
+      );
+      return;
+    }
+
     await setDoc(userRef, {
       email: normalizedEmail,
       role: environment.adminEmails.includes(normalizedEmail) ? 'admin' : 'customer',
@@ -80,7 +97,7 @@ export class UserService {
 
   async createOrUpdateAdminManagedUser(data: {
     email: string;
-    role: 'admin' | 'customer';
+    role: 'admin' | 'employee' | 'customer';
     disabled?: boolean;
     accountType?: 'private' | 'company';
     displayName?: string;
@@ -88,6 +105,7 @@ export class UserService {
     companyName?: string;
     taxNumber?: string;
     note?: string;
+    employeePermissions?: UserProfile['employeePermissions'];
   }): Promise<string> {
     const normalizedEmail = data.email.trim().toLowerCase();
     const matchQuery = query(this.usersCollection, where('email', '==', normalizedEmail), limit(1));
@@ -102,7 +120,10 @@ export class UserService {
       phone: (data.phone || '').trim(),
       companyName: (data.companyName || '').trim(),
       taxNumber: (data.taxNumber || '').trim(),
-      note: (data.note || '').trim()
+      note: (data.note || '').trim(),
+      employeePermissions: data.role === 'employee'
+        ? (data.employeePermissions || this.getDefaultEmployeePermissions())
+        : this.getEmptyEmployeePermissions()
     };
 
     if (!snapshot.empty) {
@@ -144,5 +165,25 @@ export class UserService {
         }
       }
     );
+  }
+
+  private getDefaultEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    return {
+      canRecordSales: true,
+      canViewInventory: true,
+      canManageProducts: true,
+      canManageCustomers: true,
+      canDisableCustomers: true
+    };
+  }
+
+  private getEmptyEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    return {
+      canRecordSales: false,
+      canViewInventory: false,
+      canManageProducts: false,
+      canManageCustomers: false,
+      canDisableCustomers: false
+    };
   }
 }

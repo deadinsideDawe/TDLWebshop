@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1190" height="1684" viewBox="0 0 595 842" role="img" aria-label="TDLWebshop számla minta">
+  <rect width="595" height="842" fill="#f8fafc"/>
+  <rect x="36" y="760" width="523" height="64" fill="#080d18" stroke="#1f7bdb" stroke-width="1.2"/>
+  <line x1="380" y1="768" x2="530" y2="768" stroke="#ef4444" stroke-width="1.5"/>
+  <path d="M54 796 A24 24 0 1 1 92 776" fill="none" stroke="#1685e6" stroke-width="4"/>
+  <rect x="55" y="787" width="32" height="14" fill="#cbd5e1"/>
+  <rect x="96" y="786" width="4" height="18" fill="#0d7ed2"/>
+  <text x="108" y="795" font-family="Arial Black, Arial, sans-serif" font-size="22" font-weight="900" fill="#0d7ed2">TDL</text>
+  <text x="168" y="795" font-family="Arial Black, Arial, sans-serif" font-size="18" font-weight="900" fill="#e5e7eb">Webshop</text>
+  <text x="430" y="804" font-family="Arial Black, Arial, sans-serif" font-size="20" font-weight="900" fill="#ffffff">SZÁMLA</text>
+  <text x="430" y="786" font-family="Arial, sans-serif" font-size="10" fill="#dbeafe">Számlaszám: INV-2026-0001</text>
+  <text x="430" y="771" font-family="Arial, sans-serif" font-size="10" fill="#dbeafe">Kiállítás: 2026. 04. 23.</text>
+
+  <text x="50" y="746" font-family="Arial, sans-serif" font-size="11" fill="#111827">Rendelés azonosító: order-1</text>
+  <text x="320" y="746" font-family="Arial, sans-serif" font-size="11" fill="#111827">Csatorna: Webes</text>
+
+  <rect x="36" y="620" width="255" height="104" fill="#e8edf5" stroke="#c7d0dd"/>
+  <rect x="304" y="620" width="255" height="104" fill="#e8edf5" stroke="#c7d0dd"/>
+  <text x="48" y="706" font-family="Arial Black, Arial, sans-serif" font-size="12" fill="#111827">Kiállító</text>
+  <text x="48" y="688" font-family="Arial, sans-serif" font-size="11" fill="#111827">Név: TDL Webshop</text>
+  <text x="48" y="672" font-family="Arial, sans-serif" font-size="10" fill="#111827">Cím: 1111 Budapest, Minta utca 10.</text>
+  <text x="48" y="656" font-family="Arial, sans-serif" font-size="10" fill="#111827">Adószám: 12345678-2-42</text>
+
+  <text x="316" y="706" font-family="Arial Black, Arial, sans-serif" font-size="12" fill="#111827">Vevő</text>
+  <text x="316" y="688" font-family="Arial, sans-serif" font-size="11" fill="#111827">Név: Teszt Vevő</text>
+  <text x="316" y="672" font-family="Arial, sans-serif" font-size="10" fill="#111827">Cím: 1111 Budapest, Teszt utca 1.</text>
+  <text x="316" y="656" font-family="Arial, sans-serif" font-size="10" fill="#111827">Email: teszt@example.com</text>
+  <text x="316" y="640" font-family="Arial, sans-serif" font-size="10" fill="#111827">Telefon: +36 1 234 567</text>
+  <text x="316" y="624" font-family="Arial, sans-serif" font-size="10" fill="#111827">Cég: -</text>
+
+  <text x="48" y="600" font-family="Arial, sans-serif" font-size="10" fill="#111827">Fizetés módja: Bankkártyás fizetés (bemutató)</text>
+  <text x="290" y="600" font-family="Arial, sans-serif" font-size="10" fill="#111827">Szállítás módja: Házhozszállítás</text>
+  <text x="48" y="584" font-family="Arial, sans-serif" font-size="10" fill="#111827">Vevő adószám: -</text>
+
+  <rect x="36" y="566" width="523" height="24" fill="#2e3d61"/>
+  <text x="48" y="573" font-family="Arial Black, Arial, sans-serif" font-size="10" fill="#ffffff">Megnevezés</text>
+  <text x="320" y="573" font-family="Arial Black, Arial, sans-serif" font-size="10" fill="#ffffff">Menny.</text>
+  <text x="382" y="573" font-family="Arial Black, Arial, sans-serif" font-size="10" fill="#ffffff">Egységár</text>
+  <text x="460" y="573" font-family="Arial Black, Arial, sans-serif" font-size="10" fill="#ffffff">Bruttó</text>
+
+  <g font-family="Arial, sans-serif" font-size="10" fill="#111827">
+    <rect x="36" y="546" width="523" height="20" fill="#e8edf5"/>
+    <text x="48" y="552">Radiátor szelep</text>
+    <text x="326" y="552">2 db</text>
+    <text x="380" y="552">1 000 Ft</text>
+    <text x="458" y="552">2 000 Ft</text>
+    <rect x="36" y="524" width="523" height="20" fill="#f1f5f9"/>
+    <text x="48" y="530">Kondenzációs kazán bekötő készlet</text>
+    <text x="326" y="530">1 db</text>
+    <text x="380" y="530">18 990 Ft</text>
+    <text x="458" y="530">18 990 Ft</text>
+    <rect x="36" y="502" width="523" height="20" fill="#e8edf5"/>
+    <text x="48" y="508">Alupex cső 16x2 mm</text>
+    <text x="326" y="508">3 db</text>
+    <text x="380" y="508">2 890 Ft</text>
+    <text x="458" y="508">8 670 Ft</text>
+  </g>
+
+  <rect x="300" y="364" width="259" height="90" fill="#f1f5f9" stroke="#c7d0dd"/>
+  <text x="314" y="428" font-family="Arial, sans-serif" font-size="11" fill="#111827">Nettó: 23 354 Ft</text>
+  <text x="314" y="410" font-family="Arial, sans-serif" font-size="11" fill="#111827">Áfa (27%): 6 306 Ft</text>
+  <text x="314" y="388" font-family="Arial Black, Arial, sans-serif" font-size="13" fill="#111827">Fizetendő végösszeg: 29 660 Ft</text>
+
+  <text x="36" y="60" font-family="Arial, sans-serif" font-size="9" fill="#475569">Köszönjük a vásárlást! Ez a dokumentum webshop bizonylat.</text>
+</svg>
