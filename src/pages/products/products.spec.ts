@@ -55,7 +55,7 @@ describe('Products component logic', () => {
       { navigate: async () => true } as never,
       { getProductsStream: () => () => undefined } as never,
       { getOrdersStream: () => () => undefined } as never,
-      { success: () => undefined } as never,
+      { success: () => undefined, error: () => undefined, info: () => undefined } as never,
       { toggleWishlist: () => true, isInWishlist: () => false } as never,
       { getActivePackagesStream: () => () => undefined } as never,
       { run: (fn: () => void) => fn() } as never,
@@ -64,6 +64,20 @@ describe('Products component logic', () => {
 
     return { component, added };
   }
+
+  const testInstallerPackage = {
+    id: 'pkg-1',
+    name: 'Teszt csomag',
+    subtitle: '',
+    description: '',
+    isActive: true,
+    items: [
+      { productSku: 'FUT-1', quantity: 4, label: 'Radiator szelep' },
+      { productSku: 'FUT-2', quantity: 1, label: 'Futesi termosztat' },
+      { productSku: 'FUT-3', quantity: 2, label: 'Kazanhazi golyoscsap' },
+      { productSku: 'SZER-1', quantity: 2, label: 'Menettomito szalag' }
+    ]
+  };
 
   it('marks product as out of stock when quantity is 0', () => {
     const { component } = createComponent();
@@ -90,6 +104,8 @@ describe('Products component logic', () => {
 
   it('builds an installer package from available matching products', () => {
     const { component } = createComponent();
+    component.installerPackages = [testInstallerPackage] as never;
+    component.selectedInstallerPackageId = 'pkg-1';
     component.products = [
       product({ id: 1, name: 'Radiator szelep', sku: 'FUT-1', category: 'Futes', stockQuantity: 10, price: 3000 }),
       product({ id: 2, name: 'Futesi termosztat', sku: 'FUT-2', category: 'Futes', stockQuantity: 3, price: 12000 }),
@@ -105,6 +121,8 @@ describe('Products component logic', () => {
 
   it('adds installer package items to cart with package quantities', () => {
     const { component, added } = createComponent();
+    component.installerPackages = [testInstallerPackage] as never;
+    component.selectedInstallerPackageId = 'pkg-1';
     component.products = [
       product({ id: 1, name: 'Radiator szelep', sku: 'FUT-1', category: 'Futes', stockQuantity: 10, price: 3000 }),
       product({ id: 2, name: 'Futesi termosztat', sku: 'FUT-2', category: 'Futes', stockQuantity: 3, price: 12000 }),
