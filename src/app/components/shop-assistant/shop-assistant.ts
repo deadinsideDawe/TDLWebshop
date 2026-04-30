@@ -27,19 +27,19 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
   sending = false;
   userInput = '';
   settingsOpen = false;
-  llmModel = 'gpt-4.1-mini';
+  llmModel = 'openrouter/free';
   messages: ChatMessage[] = [
     {
       role: 'assistant',
-      text: 'Szia! Leírod, mire keresel megoldást? Például: "fűtés 15000 Ft alatt" vagy "cső, szerelvény".'
+      text: 'Szia! A TDL Webshop termékei alapján tudok ajánlani, és épületgépészeti kérdésekben is segítek.'
     }
   ];
 
   quickQuestions = [
-    'Fűtés 15000 Ft alatt',
-    'Hűtéshez keresek terméket',
-    'Vízszereléshez kellene ajánlat',
-    'Szellőzéshez mutass top termékeket'
+    'Milyen klímát ajánlasz egy 25 m2-es szobába?',
+    'Milyen termék kell radiátor bekötéshez?',
+    'Mutass vízszerelési termékeket 15000 Ft alatt',
+    'Milyen szellőztetést ajánlasz fürdőszobába?'
   ];
 
   private products: Product[] = [];
@@ -52,6 +52,10 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
     private monitoringService: MonitoringService,
     private router: Router
   ) {}
+
+  get assistantModeLabel(): string {
+    return this.chatbotLlmService.isConfigured() ? 'AI mód aktív' : 'Helyi katalógus mód';
+  }
 
   ngOnInit(): void {
     this.llmModel = this.chatbotLlmService.getModel();
@@ -91,7 +95,7 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
 
   async send(): Promise<void> {
     const input = this.userInput.trim();
-    if (!input) {
+    if (!input || this.sending) {
       return;
     }
 
@@ -101,7 +105,7 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
     if (this.loadingProducts) {
       this.messages.push({
         role: 'assistant',
-        text: 'A terméklista még töltődik, kérlek próbáld meg 1-2 másodperc múlva.'
+        text: 'A terméklista még töltődik, kérlek próbáld meg pár másodperc múlva.'
       });
       return;
     }
@@ -134,7 +138,7 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
       });
       this.messages.push({
         role: 'assistant',
-        text: `Az AI kapcsolat most nem elérhető, ezért helyi ajánlót használok. ${fallbackReply.text}`,
+        text: `Az AI kapcsolat most nem elérhető, ezért a helyi katalógus alapján válaszolok. ${fallbackReply.text}`,
         products: fallbackReply.suggestedProducts
       });
     } finally {
@@ -157,7 +161,7 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
     this.chatbotLlmService.setModel(this.llmModel);
     this.messages.push({
       role: 'assistant',
-      text: 'AI modell beállítás mentve. A kapcsolat most szerver oldali proxyval fut.'
+      text: 'AI modell beállítás mentve. Az API kulcs továbbra sem kerül a böngészőbe.'
     });
     this.settingsOpen = false;
   }

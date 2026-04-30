@@ -10,12 +10,14 @@ import { CustomerDirectoryService } from '../../app/services/customer-directory.
 import { InvoiceService } from '../../app/services/invoice.service';
 import { NewsService } from '../../app/services/news.service';
 import { NewsletterService } from '../../app/services/newsletter.service';
+import { InstallerPackageService } from '../../app/services/installer-package.service';
 import { Order } from '../../app/models/order.model';
 import { Product } from '../../app/models/product.model';
 import { UserProfile } from '../../app/models/user-profile.model';
 import { CustomerProfile } from '../../app/models/customer-profile.model';
 import { NewsItem } from '../../app/models/news.model';
 import { NewsletterSubscriber } from '../../app/models/newsletter-subscriber.model';
+import { InstallerPackage } from '../../app/models/installer-package.model';
 import { environment } from '../../environments/environment';
 import { CartItem } from '../../app/services/cart.service';
 import { ToastService } from '../../app/services/toast.service';
@@ -169,6 +171,19 @@ export class Admin implements OnInit, OnDestroy {
   csvImportSummary = '';
   csvImportErrors: string[] = [];
   csvImportPreview: Product[] = [];
+  installerPackages: InstallerPackage[] = [];
+  installerPackagesLoading = true;
+  installerPackageError = '';
+  installerPackageSaving = false;
+  installerPackageDeletingId: string | null = null;
+  editingInstallerPackageId: string | null = null;
+  installerPackageName = '';
+  installerPackageSubtitle = '';
+  installerPackageDescription = '';
+  installerPackageIsActive = true;
+  installerPackageItems: Array<{ productSku: string; quantity: number; label: string }> = [
+    { productSku: '', quantity: 1, label: '' }
+  ];
   deletingProductId: string | null = null;
   deleteProductConfirmOpen = false;
   deleteAllProductsConfirmOpen = false;
@@ -285,6 +300,7 @@ export class Admin implements OnInit, OnDestroy {
   private unsubscribeNews?: () => void;
   private unsubscribeNewsletter?: () => void;
   private unsubscribeLogs?: () => void;
+  private unsubscribeInstallerPackages?: () => void;
   private authSubscription?: Subscription;
   private loadingFallbackTimer?: ReturnType<typeof setTimeout>;
   private lastAdminUserId = '';
@@ -299,6 +315,7 @@ export class Admin implements OnInit, OnDestroy {
     private invoiceService: InvoiceService,
     private newsService: NewsService,
     private newsletterService: NewsletterService,
+    private installerPackageService: InstallerPackageService,
     private toastService: ToastService,
     private monitoringService: MonitoringService,
     private ngZone: NgZone,
@@ -467,6 +484,29 @@ export class Admin implements OnInit, OnDestroy {
       }
     );
 
+    if (this.canManageProducts()) {
+      this.unsubscribeInstallerPackages = this.installerPackageService.getAllPackagesStream(
+        items => {
+          this.ngZone.run(() => {
+            this.installerPackages = items;
+            this.installerPackagesLoading = false;
+            this.installerPackageError = '';
+            this.cdr.detectChanges();
+          });
+        },
+        error => {
+          this.ngZone.run(() => {
+            console.error(error);
+            this.installerPackagesLoading = false;
+            this.installerPackageError = 'A szerelői csomagok betöltése nem sikerült.';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+    } else {
+      this.installerPackagesLoading = false;
+    }
+
     if (this.auth.isCurrentUserAdmin()) {
       this.unsubscribeNewsletter = this.newsletterService.getSubscribersStream(
         items => {
@@ -546,6 +586,10 @@ export class Admin implements OnInit, OnDestroy {
 
     if (this.unsubscribeLogs) {
       this.unsubscribeLogs();
+    }
+
+    if (this.unsubscribeInstallerPackages) {
+      this.unsubscribeInstallerPackages();
     }
 
     this.authSubscription?.unsubscribe();
@@ -867,6 +911,120 @@ export class Admin implements OnInit, OnDestroy {
     }
   }
 
+  addInstallerPackageItem(): void {
+    this.installerPackageItems.push({ productSku: '', quantity: 1, label: '' });
+  }
+
+  removeInstallerPackageItem(index: number): void {
+    if (this.installerPackageItems.length === 1) {
+      this.installerPackageItems = [{ productSku: '', quantity: 1, label: '' }];
+      return;
+    }
+
+    this.installerPackageItems.splice(index, 1);
+  }
+
+  async saveInstallerPackage(): Promise<void> {
+    this.installerPackageError = '';
+
+    if (!this.auth.isCurrentUserAdmin()) {
+      this.installerPackageError = 'Szerelői csomag mentéséhez admin jogosultság kell.';
+      return;
+    }
+
+    const name = this.installerPackageName.trim();
+    const subtitle = this.installerPackageSubtitle.trim();
+    const description = this.installerPackageDescription.trim();
+    const items = this.installerPackageItems
+      .map(item => ({
+        productSku: item.productSku.trim(),
+        quantity: Math.max(1, Math.round(Number(item.quantity) || 1)),
+        label: item.label.trim()
+      }))
+      .filter(item => !!item.productSku);
+
+    if (!name || items.length === 0) {
+      this.installerPackageError = 'Adj meg csomagnevet és legalább egy terméket.';
+      return;
+    }
+
+    this.installerPackageSaving = true;
+
+    try {
+      const payload: InstallerPackage = {
+        name,
+        subtitle,
+        description,
+        isActive: this.installerPackageIsActive,
+        items
+      };
+
+      if (this.editingInstallerPackageId) {
+        await this.installerPackageService.updatePackage(this.editingInstallerPackageId, payload);
+        this.toastService.success('Szerelői csomag frissítve', name);
+      } else {
+        await this.installerPackageService.addPackage(payload);
+        this.toastService.success('Szerelői csomag létrehozva', name);
+      }
+
+      this.resetInstallerPackageForm();
+    } catch (error) {
+      console.error(error);
+      this.installerPackageError = normalizeErrorMessage(error, 'A szerelői csomag mentése nem sikerült.');
+      this.toastService.error('Csomag mentése sikertelen', this.installerPackageError);
+    } finally {
+      this.installerPackageSaving = false;
+    }
+  }
+
+  startEditInstallerPackage(item: InstallerPackage): void {
+    this.editingInstallerPackageId = item.id || null;
+    this.installerPackageName = item.name || '';
+    this.installerPackageSubtitle = item.subtitle || '';
+    this.installerPackageDescription = item.description || '';
+    this.installerPackageIsActive = item.isActive !== false;
+    this.installerPackageItems = (item.items || []).length > 0
+      ? item.items.map(line => ({
+        productSku: line.productSku || '',
+        quantity: Math.max(1, Number(line.quantity) || 1),
+        label: line.label || ''
+      }))
+      : [{ productSku: '', quantity: 1, label: '' }];
+  }
+
+  async deleteInstallerPackage(item: InstallerPackage): Promise<void> {
+    if (!item.id || !this.auth.isCurrentUserAdmin()) {
+      return;
+    }
+
+    this.installerPackageDeletingId = item.id;
+    this.installerPackageError = '';
+
+    try {
+      await this.installerPackageService.deletePackage(item.id);
+      this.toastService.success('Szerelői csomag törölve', item.name);
+
+      if (this.editingInstallerPackageId === item.id) {
+        this.resetInstallerPackageForm();
+      }
+    } catch (error) {
+      console.error(error);
+      this.installerPackageError = normalizeErrorMessage(error, 'A szerelői csomag törlése nem sikerült.');
+      this.toastService.error('Csomag törlése sikertelen', this.installerPackageError);
+    } finally {
+      this.installerPackageDeletingId = null;
+    }
+  }
+
+  resetInstallerPackageForm(): void {
+    this.editingInstallerPackageId = null;
+    this.installerPackageName = '';
+    this.installerPackageSubtitle = '';
+    this.installerPackageDescription = '';
+    this.installerPackageIsActive = true;
+    this.installerPackageItems = [{ productSku: '', quantity: 1, label: '' }];
+  }
+
   startEditNews(item: NewsItem): void {
     // A kiválasztott hir adatait visszatoltom az urlapba.
     this.editingNewsId = item.id || null;
@@ -1110,9 +1268,9 @@ export class Admin implements OnInit, OnDestroy {
   downloadCsvTemplate(): void {
     // Mintafajl letoltes: ebbe csak be kell masolni a termekeket.
     const template = [
-      'name;price;category;image;stock;stockQuantity;brand;sku;shortDescription;description;isWeeklyDeal;isTopProduct;salePercent',
-      'Termék minta 1;12990;Fűtés;products/radiator-szelep.jpg;Készleten;12;TDL;TDL-FUT-100;Rövid leírás;Hosszabb termékleírás;false;true;10',
-      'Termék minta 2;5990;Víz;products/golyoscsap.jpg;Készleten;25;TDL;TDL-VIZ-100;Rövid leírás;Hosszabb termékleírás;true;false;0'
+      'name;price;category;image;galleryImages;stock;stockQuantity;brand;sku;shortDescription;description;isWeeklyDeal;isTopProduct;salePercent;saleStartsAt;saleEndsAt',
+      'Termék minta 1;12990;Fűtés;products/radiator-szelep.jpg;products/radiator-szelep.jpg|products/padlofutes-cso.jpg;Készleten;12;TDL;TDL-FUT-100;Rövid leírás;Hosszabb termékleírás;false;true;10;0;0',
+      'Termék minta 2;5990;Víz;products/golyoscsap.jpg;;Készleten;25;TDL;TDL-VIZ-100;Rövid leírás;Hosszabb termékleírás;true;false;0;0;0'
     ].join('\n');
 
     this.downloadTextFile(template, 'termek-import-minta.csv');
@@ -1160,31 +1318,22 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   private parseCsv(content: string): string[][] {
-    // Egyszeru CSV parser pontosvesszo/vesszo delimiter tamogatassal.
-    // Idézőjeles mezőket is kezel, így termékleírásban szereplő vessző nem töri szét a sort.
+    // Teljes CSV parser: az idézőjeles, több soros termékleírásokat is egy mezőben tartja.
     const rows: string[][] = [];
     const normalized = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = normalized.split('\n').filter(line => line.trim() !== '');
-    if (lines.length === 0) {
+    const firstLine = normalized.split('\n').find(line => line.trim() !== '');
+    if (!firstLine) {
       return rows;
     }
 
-    const delimiter = lines[0].includes(';') ? ';' : ',';
-    for (const line of lines) {
-      rows.push(this.parseCsvLine(line, delimiter));
-    }
-
-    return rows;
-  }
-
-  private parseCsvLine(line: string, delimiter: string): string[] {
-    const cells: string[] = [];
+    const delimiter = firstLine.includes(';') ? ';' : ',';
     let current = '';
+    let row: string[] = [];
     let inQuotes = false;
 
-    for (let index = 0; index < line.length; index += 1) {
-      const char = line[index];
-      const next = line[index + 1];
+    for (let index = 0; index < normalized.length; index += 1) {
+      const char = normalized[index];
+      const next = normalized[index + 1];
 
       if (char === '"') {
         if (inQuotes && next === '"') {
@@ -1197,7 +1346,17 @@ export class Admin implements OnInit, OnDestroy {
       }
 
       if (!inQuotes && char === delimiter) {
-        cells.push(current.trim());
+        row.push(current.trim());
+        current = '';
+        continue;
+      }
+
+      if (!inQuotes && char === '\n') {
+        row.push(current.trim());
+        if (row.some(cell => cell !== '')) {
+          rows.push(row);
+        }
+        row = [];
         current = '';
         continue;
       }
@@ -1205,8 +1364,14 @@ export class Admin implements OnInit, OnDestroy {
       current += char;
     }
 
-    cells.push(current.trim());
-    return cells;
+    if (current !== '' || row.length > 0) {
+      row.push(current.trim());
+      if (row.some(cell => cell !== '')) {
+        rows.push(row);
+      }
+    }
+
+    return rows;
   }
 
   private normalizeCsvHeader(header: string): string {
@@ -1237,6 +1402,7 @@ export class Admin implements OnInit, OnDestroy {
     const priceRaw = getValue('price', 'ar');
     const category = getValue('category', 'kategoria');
     const image = getValue('image', 'kep', 'kepurl');
+    const galleryImagesRaw = getValue('galleryimages', 'galeriakepek', 'tovabbikepek');
     const stockRaw = getValue('stock', 'keszletstatusz', 'statusz') || 'Keszleten';
     const stockQtyRaw = getValue('stockquantity', 'keszletdb', 'db');
     const brand = getValue('brand', 'marka');
@@ -1246,6 +1412,8 @@ export class Admin implements OnInit, OnDestroy {
     const isWeeklyDealRaw = getValue('isweeklydeal', 'hetiajanlat');
     const isTopProductRaw = getValue('istopproduct', 'toptermek');
     const salePercentRaw = getValue('salepercent', 'akciosszazalek');
+    const saleStartsAtRaw = getValue('salestartsat', 'akciakezdete');
+    const saleEndsAtRaw = getValue('saleendsat', 'akciavege');
 
     const price = Number(priceRaw);
     if (!name) {
@@ -1275,6 +1443,15 @@ export class Admin implements OnInit, OnDestroy {
 
     const stockQuantity = Math.max(0, Number(stockQtyRaw || 0) || 0);
     const salePercent = Math.max(0, Math.min(95, Number(salePercentRaw || 0) || 0));
+    const saleStartsAt = Number(saleStartsAtRaw || 0) || 0;
+    const saleEndsAt = Number(saleEndsAtRaw || 0) || 0;
+    const images = Array.from(new Set([
+      image,
+      ...galleryImagesRaw
+        .split('|')
+        .map(item => item.trim())
+        .filter(Boolean)
+    ]));
 
     return {
       name,
@@ -1290,7 +1467,9 @@ export class Admin implements OnInit, OnDestroy {
       isWeeklyDeal: this.parseBoolean(isWeeklyDealRaw),
       isTopProduct: this.parseBoolean(isTopProductRaw),
       salePercent,
-      images: [image]
+      saleStartsAt,
+      saleEndsAt,
+      images
     };
   }
 
@@ -2450,6 +2629,12 @@ export class Admin implements OnInit, OnDestroy {
       const brand = (product.brand || '').toLowerCase();
       return name.includes(term) || sku.includes(term) || category.includes(term) || brand.includes(term);
     });
+  }
+
+  getInstallerPackageProductLabel(productSku: string): string {
+    const normalizedSku = productSku.trim().toLowerCase();
+    const product = this.products.find(item => (item.sku || '').toLowerCase() === normalizedSku);
+    return product ? `${product.name} (${product.sku})` : productSku;
   }
 
   getSalesChannelLabel(channel?: string): string {

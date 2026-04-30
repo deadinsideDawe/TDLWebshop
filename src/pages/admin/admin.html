@@ -179,6 +179,81 @@
         </div>
       </section>
 
+      <section class="local-sale-card csv-import-card">
+        <h4>Szerelői csomagok</h4>
+        <p class="info-text">Itt állítható össze kézzel, hogy egy profi/szerelői csomag pontosan melyik termékekből álljon.</p>
+
+        <div class="local-sale-grid">
+          <div class="field-group">
+            <label>Csomag neve</label>
+            <input [(ngModel)]="installerPackageName" placeholder="pl. Fűtési alapcsomag">
+          </div>
+          <div class="field-group">
+            <label>Alcím</label>
+            <input [(ngModel)]="installerPackageSubtitle" placeholder="pl. Kazánházi és radiátoros munkákhoz">
+          </div>
+          <label class="checkbox-line">
+            <input type="checkbox" [(ngModel)]="installerPackageIsActive">
+            Aktív csomag (megjelenik a termékoldalon)
+          </label>
+        </div>
+
+        <div class="field-group">
+          <label>Leírás</label>
+          <textarea class="local-sale-note" [(ngModel)]="installerPackageDescription" placeholder="Rövid magyarázat, mire ajánlott a csomag."></textarea>
+        </div>
+
+        <div class="mini-list">
+          <div class="mini-row package-edit-row" *ngFor="let line of installerPackageItems; let i = index">
+            <select [(ngModel)]="line.productSku">
+              <option value="">Termék kiválasztása</option>
+              <option *ngFor="let product of products" [value]="product.sku">
+                {{ product.name }} ({{ product.sku }})
+              </option>
+            </select>
+            <input type="number" min="1" [(ngModel)]="line.quantity" placeholder="db">
+            <input [(ngModel)]="line.label" placeholder="Csomagelem megnevezése">
+            <button class="btn delete-btn" type="button" (click)="removeInstallerPackageItem(i)">Sor törlése</button>
+          </div>
+        </div>
+
+        <div class="product-admin-actions">
+          <button class="btn edit-btn" type="button" (click)="addInstallerPackageItem()">Új sor</button>
+          <button class="btn btn-secondary" type="button" (click)="saveInstallerPackage()" [disabled]="installerPackageSaving">
+            {{ installerPackageSaving ? 'Mentés...' : (editingInstallerPackageId ? 'Csomag frissítése' : 'Csomag mentése') }}
+          </button>
+          <button class="btn cancel-btn" type="button" *ngIf="editingInstallerPackageId" (click)="resetInstallerPackageForm()">
+            Szerkesztés megszakítása
+          </button>
+        </div>
+
+        <p class="error-box" *ngIf="installerPackageError">{{ installerPackageError }}</p>
+        <p class="info-text" *ngIf="installerPackagesLoading">Szerelői csomagok betöltése...</p>
+
+        <div class="mini-list" *ngIf="!installerPackagesLoading && installerPackages.length > 0">
+          <div class="mini-row news-row" *ngFor="let package of installerPackages">
+            <div>
+              <strong>{{ package.name }}</strong>
+              <span>{{ package.isActive === false ? 'Inaktív' : 'Aktív' }} - {{ package.items.length }} tétel</span>
+              <small *ngFor="let line of package.items.slice(0, 4)">
+                {{ line.quantity }} db - {{ getInstallerPackageProductLabel(line.productSku) }}
+              </small>
+            </div>
+            <div class="product-admin-actions">
+              <button class="btn edit-btn" type="button" (click)="startEditInstallerPackage(package)">Szerkesztés</button>
+              <button
+                class="btn delete-btn"
+                type="button"
+                (click)="deleteInstallerPackage(package)"
+                [disabled]="installerPackageDeletingId === package.id"
+              >
+                {{ installerPackageDeletingId === package.id ? 'Törlés...' : 'Törlés' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div class="products-toolbar">
         <label>Termék keresés</label>
         <input [(ngModel)]="productSearchTerm" placeholder="Keresés név, cikkszám, kategória vagy márka alapján">
@@ -938,32 +1013,34 @@
             <p *ngIf="order.pricing">Fizetési díj: {{ order.pricing.paymentFee }} Ft</p>
             <p *ngIf="order.pricing && order.pricing.discount > 0">Kedvezmény: -{{ order.pricing.discount }} Ft</p>
             <p>Végösszeg: {{ order.total }} Ft</p>
-            <button
-              class="btn details-btn"
-              type="button"
-              (click)="downloadOrderInvoice(order)"
-              [disabled]="invoiceLoadingId === order.id"
-            >
-              {{ invoiceLoadingId === order.id ? 'Számla generálása...' : 'Számla letöltése' }}
-            </button>
-            <a class="btn edit-btn compact-action-btn" [href]="getOrderEmailHref(order)">
-              Email sablon
-            </a>
-            <div class="status-editor">
-              <span>Állapot: <strong>{{ order.status }}</strong></span>
+            <div class="order-action-row">
               <button
-                class="btn edit-btn"
+                class="btn details-btn compact-action-btn"
                 type="button"
-                (click)="requestOrderStatusChange(order)"
-                [disabled]="orderStatusLoadingId === order.id"
+                (click)="downloadOrderInvoice(order)"
+                [disabled]="invoiceLoadingId === order.id"
               >
-                {{ orderStatusLoadingId === order.id ? 'Mentés...' : 'Állapot módosítása' }}
+                {{ invoiceLoadingId === order.id ? 'Számla generálása...' : 'Számla letöltése' }}
               </button>
+              <a class="btn edit-btn compact-action-btn" [href]="getOrderEmailHref(order)">
+                Email sablon
+              </a>
+              <div class="status-editor order-status-editor">
+                <span>Állapot: <strong>{{ order.status }}</strong></span>
+                <button
+                  class="btn edit-btn compact-action-btn"
+                  type="button"
+                  (click)="requestOrderStatusChange(order)"
+                  [disabled]="orderStatusLoadingId === order.id"
+                >
+                  {{ orderStatusLoadingId === order.id ? 'Mentés...' : 'Állapot módosítása' }}
+                </button>
+              </div>
             </div>
             <p>Szállítási cím: {{ order.shipping.zip }}, {{ order.shipping.city }}, {{ order.shipping.address }}</p>
             <p *ngIf="order.appliedCoupon">Kupon: {{ order.appliedCoupon.code }} - {{ order.appliedCoupon.description }}</p>
             <p *ngIf="!order.appliedCoupon && order.couponCode">Kupon: {{ order.couponCode }}</p>
-            <button class="btn details-btn" type="button" (click)="openOrderDetails(order)">
+            <button class="btn details-btn compact-action-btn" type="button" (click)="openOrderDetails(order)">
               Rendelés részletei
             </button>
           </article>

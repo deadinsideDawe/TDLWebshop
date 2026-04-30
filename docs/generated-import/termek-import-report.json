@@ -1,0 +1,9 @@
+{
+  "input": "C:\\Users\\Dell\\Downloads\\termek-import-azonnali-feltolteshez.xlsx",
+  "output_xlsx": "C:\\Users\\Dell\\webshop\\docs\\generated-import\\termek-import-vegleges.xlsx",
+  "output_csv": "C:\\Users\\Dell\\webshop\\docs\\generated-import\\termek-import-vegleges.csv",
+  "processed_rows": 60,
+  "missing_images": [
+    "products/futes/ariston_kazan_4.jpg"
+  ]
+}

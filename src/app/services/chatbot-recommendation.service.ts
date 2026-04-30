@@ -24,15 +24,15 @@ export class ChatbotRecommendationService {
 
     if (filtered.length === 0) {
       return {
-        text: 'Ehhez a kéréshez most nem találtam pontos találatot. Próbáld meg kategóriával vagy árkerettel (pl. "fűtés 15000 Ft alatt").',
+        text: 'Ehhez a kéréshez most nem találtam pontos katalógus-találatot. Próbáld meg kategóriával vagy árkerettel, például: "fűtés 15000 Ft alatt".',
         suggestedProducts: []
       };
     }
 
     const first = filtered[0];
     const text = maxBudget !== null
-      ? `Ez alapján ezeket javaslom ${maxBudget} Ft alatt. A legerősebb találat: ${first.name}.`
-      : `Ez alapján ezeket javaslom. A legerősebb találat: ${first.name}.`;
+      ? `A katalógus alapján ezeket javaslom ${maxBudget} Ft alatt. A legerősebb találat: ${first.name}.`
+      : `A katalógus alapján ezeket javaslom. A legerősebb találat: ${first.name}.`;
 
     return {
       text,
@@ -71,12 +71,12 @@ export class ChatbotRecommendationService {
 
   private detectCategory(normalizedMessage: string): string | null {
     const categoryMap: Array<[string, string[]]> = [
-      ['futes', ['futes', 'radiator', 'kazan', 'termosztat', 'padlofutes']],
-      ['hutes', ['hutes', 'klima', 'fan', 'kondenz']],
-      ['viz', ['viz', 'csap', 'szuro', 'nyomasmero', 'cso']],
-      ['szellozes', ['szellozes', 'legtechnika', 'legcsatorna', 'anemosztat']],
-      ['szerelveny', ['szerelveny', 'idom', 'szelep', 't idom']],
-      ['lakossagi', ['lakossagi', 'otthoni', 'haztartasi']]
+      ['futes', ['futes', 'radiator', 'kazan', 'termosztat', 'padlofutes', 'bojler', 'melegviz']],
+      ['hutes', ['hutes', 'klima', 'legkondi', 'mobilklima', 'split', 'kondenz']],
+      ['viz', ['viz', 'csap', 'csaptelep', 'szuro', 'nyomasmero', 'mosdo', 'wc', 'kad', 'zuhany']],
+      ['szellozes', ['szellozes', 'legtechnika', 'legcsatorna', 'ventilator', 'hovisszanyero', 'paratlanito']],
+      ['szerelveny', ['szerelveny', 'idom', 'szelep', 'tagulasi', 'press', 'alpex']],
+      ['lakossagi', ['lakossagi', 'otthoni', 'haztartasi', 'furdo', 'kiegeszito', 'tukor']]
     ];
 
     for (const [category, keywords] of categoryMap) {
@@ -89,7 +89,7 @@ export class ChatbotRecommendationService {
   }
 
   private extractBudget(normalizedMessage: string): number | null {
-    const regex = /(\d{3,6})\s*(ft|forint|alatt)?/i;
+    const regex = /(\d{3,7})\s*(ft|forint|alatt)?/i;
     const match = normalizedMessage.match(regex);
     if (!match) {
       return null;
