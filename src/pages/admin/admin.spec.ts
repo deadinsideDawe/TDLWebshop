@@ -10,21 +10,22 @@ describe('Admin helper logic', () => {
       ensureInvoiceForOrder: async () => ({ invoiceNumber: 'INV-1', invoicedAt: Date.now() })
     };
 
-    const component = new Admin(
-      { queryParamMap: { subscribe: () => ({ unsubscribe: () => undefined }) } } as never,
-      { isCurrentUserAdmin: () => true, getUser: () => ({ uid: 'u1', email: 'admin@tdlwebshop.hu' }) } as never,
-      { getProductsStream: () => () => undefined, updateProduct: async () => undefined, deleteProduct: async () => undefined, addProduct: async () => undefined, seedProductsIfEmpty: async () => true } as never,
-      orderServiceStub as never,
-      { getUsersStream: () => () => undefined, updateUserProfile: async () => undefined } as never,
-      { getProfilesStream: () => () => undefined, createProfile: async () => 'p1', updateProfile: async () => undefined, touchProfile: async () => undefined } as never,
-      { downloadInvoicePdf: () => undefined } as never,
-      { getAllNewsStream: () => () => undefined } as never,
-      { getSubscribersStream: () => () => undefined } as never,
-      { success: () => undefined, error: () => undefined, info: () => undefined } as never,
-      { capture: () => undefined, getRecentLogsStream: () => () => undefined } as never,
-      { run: (fn: () => void) => fn() } as never,
-      { detectChanges: () => undefined } as never
-    );
+   const component = new Admin(
+  { queryParamMap: { subscribe: () => ({ unsubscribe: () => undefined }) } } as never,
+  { isCurrentUserAdmin: () => true, getUser: () => ({ uid: 'u1', email: 'admin@tdlwebshop.hu' }) } as never,
+  { getProductsStream: () => () => undefined, updateProduct: async () => undefined, deleteProduct: async () => undefined, addProduct: async () => undefined, seedProductsIfEmpty: async () => true } as never,
+  orderServiceStub as never,
+  { getUsersStream: () => () => undefined, updateUserProfile: async () => undefined } as never,
+  { getProfilesStream: () => () => undefined, createProfile: async () => 'p1', updateProfile: async () => undefined, touchProfile: async () => undefined } as never,
+  { downloadInvoicePdf: () => undefined } as never,
+  { getAllNewsStream: () => () => undefined } as never,
+  { getSubscribersStream: () => () => undefined } as never,   // newsletterService (9.)
+  { getAllPackagesStream: () => () => undefined } as never,    // installerPackageService (10.) ← EZT ADD BE
+  { success: () => undefined, error: () => undefined, info: () => undefined } as never,  // toastService (11.)
+  { capture: () => undefined, getRecentLogsStream: () => () => undefined } as never,     // monitoringService (12.)
+  { run: (fn: () => void) => fn() } as never,                 // ngZone (13.)
+  { detectChanges: () => undefined } as never                 // cdr (14.)
+);
 
     return { component, orderServiceStub };
   }

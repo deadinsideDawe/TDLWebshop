@@ -57,6 +57,7 @@ describe('Products component logic', () => {
       { getOrdersStream: () => () => undefined } as never,
       { success: () => undefined } as never,
       { toggleWishlist: () => true, isInWishlist: () => false } as never,
+      { getActivePackagesStream: () => () => undefined } as never,
       { run: (fn: () => void) => fn() } as never,
       { detectChanges: () => undefined } as never
     );
