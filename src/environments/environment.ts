@@ -2,7 +2,7 @@
 // Itt tartjuk az admin email listat, keszlet warning kuszobot es Firebase configot.
 export const environment = {
   production: false,
-  aiAssistantEndpoint: '',
+  aiAssistantEndpoint: 'http://127.0.0.1:5001/tdlwebshop/europe-west1/aiAssistant',
   invoiceIssuer: {
     name: 'TDL Webshop',
     address: '1111 Budapest, Minta utca 10.',

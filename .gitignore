@@ -8,6 +8,7 @@
 
 # Node
 /node_modules
+functions/node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -34,6 +35,15 @@ yarn-error.log
 .sass-cache/
 /connect.lock
 /coverage
+/docs/tmp/
+/render-temp/
+/render_temp_docx/
+/render_temp_docx_final/
+/docs/_segedanyagok/tmp_render/
+/docs/*_render/
+/docs/vazlat_render*/
+/docs/tdlwebshop_szakdolgozat_render/
+~$*.docx
 /libpeerconnection.log
 testem.log
 /typings
@@ -48,6 +58,7 @@ Thumbs.db
 .env.local
 .env.development
 .env.production
+!.env.example
 
 # Firebase
 .firebase/

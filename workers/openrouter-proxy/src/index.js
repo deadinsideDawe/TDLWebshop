@@ -1,5 +1,5 @@
 // Cloudflare Worker proxy a TDL Webshop AI segitohoz.
-// A fajlba nem kerulhet valodi OpenRouter API kulcs.
+// Valodi OpenRouter API kulcs nem kerulhet ebbe a fajlba.
 // A kulcsot Cloudflare secretkent kell beallitani: OPENROUTER_API_KEY.
 
 const ALLOWED_ORIGINS = new Set([
@@ -50,7 +50,7 @@ function isDomainQuestion(message) {
     'futes', 'hutes', 'klima', 'viz', 'vizszereles', 'szellozes', 'legtechnika', 'legcsatorna',
     'kazan', 'bojler', 'radiator', 'termosztat', 'padlofutes', 'csap', 'csaptelep', 'mosdo', 'wc',
     'kad', 'zuhany', 'szelep', 'idom', 'alpex', 'press', 'ventilator', 'hovisszanyero', 'paratlanito',
-    'furdo', 'lakossagi', 'szereles', 'szerelo'
+    'furdo', 'lakossagi', 'szereles', 'szerelo', 'szigeteles', 'hoszigeteles'
   ];
 
   return domainWords.some(word => normalizedMessage.includes(normalize(word)));
@@ -103,12 +103,13 @@ function buildSystemPrompt() {
     'A webshop futes, hutes, vizszereles, szellozes, szerelveny es lakossagi termekekkel foglalkozik.',
     'Termeket kizarolag a megadott katalogusreszletbol ajanlhatsz.',
     'Arat, keszletet, cikkszamot es konkret termeket nem talalhatsz ki.',
-    'Ha nincs pontos termektalalat, adj rovid szakmai iranyt, majd kerj egy pontosito adatot.',
+    'Ha a katalogusreszlet ures, vagy nincs benne a kerdeshez pontosan illo termek, ne adj vissza productNames/productSkus erteket.',
+    'Ilyenkor adj rovid szakmai iranyt, es ird oda, hogy pontos ajanlatert vagy beszerezhetosegert erdemes emailben vagy szemelyesen felkeresni az uzletet.',
     'Szerelesi, gaz vagy villamos biztonsagi kerdesnel jelezd, hogy szakember ellenorzese szukseges.',
     'Nem epuletgepeszeti vagy nem webshopos kerdesre udvariasan utasitsd el a valaszt.',
     'A valasz mindig ervenyes JSON legyen, pontosan ilyen mezokkel:',
     '{"text":"rovid magyar valasz","productNames":["termeknev"],"productSkus":["cikkszam"]}',
-    'Maximum 4 termeket adj vissza.'
+    'Maximum 4 termeket adj vissza, de csak akkor, ha azok kozvetlenul illenek a kerdeshez.'
   ].join('\n');
 }
 

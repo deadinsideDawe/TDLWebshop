@@ -1,89 +1,173 @@
-# TDL Épületgépészeti Webshop
+# TDL Epuletgepeszeti Webshop
 
-> Szakdolgozati projekt - kisebb épületgépészeti vállalkozásoknak tervezett webshop rendszer.
+Szakdolgozati projektkent keszult epuletgepeszeti webshop es adminisztracios rendszer. A cel egy olyan termekszeru MVP megvalositasa volt, amelyben a vasarloi rendelesi folyamat es a belso admin/dolgozoi folyamatok egyutt mukodnek.
 
-## Egy mondatos leírás
-Ez a rendszer egy olyan épületgépészeti webshopot valósít meg, ahol a vásárlók gyorsan tudnak terméket keresni és rendelni, az admin pedig valós időben kezeli a készletet, rendeléseket és kiemelt tartalmakat.
+## Rovid leiras
 
-## Fő funkciók
-- vásárlói felület: főoldal, kategóriák, terméklista, termék részletek, kosár, checkout
-- Firebase Auth alapú bejelentkezés és regisztráció
-- profilkezelés és saját rendelések megtekintése
-- admin panel: termékek, készlet, rendelések, felhasználók, főoldali hírek
-- Firestore alapú valós adatok (termékek, rendelések, felhasználói profilok)
-- helyszíni vásárlás rögzítése és PDF bizonylat készítés
-- kuponlogika és akciós termék kezelés (időablak + kedvezmény százalék)
-- világos/sötét mód és reszponzív megjelenés
+A TDLWebshop epuletgepeszeti termekeket kezelo webaruhaz. A vasarlok termekeket bongeszhetnek, kosarba helyezhetik azokat, rendelest adhatnak le, majd profiljukban kovethetik a korabbi rendeleseiket. Az admin es dolgozoi oldal termekkezelest, keszletfigyelest, rendeleskezelest, vasarlokezelest, helyszini ertekesitest, kuponokat es PDF bizonylat/szamla generalast tamogat.
 
-## Technológiai stack
-- frontend: Angular (standalone komponensek), TypeScript, HTML, CSS
-- backend szolgáltatások: Firebase Spark kompatibilis használat (Auth, Firestore, Hosting)
-- adatkezelés: Firestore + lokális kosár (localStorage)
+## Fo funkciok
 
-## Gyors indítás lokálisan
-### 1) Elvárt környezet
-- Node.js: `>=20 <23` (a projekt erre van beállítva)
-- npm: a Node verzióhoz tartozó alap npm
+- Vasarloi felulet: kezdolap, kategoriak, termeklista, termekadatlap, kosar, checkout.
+- Regisztracio es bejelentkezes Firebase Auth segitsegevel.
+- Profil oldal korabbi rendelesekhez es felhasznaloi adatokhoz.
+- Admin felulet termekekhez, keszlethez, rendelesekhez, vasarlokhoz, kuponokhoz es hirekhez.
+- Dolgozoi jogosultsag: helyszini rendeles, keszlet es termekkezeles korlatozott admin jogokkal.
+- Helyszini vasarlas rogzitese mentett vasarlokkal es PDF bizonylattal.
+- Kuponlogika es akcios termekek kezelese.
+- Keszletfigyeles es alacsony keszlet jelzese.
+- Vasarloi AI asszisztens sajat termekkatalogus-kontextussal, OpenRouter proxyval.
+- Vilagos/sotet mod es reszponziv felulet.
 
-### 2) Telepítés
+## Technologiai stack
+
+- Frontend: Angular standalone komponensek, TypeScript, HTML, CSS.
+- Adattarolas es auth: Firebase Auth, Firestore, Firebase Hosting.
+- PDF generalas: kliensoldali bizonylat/szamla generalas.
+- AI proxy: Cloudflare Worker + OpenRouter.
+- CI: GitHub Actions build ellenorzes.
+
+## Lokalis futtatas
+
+### Elofeltetelek
+
+- Node.js: javasolt `20.x` vagy `22.x` LTS.
+- npm.
+- Firebase projekt, ha sajat adatbazissal szeretned futtatni.
+
+### Telepites
+
 ```bash
 npm install
 ```
 
-### 3) Fejlesztői futtatás
+### Fejlesztoi inditas
+
 ```bash
 npm start
 ```
 
-Alapértelmezett cím:
-`http://localhost:4200`
+Alapertelmezett cim:
 
-## Build és ellenőrzés
+```text
+http://localhost:4200
+```
+
+### Build
+
 ```bash
 npm run build
+```
+
+### Tesztek
+
+```bash
 npm test -- --watch=false
 ```
 
-## Firebase deploy (ha szükséges)
+## Firebase deploy
+
+Hosting deploy:
+
 ```bash
-npm run deploy:spark
+firebase deploy --only hosting
 ```
 
-Firestore szabály módosításakor külön futtatható:
+Firestore szabalyok deploy:
+
 ```bash
-npm run deploy:rules
+firebase deploy --only firestore:rules
 ```
 
-Megjegyzés: a projekt az alap Firebase Spark csomaggal futtatható. Cloud Functions deploy nincs bekötve az alap deployba, mert ahhoz fizetős Blaze csomag kellene.
+Az alap projekt Firebase Spark kompatibilis mukodesre keszult. A `functions/` mappa opcion is tovabbfejlesztesi irany, de a fo deploy folyamat nem igenyel Cloud Functions hasznalatot.
 
-## Hosted verzió
-- élő URL: [https://tdlwebshop.web.app](https://tdlwebshop.web.app)
+## AI asszisztens es OpenRouter proxy
 
-## Projektstruktúra (röviden)
+Az AI asszisztens nem tarol OpenRouter API kulcsot a frontend kodban. A bongeszo egy Cloudflare Worker proxyt hiv, a Worker pedig szerveroldali secretkent eri el az OpenRouter kulcsot.
+
+Fontos:
+
+- OpenRouter API kulcsot tilos Angular kornyezeti fajlba vagy frontend kodba irni.
+- A kulcsot Cloudflare Worker secretkent kell beallitani.
+- A frontendben csak a Worker publikus URL-je szerepelhet.
+- A modellvalasztas nem allithato a vasarloi feluleten.
+
+Reszletes leiras:
+
+- [docs/ai-asszisztens-openrouter.md](docs/ai-asszisztens-openrouter.md)
+- [workers/openrouter-proxy/README.md](workers/openrouter-proxy/README.md)
+
+## Kornyezeti valtozok es titkok
+
+A repoban nem szerepelhet valodi jelszo, token vagy privat API kulcs. A szukseges mintak az `.env.example` fajlban talalhatok.
+
+Megjegyzesek:
+
+- A Firebase web app config onmagaban nem klasszikus titok, de a Firestore szabalyoknak vedeniuk kell az adatokat.
+- Demo belepesi adatokat nem erdemes a repoba commitolni.
+- Valodi `.env` fajl, API kulcs, token, `node_modules`, build mappa es lokalis cache nem kerulhet a vegleges repoba.
+
+## Demo szerepkorok
+
+A demo belepesi adatok nem szerepelnek a kodban. A beadashoz es bemutatohoz kulon, privat csatornan erdemes megadni:
+
+- admin felhasznalo,
+- dolgozoi felhasznalo,
+- vasarloi felhasznalo.
+
+## Projektstruktura
+
 ```text
 src/
   app/
-    services/
-    guards/
     components/
+    guards/
+    models/
+    services/
   pages/
-    home/
-    products/
-    product-details/
+    admin/
     cart/
     checkout/
+    contact/
+    home/
+    product-details/
+    products/
     profile/
-    admin/
+    wishlist/
+workers/
+  openrouter-proxy/
 docs/
-  ux/
-functions/  # opcionális továbbfejlesztés Blaze csomag esetén
+  01_product/
+  02_architecture/
+  04_quality/
+  05_security_ops/
+  06_release/
+  07_ai/
+public/
+  products/
+scripts/
+functions/
 ```
 
-## Dokumentáció
-- UX dokumentáció: [docs/ux/README.md](docs/ux/README.md)
-- Szakdolgozati funkció összefoglaló: [docs/thesis-feature-summary.md](docs/thesis-feature-summary.md)
-- Védési kérdés-válasz jegyzet: [docs/thesis-defense-notes.md](docs/thesis-defense-notes.md)
-- Bemutató forgatókönyv: [docs/demo-script.md](docs/demo-script.md)
-- Végső manuális ellenőrző lista: [docs/final-manual-checklist.md](docs/final-manual-checklist.md)
-- Regressziós ellenőrző lista: [docs/testing/regression-checklist.md](docs/testing/regression-checklist.md)
-- Projektterv: [project_plan.md](project_plan.md)
+## Dokumentacio
+
+- Dokumentacios index: [docs/00_index.md](docs/00_index.md)
+- Javitott szakdolgozati alap: [docs/TDLWebshop_szakdolgozat_javitott_alap.docx](docs/TDLWebshop_szakdolgozat_javitott_alap.docx)
+- Leadando checklist: [docs/leadando_checklist.md](docs/leadando_checklist.md)
+- MVP brief: [docs/01_product/mvp_brief.md](docs/01_product/mvp_brief.md)
+- Piaci elemzes: [docs/01_product/piaci_elemzes.md](docs/01_product/piaci_elemzes.md)
+- Kovetelmenyek: [docs/01_product/kovetelmenyek_traceability.md](docs/01_product/kovetelmenyek_traceability.md)
+- Use case-ek: [docs/01_product/use_cases.md](docs/01_product/use_cases.md)
+- UX kepernyospecifikacio: [docs/ux/ux_screen_spec.md](docs/ux/ux_screen_spec.md)
+- Modulok es interfeszek: [docs/02_architecture/modules_interfaces.md](docs/02_architecture/modules_interfaces.md)
+- Konzulensi visszajelzes szerinti allapot: [docs/konzulensi-visszajelzes-megfeleles.md](docs/konzulensi-visszajelzes-megfeleles.md)
+- Abra-, kepernyokep- es kodreszlet-terv: [docs/abra_es_kod_kepernyokep_terv.md](docs/abra_es_kod_kepernyokep_terv.md)
+- Tesztelesi fejezet: [docs/testing-thesis-section.md](docs/testing-thesis-section.md)
+- Reprodukcios README: [docs/reprodukcios_README.md](docs/reprodukcios_README.md)
+- AI hasznalat: [docs/07_ai/ai-usage-thesis-section.md](docs/07_ai/ai-usage-thesis-section.md)
+
+## Elo verzio
+
+Firebase Hosting:
+
+[https://tdlwebshop.web.app](https://tdlwebshop.web.app)

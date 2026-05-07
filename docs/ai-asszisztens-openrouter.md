@@ -1,43 +1,45 @@
 # TDL Webshop AI asszisztens OpenRouterrel
 
-Ez a megoldás úgy épül fel, hogy az Angular alkalmazás nem tartalmaz API kulcsot. A felhasználó kérdése és a releváns termékkatalógus-részlet egy szerveroldali proxyhoz kerül, a proxy pedig OpenRouteren keresztül kéri le az AI választ.
+Az AI asszisztens ugy epul fel, hogy az Angular alkalmazas nem tartalmaz OpenRouter API kulcsot. A felhasznalo kerdese es a relevans termekkatalogus-reszlet egy szerveroldali proxyhoz kerul, a proxy pedig meghivja az OpenRouter API-t.
+
+## Miert nem Firebase Function az elso eles irany?
+
+A Firebase projekt jelenleg Spark csomagon van. A Firebase Functions secret kezeleshez a Firebase Blaze csomagot ker, ezert az ingyenesebb eles megoldas a Cloudflare Worker proxy.
+
+## Eles mukodes
+
+1. A frontend csak a publikus proxy URL-t ismeri.
+2. A valodi OpenRouter kulcs Cloudflare secretkent szerepel.
+3. A felhasznalo nem valaszthat modellt a feluleten.
+4. A modell szerveroldalon van beallitva, alapertelmezetten: `openrouter/auto`.
 
 ## Mit tud az asszisztens?
 
-- A Firestore-ból betöltött termékek alapján ajánl termékeket.
-- Figyelembe veszi a kategóriát, nevet, cikkszámot, készletet és árat.
-- Épületgépészeti kérdésekre is tud rövid szakmai választ adni.
-- Ha nincs beállítva AI proxy, a webshop helyi katalógus-alapú ajánlóra vált vissza.
+- A Firestore-bol betoltott termekek alapjan ajanl termekeket.
+- Figyelembe veszi a kategoriat, nevet, cikkszamot, keszletet es arat.
+- Epuletgepeszeti kerdesekre rovid, ovatos szakmai valaszt ad.
+- Nem epuletgepeszeti kerdesnel jelzi, hogy csak webshopos es szakmai temaban tud segiteni.
+- Termeket csak a megadott katalogusreszletbol ajanlhat.
 
-## Miért kell proxy?
+## Beuzemeles roviden
 
-Az OpenRouter API kulcsot nem szabad frontend kódban tárolni, mert a böngészőből bárki ki tudná olvasni. Ezért a kulcs egy Cloudflare Worker titkos változójaként szerepel, az Angular alkalmazás pedig csak a Worker publikus URL-jét ismeri.
+1. Hozz letre uj OpenRouter kulcsot.
+2. A kulcsot ne ird be fajlba es ne kuldd el chatben.
+3. A Worker mappaban allitsd be secretkent:
 
-## Beüzemelés röviden
+```powershell
+cd workers/openrouter-proxy
+npx wrangler login
+npx wrangler secret put OPENROUTER_API_KEY
+npx wrangler deploy
+```
 
-1. Hozz létre egy Cloudflare Worker projektet.
-2. Másold be a Worker kódját innen:
-   `docs/deployment/openrouter-worker.js`
-3. Állítsd be a Worker secretet:
-   `OPENROUTER_API_KEY`
-4. Opcionális környezeti változó:
-   `OPENROUTER_MODEL=openrouter/free`
-5. A Worker URL-jét írd be az Angular környezeti fájlba:
-   `src/environments/environment.prod.ts`
-
-Példa:
+4. A deploy utan kapott Worker URL-t ird be a production endpoint helyere:
 
 ```ts
-aiAssistantEndpoint: 'https://tdl-ai-assistant.sajat-nev.workers.dev',
+aiAssistantEndpoint: 'https://tdlwebshop-ai.<sajat-subdomain>.workers.dev'
 ```
 
-Ezután:
+## Fontos leadasi megjegyzes
 
-```bash
-npm run build
-firebase deploy --only hosting
-```
-
-## Fontos leadási megjegyzés
-
-A repóba ne kerüljön valódi OpenRouter kulcs. Ha dokumentálni kell a működést, csak azt írd le, hogy a kulcs a Worker secret tárolójában van, és a frontend kizárólag a proxy endpointot hívja.
+A repoba ne keruljon valodi OpenRouter kulcs. Ha dokumentalni kell a mukodest, csak azt kell leirni, hogy a kulcs szerveroldali secretkent van tarolva, es a frontend kizarolag a proxy endpointot hivja.

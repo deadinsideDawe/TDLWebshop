@@ -26,8 +26,6 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
   loadingProducts = true;
   sending = false;
   userInput = '';
-  settingsOpen = false;
-  llmModel = 'openrouter/free';
   messages: ChatMessage[] = [
     {
       role: 'assistant',
@@ -58,8 +56,6 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.llmModel = this.chatbotLlmService.getModel();
-
     this.unsubscribeProducts = this.productService.getProductsStream(
       products => {
         this.products = products;
@@ -155,14 +151,5 @@ export class ShopAssistantComponent implements OnInit, OnDestroy {
 
     await this.router.navigate(['/products'], { queryParams: { search: product.name } });
     this.close();
-  }
-
-  saveLlmSettings(): void {
-    this.chatbotLlmService.setModel(this.llmModel);
-    this.messages.push({
-      role: 'assistant',
-      text: 'AI modell beállítás mentve. Az API kulcs továbbra sem kerül a böngészőbe.'
-    });
-    this.settingsOpen = false;
   }
 }

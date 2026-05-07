@@ -1,7 +1,7 @@
 // Production kornyezeti valtozok.
 export const environment = {
   production: true,
-  aiAssistantEndpoint: '',
+  aiAssistantEndpoint: 'https://tdlwebshop-ai.toth-davidlaszlo19971020.workers.dev',
   invoiceIssuer: {
     name: 'TDL Webshop',
     address: '1111 Budapest, Minta utca 10.',

@@ -1,0 +1,7 @@
+name = "tdlwebshop-ai"
+main = "src/index.js"
+compatibility_date = "2026-05-05"
+
+[vars]
+SITE_URL = "https://tdlwebshop.web.app"
+OPENROUTER_MODEL = "openrouter/auto"
