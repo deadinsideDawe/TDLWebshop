@@ -15,6 +15,8 @@ Ez a dokumentacios csomag a TDL Webshop szakdolgozati projekt legfontosabb terme
 | Teszteles es validacio | [teszteles-validacio-osszefoglalo.md](teszteles-validacio-osszefoglalo.md), [testing/regression-checklist.md](testing/regression-checklist.md) | kidolgozva, manualis teszteles kozben pipalando |
 | Reprodukalhatosag | [reprodukcios_README.md](reprodukcios_README.md), [../README.md](../README.md), [../.env.example](../.env.example) | kidolgozva |
 | MI-hasznalat dokumentalasa | [07_ai/ai-usage-thesis-section.md](07_ai/ai-usage-thesis-section.md), [07_ai/ai_manifest.md](07_ai/ai_manifest.md) | kidolgozva, sajat hangra athuzando |
+| Szakdolgozati fejezetvaz, kepernyokepek es kodreszletek | [szakdolgozat_fejezetvaz_kepernyokep_kodterv.md](szakdolgozat_fejezetvaz_kepernyokep_kodterv.md) | friss osszefoglalo, sajat stilusra athuzando |
+| Holnapi zaro munkamenet | [holnapi_zaro_munkacsomag.md](holnapi_zaro_munkacsomag.md) | pipalhato, 8:00-13:00 munkaterv |
 
 ## 01 Product
 
@@ -60,6 +62,8 @@ Ez a dokumentacios csomag a TDL Webshop szakdolgozati projekt legfontosabb terme
 - [Keszultsegi scorecard](06_release/scorecard.md)
 - [Konzulensi visszajelzes szerinti megfeleles](konzulensi-visszajelzes-megfeleles.md)
 - [Zarasi audit es heti teendok](00_zarasi_audit_es_teendok.md)
+- [Holnapi zaro munkacsomag](holnapi_zaro_munkacsomag.md)
+- [Szakdolgozati fejezetvaz, kepernyokep- es kodterv](szakdolgozat_fejezetvaz_kepernyokep_kodterv.md)
 - [Abra-, kepernyokep- es kodreszlet-terv](abra_es_kod_kepernyokep_terv.md)
 - [Leadando checklist](leadando_checklist.md)
 - [Javitott szakdolgozati Word-alap](TDLWebshop_szakdolgozat_javitott_alap.docx)

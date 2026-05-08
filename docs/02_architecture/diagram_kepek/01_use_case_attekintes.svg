@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980" role="img" aria-label="1. Use case attekintes">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <linearGradient id="blueRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1500" height="980" fill="#f8fafc"/>
+  <rect x="18" y="18" width="1464" height="944" rx="18" fill="#ffffff" stroke="#dbeafe"/>
+  <text x="46" y="64" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">1. Use case attekintes</text>
+  <line x1="46" y1="84" x2="1454" y2="84" stroke="url(#blueRed)" stroke-width="4"/>
+  
+  
+  <rect x="70" y="140" width="230" height="90" rx="12" fill="#f8fafc" stroke="#64748b" stroke-width="2" filter="url(#shadow)"/>
+  <text x="86" y="168" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Vendeg vasarlo</text>
+  <text x="86" y="198" font-family="Arial, sans-serif" font-size="14" fill="#475569">Regisztracio nelkul is</text><text x="86" y="215" font-family="Arial, sans-serif" font-size="14" fill="#475569">bongeszhet es rendelhet</text>
+  
+  <rect x="70" y="290" width="230" height="90" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="86" y="318" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Regisztralt vasarlo</text>
+  <text x="86" y="348" font-family="Arial, sans-serif" font-size="14" fill="#475569">Profil, rendelestortenet es</text><text x="86" y="365" font-family="Arial, sans-serif" font-size="14" fill="#475569">kivansaglista</text>
+  
+  <rect x="70" y="470" width="230" height="90" rx="12" fill="#ecfeff" stroke="#0891b2" stroke-width="2" filter="url(#shadow)"/>
+  <text x="86" y="498" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Dolgozo</text>
+  <text x="86" y="528" font-family="Arial, sans-serif" font-size="14" fill="#475569">Helyszini eladas, keszlet es</text><text x="86" y="545" font-family="Arial, sans-serif" font-size="14" fill="#475569">termekfeltoltes</text>
+  
+  <rect x="70" y="650" width="230" height="90" rx="12" fill="#fff1f2" stroke="#dc2626" stroke-width="2" filter="url(#shadow)"/>
+  <text x="86" y="678" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Admin</text>
+  <text x="86" y="708" font-family="Arial, sans-serif" font-size="14" fill="#475569">Teljes adminisztracio es</text><text x="86" y="725" font-family="Arial, sans-serif" font-size="14" fill="#475569">jogosultsagkezeles</text>
+
+  
+  <rect x="430" y="120" width="260" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="446" y="148" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Termekek bongeszese</text>
+  
+  
+  <rect x="430" y="225" width="260" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="446" y="253" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Kosar es checkout</text>
+  
+  
+  <rect x="430" y="330" width="260" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="446" y="358" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">AI asszisztens</text>
+  
+  
+  <rect x="430" y="455" width="260" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="446" y="483" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Helyszini vasarlas</text>
+  
+  
+  <rect x="430" y="560" width="260" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="446" y="588" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Keszlet megtekintese</text>
+  
+  
+  <rect x="430" y="665" width="260" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="446" y="693" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Termekfeltoltes</text>
+  
+
+  
+  <rect x="830" y="130" width="280" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="846" y="158" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Rendeleskezeles</text>
+  
+  
+  <rect x="830" y="250" width="280" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="846" y="278" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Profil es statuszkovetes</text>
+  
+  
+  <rect x="830" y="370" width="280" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="846" y="398" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Kuponok es akciok</text>
+  
+  
+  <rect x="830" y="490" width="280" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="846" y="518" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Felhasznalok kezelese</text>
+  
+  
+  <rect x="830" y="610" width="280" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="846" y="638" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">Mentett vasarlok kezelese</text>
+  
+  
+  <rect x="830" y="730" width="280" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+  <text x="846" y="758" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#0f172a">PDF szamla/bizonylat</text>
+  
+
+  
+  <line x1="300" y1="185" x2="430" y2="160" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="185" x2="430" y2="265" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="335" x2="430" y2="265" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="335" x2="430" y2="370" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="515" x2="430" y2="495" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="515" x2="430" y2="600" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="515" x2="430" y2="705" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="695" x2="830" y2="170" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="695" x2="830" y2="410" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="300" y1="695" x2="830" y2="530" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="690" y1="265" x2="830" y2="170" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+  
+  <line x1="690" y1="495" x2="830" y2="770" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  
+
+</svg>

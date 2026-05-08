@@ -23,7 +23,7 @@ service cloud.firestore {
     }
 
     function isActiveUser() {
-      // Tiltott user tokennel se tudjon Ă­rni, de Ăşj regisztrĂˇciĂłnĂˇl mĂ©g nincs user doc.
+      // Tiltott felhasználó érvényes tokennel se tudjon írni, új regisztrációnál viszont még nincs user dokumentum.
       return isSignedIn()
         && (
           !userDocExists()

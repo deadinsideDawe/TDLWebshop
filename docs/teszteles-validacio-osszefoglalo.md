@@ -1,86 +1,86 @@
-# Teszteles es validacio osszefoglalo
+# Tesztelés és validáció összefoglaló
 
-Ez a dokumentum a konzulensi mintacsomag `10_teszteles_validacio_sablon.md` tartalmahoz igazodik. A cel az, hogy a kritikus webshop- es adminfolyamatok mukodese bizonyithato legyen automatikus es manualis ellenorzesekkel.
+Ez a dokumentum a konzulensi mintacsomag `10_teszteles_validacio_sablon.md` tartalmához igazodik. A cél az, hogy a kritikus webshop- és adminfolyamatok működése bizonyítható legyen automatikus és manuális ellenőrzésekkel.
 
-## 1. Automatikus ellenorzesek
+## 1. Automatikus ellenőrzések
 
-| Ellenorzes | Parancs | Mit bizonyit? | Aktualis elvart eredmeny |
+| Ellenőrzés | Parancs | Mit bizonyít? | Aktuális elvárt eredmény |
 |---|---|---|---|
-| Angular build | `npm run build` | a projekt lefordul production buildre | sikeres build |
-| Unit/komponens tesztek | `npm test -- --watch=false` | kritikus service es komponens logika | sikeres tesztfutas |
-| GitHub CI | GitHub Actions / CI workflow | tiszta kornyezetben is ellenorizheto a projekt | zold CI run |
+| Angular build | `npm run build` | A projekt lefordul production buildre. | Sikeres build |
+| Unit/komponens tesztek | `npm test -- --watch=false` | Kritikus service és komponens logika. | Sikeres tesztfutás |
+| GitHub CI | GitHub Actions / CI workflow | Tiszta környezetben is ellenőrizhető a projekt. | Zöld CI run |
 
-Legutobbi ellenorzesi cel: a build es a tesztek hibamentesen fussanak, az AI asszisztenshez kapcsolodo uj tesztek pedig ellenorizzek, hogy az asszisztens nem ajanl random termeket irrelevans vagy nem talalt kerdesre.
+Legutóbbi ellenőrzési cél: a build és a tesztek hibamentesen fussanak, az AI asszisztenshez kapcsolódó új tesztek pedig ellenőrizzék, hogy az asszisztens nem ajánl random terméket irreleváns vagy nem talált kérdésre.
 
-Legutobbi lokalis futtatas eredmenye:
+Legutóbbi lokális futtatás eredménye:
 
-| Datum | Parancs | Eredmeny | Megjegyzes |
+| Dátum | Parancs | Eredmény | Megjegyzés |
 |---|---|---|---|
-| 2026-05-05 | `npm run build` | sikeres | Angular build keszult a `dist/webshop` mappaba |
-| 2026-05-05 | `npm test -- --watch=false` | 14 test file / 40 test passed | Node `v25.8.0` LTS figyelmeztetes megjelent, ezert leadashoz `20.x` vagy `22.x` javasolt |
+| 2026-05-08 | `npm run build` | Sikeres | Angular build készült a `dist/webshop` mappába. |
+| 2026-05-08 | `npm test -- --watch=false` | 14 tesztfájl / 41 sikeres teszt / 0 hiba | Lokálisan Node `v25.8.0` LTS figyelmeztetés megjelent, ezért leadáshoz és CI-hez Node 22 javasolt. |
 
-## 2. Kiemelt tesztteruletek
+## 2. Kiemelt tesztterületek
 
-| ID | Terulet | Ellenorzes | Tipus | Kapcsolodo kovetelmeny |
+| ID | Terület | Ellenőrzés | Típus | Kapcsolódó követelmény |
 |---|---|---|---|---|
-| TC-01 | Termeklista | kategoria, kereses, akcios termek megjelenes | manualis | FK-01 |
-| TC-02 | Kosar | termek hozzaadasa, mennyiseg modositas, torles | manualis + unit | FK-02 |
-| TC-03 | Checkout | rendelés leadása valid adatokkal | manualis | FK-03 |
-| TC-04 | Checkout validacio | hibas email/telefon es hianyzo mezok kezelese | manualis | NFK-03 |
-| TC-05 | Profil | korabbi rendelesek es statuszok megjelenese | manualis | FK-04 |
-| TC-06 | Admin termekkezeles | termek letrehozas, modositas, CSV import | manualis | FK-05 |
-| TC-07 | Helyszini vasarlas | mentett vasarlo, termekkereso, PDF/szamla | manualis | FK-06 |
-| TC-08 | Jogosultsag | admin, dolgozo, vasarlo eltero jogok | manualis | FK-07 |
-| TC-09 | Keszlet | rendeles utan keszletvaltozas, alacsony keszlet | manualis | FK-08 |
-| TC-10 | Kupon | ervenyes/ervenytelen kupon es kedvezmeny | manualis | FK-09 |
-| TC-11 | AI asszisztens | domain kerdes, termekajanlas, irrelevans kerdes | automata + manualis | FK-10 |
+| TC-01 | Terméklista | Kategória, keresés, akciós termék megjelenés. | Manuális | FK-01 |
+| TC-02 | Kosár | Termék hozzáadása, mennyiség módosítás, törlés. | Manuális + unit | FK-02 |
+| TC-03 | Checkout | Rendelés leadása valid adatokkal. | Manuális | FK-03 |
+| TC-04 | Checkout validáció | Hibás email/telefon és hiányzó mezők kezelése. | Manuális | NFK-03 |
+| TC-05 | Profil | Korábbi rendelések és státuszok megjelenése. | Manuális | FK-04 |
+| TC-06 | Admin termékkezelés | Termék létrehozás, módosítás, CSV import. | Manuális | FK-05 |
+| TC-07 | Helyszíni vásárlás | Mentett vásárló, termékkereső, PDF/számla. | Manuális | FK-06 |
+| TC-08 | Jogosultság | Admin, dolgozó, vásárló eltérő jogok. | Manuális | FK-07 |
+| TC-09 | Készlet | Rendelés után készletváltozás, alacsony készlet. | Manuális | FK-08 |
+| TC-10 | Kupon | Érvényes/érvénytelen kupon és kedvezmény. | Manuális | FK-09 |
+| TC-11 | AI asszisztens | Domain kérdés, termékajánlás, irreleváns kérdés. | Automata + manuális | FK-10 |
 
-## 3. Vasarloi folyamat manualis tesztje
+## 3. Vásárlói folyamat manuális tesztje
 
-1. Kezdolap betoltese dark es light modban.
-2. Termeklista megnyitasa.
-3. Kategoria es kereses hasznalata.
-4. Termekadatlap megnyitasa.
-5. Termek kosarba helyezese.
-6. Kosarban mennyiseg modositas.
-7. Checkout urlap kitoltese.
-8. Hibas email es telefonszam kiprobalasa.
-9. Ervenyes kupon kiprobalasa.
-10. Rendelés leadasa.
-11. Sikeres rendelés oldal ellenorzese.
-12. Profil oldalon a rendelés megjelenesenek ellenorzese.
+1. Kezdőlap betöltése dark és light módban.
+2. Terméklista megnyitása.
+3. Kategória és keresés használata.
+4. Termékadatlap megnyitása.
+5. Termék kosárba helyezése.
+6. Kosárban mennyiség módosítás.
+7. Checkout űrlap kitöltése.
+8. Hibás email és telefonszám kipróbálása.
+9. Érvényes kupon kipróbálása.
+10. Rendelés leadása.
+11. Sikeres rendelés oldal ellenőrzése.
+12. Profil oldalon a rendelés megjelenésének ellenőrzése.
 
-## 4. Admin/dolgozoi folyamat manualis tesztje
+## 4. Admin/dolgozói folyamat manuális tesztje
 
-1. Admin belepes.
-2. Termek letrehozasa vagy modositas.
-3. CSV import elonezet es mentes.
-4. Keszletlista kategoriara szurese.
-5. Rendelés statuszanak modositasa.
-6. PDF/szamla letoltese.
-7. Mentett vasarlo letrehozasa, szerkesztese, tiltasa.
-8. Helyszini vasarlas rogzitese mentett vasarloval.
-9. Dolgozoi belepessel ellenorzes: csak engedelyezett funkciok latszanak.
-10. Vasarloi belepessel ellenorzes: admin felulet nem erheto el.
+1. Admin belépés.
+2. Termék létrehozása vagy módosítása.
+3. CSV import előnézet és mentés.
+4. Készletlista kategóriára szűrése.
+5. Rendelés státuszának módosítása.
+6. PDF/számla letöltése.
+7. Mentett vásárló létrehozása, szerkesztése, tiltása.
+8. Helyszíni vásárlás rögzítése mentett vásárlóval.
+9. Dolgozói belépéssel ellenőrzés: csak engedélyezett funkciók látszanak.
+10. Vásárlói belépéssel ellenőrzés: admin felület nem érhető el.
 
-## 5. AI asszisztens validacio
+## 5. AI asszisztens validáció
 
-Az AI asszisztensnel kulon fontos, hogy ne keltsen hamis termekajanlasi biztonsagot.
+Az AI asszisztensnél külön fontos, hogy ne keltsen hamis termékajánlási biztonságot.
 
-Ellenorizendo esetek:
+Ellenőrizendő esetek:
 
-- "Milyen klimat ajanlasz egy 25 m2-es szobaba?" - domain kerdes, adhat szakmai iranyt es relevans katalogus talalatot.
-- "Milyen bojler kell egy 6 fos csaladnak?" - szakmai iranyt adhat, de csak akkor ajanl katalogus termeket, ha van relevans bojler a katalogusreszletben.
-- "Hany evig elnek a teknosok?" - nem domain kerdes, udvariasan elutasitja.
-- "Milyen szigetelest ajanlasz?" - ha nincs szigeteles termek a katalogusban, nem ajanl random termeket, hanem egyeztetest javasol.
+- "Milyen klímát ajánlasz egy 25 m2-es szobába?" - domain kérdés, adhat szakmai irányt és releváns katalógus-találatot.
+- "Milyen bojler kell egy 6 fős családnak?" - szakmai irányt adhat, de csak akkor ajánl katalógus terméket, ha van releváns bojler a katalógusrészletben.
+- "Hány évig élnek a teknősök?" - nem domain kérdés, udvariasan elutasítja.
+- "Milyen szigetelést ajánlasz?" - ha nincs szigetelés termék a katalógusban, nem ajánl random terméket, hanem egyeztetést javasol.
 
-## 6. Beadas elotti bizonyitek
+## 6. Beadás előtti bizonyíték
 
-A szakdolgozatba vagy mellekletbe erdemes betenni:
+A szakdolgozatba vagy mellékletbe érdemes betenni:
 
-- GitHub Actions zold CI kepernyokep.
-- `npm run build` sikeres futas kepernyokep vagy szoveges eredmeny.
-- `npm test -- --watch=false` sikeres futas kepernyokep vagy szoveges eredmeny.
-- Checkout sikeres rendelés kepernyokep.
-- Admin rendeleskezeles es PDF/szamla kepernyokep.
-- AI asszisztens domain es nem-domain kerdesre adott valasz kepernyokep.
+- GitHub Actions zöld CI képernyőkép.
+- `npm run build` sikeres futás képernyőkép vagy szöveges eredmény.
+- `npm test -- --watch=false` sikeres futás képernyőkép vagy szöveges eredmény.
+- Checkout sikeres rendelés képernyőkép.
+- Admin rendeléskezelés és PDF/számla képernyőkép.
+- AI asszisztens domain és nem-domain kérdésre adott válasz képernyőkép.
