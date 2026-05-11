@@ -74,6 +74,7 @@ export class OrderService {
         quantity: number;
         previousStock: string;
         delta: number;
+        itemName: string;
       }> = [];
 
       if (shouldAdjustStock) {
@@ -95,13 +96,19 @@ export class OrderService {
             ref: productRef,
             quantity: Math.max(0, Number(productData.stockQuantity) || 0),
             previousStock: productData.stock || 'Keszleten',
-            delta: Math.max(0, Number(item.quantity) || 0) * direction
+            delta: Math.max(0, Number(item.quantity) || 0) * direction,
+            itemName: item.name || item.firestoreId
           });
         }
       }
 
       for (const update of stockUpdates) {
-        const nextQuantity = Math.max(0, update.quantity + update.delta);
+        const nextQuantityRaw = update.quantity + update.delta;
+        if (update.delta < 0 && nextQuantityRaw < 0) {
+          throw new Error(`insufficient-stock:${update.itemName}`);
+        }
+
+        const nextQuantity = Math.max(0, nextQuantityRaw);
         transaction.update(update.ref, {
           stockQuantity: nextQuantity,
           stock: this.resolveStockLabel(nextQuantity, update.previousStock)

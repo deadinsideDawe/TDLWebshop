@@ -9,6 +9,33 @@ const ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:4200'
 ]);
 
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+const rateBuckets = new Map();
+
+function getClientKey(request) {
+  return request.headers.get('CF-Connecting-IP')
+    || request.headers.get('X-Forwarded-For')
+    || request.headers.get('Origin')
+    || 'anonymous';
+}
+
+function isRateLimited(request, env) {
+  const now = Date.now();
+  const maxRequests = Math.max(1, Number(env.RATE_LIMIT_MAX_REQUESTS || RATE_LIMIT_MAX_REQUESTS));
+  const windowMs = Math.max(1000, Number(env.RATE_LIMIT_WINDOW_MS || RATE_LIMIT_WINDOW_MS));
+  const key = getClientKey(request);
+  const bucket = rateBuckets.get(key);
+
+  if (!bucket || now - bucket.startedAt > windowMs) {
+    rateBuckets.set(key, { startedAt: now, count: 1 });
+    return false;
+  }
+
+  bucket.count += 1;
+  return bucket.count > maxRequests;
+}
+
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
   const headers = {
@@ -129,6 +156,15 @@ export default {
 
     if (request.method !== 'POST') {
       return jsonResponse(request, { error: 'method-not-allowed' }, 405);
+    }
+
+    if (isRateLimited(request, env)) {
+      return jsonResponse(request, {
+        error: 'rate-limited',
+        text: 'Tul sok AI keres erkezett rovid idon belul. Kerlek probald ujra kesobb.',
+        productNames: [],
+        productSkus: []
+      }, 429);
     }
 
     if (!env.OPENROUTER_API_KEY) {

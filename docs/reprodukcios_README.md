@@ -67,6 +67,8 @@ Az `.env.example` csak mintat tartalmaz. Valodi jelszo, token vagy privat API ku
 | `NG_APP_AI_ASSISTANT_ENDPOINT` | AI proxy publikus URL-je | Angular environment vagy `.env` |
 | `OPENROUTER_API_KEY` | OpenRouter privat kulcs | Cloudflare Worker secret, nem frontend fajl |
 | `OPENROUTER_MODEL` | szerveroldali modellvalasztas | Cloudflare Worker env valtozo |
+| `RATE_LIMIT_MAX_REQUESTS` | AI proxy percenkenti alap keretszama | Cloudflare Worker env valtozo, opcion |
+| `RATE_LIMIT_WINDOW_MS` | AI proxy rate limit idokerete | Cloudflare Worker env valtozo, opcion |
 
 A Firebase web app config onmagaban nem klasszikus titok, de az adatvedelmet a Firestore biztonsagi szabalyok biztositjak. A dolgozatban ezt kulon erdemes roviden megmagyarazni.
 

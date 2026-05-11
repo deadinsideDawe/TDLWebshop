@@ -53,26 +53,20 @@ service cloud.firestore {
 
     function employeeCanRecordSales() {
       return isEmployee()
-        && (
-          !('employeePermissions' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
-          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeePermissions.canRecordSales == true
-        );
+        && ('employeePermissions' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeePermissions.canRecordSales == true;
     }
 
     function employeeCanManageProducts() {
       return isEmployee()
-        && (
-          !('employeePermissions' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
-          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeePermissions.canManageProducts == true
-        );
+        && ('employeePermissions' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeePermissions.canManageProducts == true;
     }
 
     function employeeCanManageCustomers() {
       return isEmployee()
-        && (
-          !('employeePermissions' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
-          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeePermissions.canManageCustomers == true
-        );
+        && ('employeePermissions' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeePermissions.canManageCustomers == true;
     }
 
     function validProductPayload() {

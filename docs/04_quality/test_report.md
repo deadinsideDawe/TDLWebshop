@@ -1,15 +1,15 @@
 # Test Report
 
-## Környezet
+## Kornyezet
 
-- Operációs rendszer: Windows fejlesztői környezet
+- Operacios rendszer: Windows fejlesztoi kornyezet
 - Frontend: Angular 21
 - Nyelv: TypeScript
-- Backend szolgáltatások: Firebase Authentication, Cloud Firestore, Firebase Hosting
+- Backend szolgaltatasok: Firebase Authentication, Cloud Firestore, Firebase Hosting
 - AI proxy: Cloudflare Worker + OpenRouter
-- CI környezet: GitHub Actions, Node 22
+- CI kornyezet: GitHub Actions, Node 22
 
-## Futtatott ellenőrzések
+## Futtatott ellenorzesek
 
 ### Build
 
@@ -17,50 +17,78 @@
 npm run build
 ```
 
-Eredmény: sikeres build. A build kimenete a `dist/webshop` mappába készült el. Lokálisan Node.js 25 figyelmeztetés jelent meg, mert ez nem LTS verzió; a CI és a javasolt reprodukciós környezet Node 22-t használ.
+Legutobb ellenorizve: 2026-05-11.
 
-### Automatizált tesztek
+Eredmeny: sikeres build. A kimenet a `dist/webshop` mappaba keszult. Lokalisan Node.js 25 kornyezetben figyelmeztetes jelent meg, mert ez nem LTS verzio; a CI es a javasolt reprodukcios kornyezet Node 22-t hasznal.
+
+### Automatizalt tesztek
 
 ```bash
 npm test -- --watch=false
 ```
 
-Legutóbb ellenőrzött eredmény: 2026-05-08.
+Legutobb ellenorizve: 2026-05-11.
 
-- 14 tesztfájl
+- 14 tesztfajl
 - 41 sikeres teszt
 - 0 sikertelen teszt
 
-## Tesztelt területek
+### NPM audit
 
-- kosárlogika és mennyiségkezelés;
-- chatbot szolgáltatás domain- és termékkatalógus-logikája;
-- számla/bizonylat generálás alaplogikája;
-- toast és hibakezelés;
-- űrlap-validátorok;
-- admin oldal fő működése;
-- cart, categories, checkout, contact, home, login és products oldalak alap működése.
+```bash
+npm audit
+npm audit --omit=dev
+```
 
-## Manuális ellenőrzéssel validálandó területek
+Legutobb ellenorizve: 2026-05-11.
 
-- kezdőoldal és design működése dark/light módban;
-- navigáció és kategória dropdown;
-- terméklista, keresés, szűrés, akciós termékek;
-- kívánságlista;
-- profiloldal és rendeléskövetés;
-- checkout validáció és sikeres rendelés;
-- helyszíni vásárlás felvétele;
-- mentett vásárlók kezelése;
-- dolgozói és admin jogosultságok;
-- AI asszisztens domain kérdésre, termékkérdésre és nem releváns kérdésre adott válasza.
+Eredmeny:
+- `npm audit`: 0 ismert serulekenyseg.
+- `npm audit --omit=dev`: 0 ismert production serulekenyseg.
 
-## Ismert hiányosságok
+## Tesztelt teruletek
 
-- Nincs teljes Playwright vagy Cypress alapú end-to-end tesztcsomag.
-- A Firestore és Auth valós integrációinak többsége manuális bizonyítással lett validálva.
-- A teljesítménymérés csak alap szinten dokumentált.
-- A végleges szakdolgozatba még képernyőképekkel kell alátámasztani a fő felhasználói és admin folyamatokat.
+- kosarlogika es mennyisegkezeles;
+- chatbot szolgaltatas domain- es termekkatalogus-logikaja;
+- szamla/bizonylat generalas alaplogikaja;
+- toast es hibakezeles;
+- urlap-validatorok;
+- admin oldal fo mukodese;
+- cart, categories, checkout, contact, home, login es products oldalak alap mukodese;
+- kuponlogika es checkout szamitas;
+- admin statuszvaltas es keszletvaltozas logikai tesztje.
 
-## Következtetés
+## Konzulensi kockazatokra adott valasz
 
-A projekt buildelhető, az automatizált tesztek zöldek, és a fő kliensoldali logikákhoz van regressziós védelem. A beadás szempontjából a legfontosabb maradék feladat a kézi tesztjegyzőkönyv végigpipálása és a GitHub Actions zöld futásának képernyőképes dokumentálása.
+| Kockazat | Kezeles |
+|---|---|
+| Webes rendelesnel keszlethiany teljesiteskor | Az `OrderService` teljesitesi tranzakcioja keszlethiany eseten hibat dob, nem nullara kerekiti a keszletet. |
+| Dolgozoi jogosultsag tul tag alapertelmezesbol | A dolgozo alapbol nem kap automatikus muveleti jogot; az admin explicit adja meg a jogosultsagokat. |
+| Guest profil email-alapu azonosito | A profil id mar nem olvashato email-slug, hanem hash alapu determinisztikus azonosito. |
+| AI proxy visszaeles | A Worker CORS mellett alap rate limitet alkalmaz, es a kulcs tovabbra is szerveroldali secret. |
+| Kliensoldali vegosszeg | MVP-korlatkent dokumentalando; eles tovabbfejleszteskent szerveroldali ar- es kuponellenorzes javasolt. |
+
+## Manualis ellenorzessel validalando teruletek
+
+- kezdooldal es design mukodese dark/light modban;
+- navigacio es kategoria dropdown;
+- termeklista, kereses, szures, akcios termekek;
+- kivansaglista;
+- profiloldal es rendeleskovetes;
+- checkout validacio es sikeres rendeles;
+- helyszini vasarlas felvetele;
+- mentett vasarlok kezelese;
+- dolgozoi es admin jogosultsagok;
+- AI asszisztens domain kerdesre, termekkerdesre es nem relevans kerdesre adott valasza.
+
+## Ismert hianyossagok
+
+- Nincs teljes Playwright vagy Cypress alapu end-to-end tesztcsomag.
+- A Firestore es Auth valos integracioinak tobbsege manualis bizonyitassal validalhato.
+- A teljesitmenymeres csak alap szinten dokumentalt.
+- A vegleges szakdolgozatba meg kepernyokepekkel kell alatamasztani a fo felhasznaloi es admin folyamatokat.
+- A vegleges beadas elott a build/test/audit parancsokat meg egyszer erdemes frissen lefuttatni, hogy a dolgozatban szereplo bizonyitek a leadaskori allapotot mutassa.
+
+## Kovetkeztetes
+
+A projekt buildelheto, az automatizalt tesztek zoldek, es a fo kliensoldali logikakhoz van regresszios vedelem. A 2026-05-11-i ellenorzes alapjan a production audit sem jelzett ismert serulekenyseget. A beadas szempontjabol a legfontosabb maradek feladat a kezi tesztjegyzokonyv vegigpipalasa, a GitHub Actions zold futasanak kepernyokepes dokumentalasa, valamint a bizonyitekok beemelese a dolgozatba.

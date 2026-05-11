@@ -657,7 +657,7 @@ export class Admin implements OnInit, OnDestroy {
     }
 
     return {
-      ...this.getDefaultEmployeePermissions(),
+      ...this.getEmptyEmployeePermissions(),
       ...(this.auth.getProfile()?.employeePermissions || {})
     };
   }
@@ -683,12 +683,13 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   private getDefaultEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    // Uj dolgozo letrehozasakor az admin jeloli ki, pontosan milyen muveleteket vegezhet.
     return {
-      canRecordSales: true,
-      canViewInventory: true,
-      canManageProducts: true,
-      canManageCustomers: true,
-      canDisableCustomers: true
+      canRecordSales: false,
+      canViewInventory: false,
+      canManageProducts: false,
+      canManageCustomers: false,
+      canDisableCustomers: false
     };
   }
 

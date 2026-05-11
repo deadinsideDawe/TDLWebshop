@@ -92,9 +92,9 @@ export class CustomerDirectoryService {
     companyName?: string;
     taxNumber?: string;
   }): Promise<string> {
-    // Vendeg vasarlonak email alapu determinisztikus id-t adunk.
+    // Vendeg vasarlonak determinisztikus, de nem olvashato email-alapu id-t adunk.
     const normalizedEmail = profile.email.trim().toLowerCase();
-    const guestId = `guest_${this.slugifyEmail(normalizedEmail)}`;
+    const guestId = `guest_${await this.hashIdentifier(normalizedEmail)}`;
     const profileRef = doc(db, 'customerProfiles', guestId);
 
     await setDoc(
@@ -165,6 +165,27 @@ export class CustomerDirectoryService {
       .replace(/[^a-z0-9._-]/g, '_')
       .replace(/_+/g, '_')
       .slice(0, 80);
+  }
+
+  private async hashIdentifier(value: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+
+    if (globalThis.crypto?.subtle) {
+      const digest = await globalThis.crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(digest))
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 32);
+    }
+
+    let hash = 2166136261;
+    for (const byte of data) {
+      hash ^= byte;
+      hash = Math.imul(hash, 16777619);
+    }
+
+    return Math.abs(hash).toString(36);
   }
 
   getProfilesStream(

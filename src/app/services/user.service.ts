@@ -168,12 +168,14 @@ export class UserService {
   }
 
   private getDefaultEmployeePermissions(): NonNullable<UserProfile['employeePermissions']> {
+    // Dolgozoi profilnal a jogosultsagokat az admin adja meg explicit modon.
+    // Igy egy uj dolgozo nem kap veletlenul teljesebb hozzaferest.
     return {
-      canRecordSales: true,
-      canViewInventory: true,
-      canManageProducts: true,
-      canManageCustomers: true,
-      canDisableCustomers: true
+      canRecordSales: false,
+      canViewInventory: false,
+      canManageProducts: false,
+      canManageCustomers: false,
+      canDisableCustomers: false
     };
   }
 
