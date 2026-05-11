@@ -24,7 +24,7 @@ A konzulensi visszajelzes alapjan a fo feladat mar nem uj funkciok hozzaadasa, h
 | MVP hatar kimondasa | [01_product/mvp_brief.md](01_product/mvp_brief.md) | kesz | dolgozatba atemelni sajat stilusban |
 | Piaci/teruleti osszehasonlitas | [01_product/piaci_elemzes.md](01_product/piaci_elemzes.md) | kesz | dolgozatba roviditett forma |
 | Kovetelmenyek es use case-ek | [01_product/kovetelmenyek_traceability.md](01_product/kovetelmenyek_traceability.md), [01_product/use_cases.md](01_product/use_cases.md) | kesz | abrakkal kiegeszitheto |
-| GUI/UX bizonyitasa | [ux/ux_screen_spec.md](ux/ux_screen_spec.md), [screenshot-plan.md](screenshot-plan.md) | kesz | kepernyokepek beillesztese |
+| GUI/UX bizonyitasa | [ux/ux_screen_spec.md](ux/ux_screen_spec.md), [ux/screens.csv](ux/screens.csv), [ux/screenshots/README.md](ux/screenshots/README.md) | kesz | kepernyokepek beillesztese |
 | Architektura | [02_architecture/c4_context_container.md](02_architecture/c4_context_container.md), [02_architecture/modules_interfaces.md](02_architecture/modules_interfaces.md) | kesz | dolgozatba abraval |
 | Adatmodell | [adatmodell-osszefoglalo.md](adatmodell-osszefoglalo.md) | kesz | Product, Cart, Order, OrderItem, UserProfile, Coupon, Invoice kiemelese |
 | Biztonsagi minimum | [05_security_ops/security_minimum.md](05_security_ops/security_minimum.md), [05_security_ops/threat_model.md](05_security_ops/threat_model.md) | kesz | manualis jogosultsagi teszt |

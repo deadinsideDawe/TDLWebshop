@@ -161,7 +161,6 @@ functions/
 - UX kepernyospecifikacio: [docs/ux/ux_screen_spec.md](docs/ux/ux_screen_spec.md)
 - Modulok es interfeszek: [docs/02_architecture/modules_interfaces.md](docs/02_architecture/modules_interfaces.md)
 - Konzulensi visszajelzes szerinti allapot: [docs/konzulensi-visszajelzes-megfeleles.md](docs/konzulensi-visszajelzes-megfeleles.md)
-- Abra-, kepernyokep- es kodreszlet-terv: [docs/abra_es_kod_kepernyokep_terv.md](docs/abra_es_kod_kepernyokep_terv.md)
 - Tesztelesi fejezet: [docs/testing-thesis-section.md](docs/testing-thesis-section.md)
 - Reprodukcios README: [docs/reprodukcios_README.md](docs/reprodukcios_README.md)
 - AI hasznalat: [docs/07_ai/ai-usage-thesis-section.md](docs/07_ai/ai-usage-thesis-section.md)

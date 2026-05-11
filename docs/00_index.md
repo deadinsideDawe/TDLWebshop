@@ -9,14 +9,12 @@ Ez a dokumentacios csomag a TDL Webshop szakdolgozati projekt legfontosabb terme
 | Problema, cel, MVP-hatar | [01_product/mvp_brief.md](01_product/mvp_brief.md), [01_product/scope_contract.md](01_product/scope_contract.md) | kidolgozva, sajat stilusra meg athuzando |
 | Piaci / teruleti osszehasonlitas | [01_product/piaci_elemzes.md](01_product/piaci_elemzes.md) | kidolgozva |
 | Kovetelmenyek es use case-ek | [01_product/kovetelmenyek_traceability.md](01_product/kovetelmenyek_traceability.md), [01_product/use_cases.md](01_product/use_cases.md) | kidolgozva |
-| GUI/UX es reszponziv mukodes | [ux/ux_screen_spec.md](ux/ux_screen_spec.md), [screenshot-plan.md](screenshot-plan.md) | kidolgozva, kepernyokepekkel kiegeszitendo |
+| GUI/UX es reszponziv mukodes | [ux/ux_screen_spec.md](ux/ux_screen_spec.md), [ux/screens.csv](ux/screens.csv) | kidolgozva, kepernyokepekkel kiegeszitendo |
 | Architektura es adatmodell | [02_architecture/c4_context_container.md](02_architecture/c4_context_container.md), [02_architecture/modules_interfaces.md](02_architecture/modules_interfaces.md), [adatmodell-osszefoglalo.md](adatmodell-osszefoglalo.md) | kidolgozva |
 | Biztonsag es titokkezeles | [05_security_ops/security_minimum.md](05_security_ops/security_minimum.md), [05_security_ops/threat_model.md](05_security_ops/threat_model.md) | kidolgozva, commit elott ujra ellenorizendo |
 | Teszteles es validacio | [teszteles-validacio-osszefoglalo.md](teszteles-validacio-osszefoglalo.md), [testing/regression-checklist.md](testing/regression-checklist.md) | kidolgozva, manualis teszteles kozben pipalando |
 | Reprodukalhatosag | [reprodukcios_README.md](reprodukcios_README.md), [../README.md](../README.md), [../.env.example](../.env.example) | kidolgozva |
 | MI-hasznalat dokumentalasa | [07_ai/ai-usage-thesis-section.md](07_ai/ai-usage-thesis-section.md), [07_ai/ai_manifest.md](07_ai/ai_manifest.md) | kidolgozva, sajat hangra athuzando |
-| Szakdolgozati fejezetvaz, kepernyokepek es kodreszletek | [szakdolgozat_fejezetvaz_kepernyokep_kodterv.md](szakdolgozat_fejezetvaz_kepernyokep_kodterv.md) | friss osszefoglalo, sajat stilusra athuzando |
-| Holnapi zaro munkamenet | [holnapi_zaro_munkacsomag.md](holnapi_zaro_munkacsomag.md) | pipalhato, 8:00-13:00 munkaterv |
 
 ## 01 Product
 
@@ -62,9 +60,6 @@ Ez a dokumentacios csomag a TDL Webshop szakdolgozati projekt legfontosabb terme
 - [Keszultsegi scorecard](06_release/scorecard.md)
 - [Konzulensi visszajelzes szerinti megfeleles](konzulensi-visszajelzes-megfeleles.md)
 - [Zarasi audit es heti teendok](00_zarasi_audit_es_teendok.md)
-- [Holnapi zaro munkacsomag](holnapi_zaro_munkacsomag.md)
-- [Szakdolgozati fejezetvaz, kepernyokep- es kodterv](szakdolgozat_fejezetvaz_kepernyokep_kodterv.md)
-- [Abra-, kepernyokep- es kodreszlet-terv](abra_es_kod_kepernyokep_terv.md)
 - [Leadando checklist](leadando_checklist.md)
 - [Javitott szakdolgozati Word-alap](TDLWebshop_szakdolgozat_javitott_alap.docx)
 
@@ -81,10 +76,5 @@ Ez a dokumentacios csomag a TDL Webshop szakdolgozati projekt legfontosabb terme
 - [Adatmodell osszefoglalo](adatmodell-osszefoglalo.md)
 - [Reprodukcios README](reprodukcios_README.md)
 - [Funkcioosszefoglalo](thesis-feature-summary.md)
-- [Vedesi jegyzetek](thesis-defense-notes.md)
 - [Demo script](demo-script.md)
-- [Kepernyokepek terve](screenshot-plan.md)
-- [Abrafeliratok](figure-captions.md)
 - [Jogosultsagi tablazat](role-system-table.md)
-- [Sajat nyelvezetre atirando fajlok](files-to-personalize.md)
-- [Segedanyagok es munkapeldanyok](./_segedanyagok/README.md)

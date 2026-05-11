@@ -64,14 +64,14 @@ Ezek hasznosak a munka kozben, de ne keveredjenek a beadando bizonyito anyagok k
 - termekimport sablonok, ha mar a vegleges import megtortent,
 - szemelyes munkajegyzetek, amelyek nem a dolgozat reszei.
 
-Ezek helye a projektben: `docs/_segedanyagok/`.
+A szemelyes munkajegyzetek es atmeneti segedanyagok lokalisan, verziozason kivul vannak tarolva, hogy a beadando repo csak a szakdolgozatot alatamaszto anyagokat tartalmazza.
 
 ## Ami meg hatra van ezen a heten
 
 1. Teljes kezi teszt vegigpipalasa a `docs/leadando_checklist.md` alapjan.
 2. GitHub Actions zold allapotanak kepernyokepezese.
 3. A fontos dokumentumok sajat nyelvezetre atirasa: MVP, piaci elemzes, kovetelmenyek, use case, biztonsag, teszteles, MI hasznalat.
-4. A dolgozat fo DOCX-ben a konkret screenshotok es kodreszletek tenyleges beillesztese az `docs/abra_es_kod_kepernyokep_terv.md` alapjan.
+4. A dolgozat fo DOCX-ben a konkret screenshotok es kodreszletek tenyleges beillesztese a `docs/ux/screens.csv`, `docs/ux/ux_screen_spec.md` es `docs/02_architecture/thesis_diagrams.md` alapjan.
 5. A Firebase/Firestore eles kornyezet gyors ellenorzese: termeklista, rendeles, admin muvelet, AI asszisztens.
 6. Vegso repo-higienia commit elott: ne legyen valodi API kulcs, jelszo, token, `node_modules`, build mappa vagy Word lock fajl commitolva.
 
