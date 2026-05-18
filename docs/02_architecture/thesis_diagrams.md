@@ -16,6 +16,9 @@ A Wordbe kozvetlenul beszurhato SVG kepek itt vannak:
 - [06_helyszini_vasarlas.svg](diagram_kepek/06_helyszini_vasarlas.svg)
 - [07_ai_asszisztens.svg](diagram_kepek/07_ai_asszisztens.svg)
 - [08_biztonsagi_attekintes.svg](diagram_kepek/08_biztonsagi_attekintes.svg)
+- [09_komponens_architektura_firebase_worker_openrouter.svg](diagram_kepek/09_komponens_architektura_firebase_worker_openrouter.svg)
+- [10_checkout_szekvencia_admin_rendeleslista.svg](diagram_kepek/10_checkout_szekvencia_admin_rendeleslista.svg)
+- [11_adatmodell_core_products_orders_users.svg](diagram_kepek/11_adatmodell_core_products_orders_users.svg)
 
 ## Beillesztesi javaslat
 
@@ -29,6 +32,9 @@ A Wordbe kozvetlenul beszurhato SVG kepek itt vannak:
 | 6. Helyszini vasarlas | Megvalositas / Admin vagy dolgozoi folyamatok | Helyszini vasarlas rogzitese mentett vasarloval |
 | 7. AI asszisztens | Megvalositas / AI asszisztens | A katalogushoz kotott AI asszisztens mukodesi folyamata |
 | 8. Biztonsagi attekintes | Biztonsag / Jogosultsagkezeles | Hitelesites, jogosultsagok es titokkezeles attekintese |
+| 9. Firebase es AI proxy komponens-architektura | Tervezes / Architektura vagy Megvalositas / AI asszisztens | Angular frontend, Firebase/Firestore es Cloudflare Worker/OpenRouter kapcsolat |
+| 10. Checkout szekvencia admin rendeleslistaval | Megvalositas / Vasarloi folyamatok | Rendelesleadas es admin oldali megjelenes folyamata |
+| 11. Celzott adatmodell | Tervezes / Adatmodell | Products, orders, users, savedCustomers, coupons es audit kapcsolatai |
 
 ## 1. Use case attekintes
 
@@ -350,6 +356,173 @@ flowchart TB
   Repo --> EnvExample
   CI --> Build["Build es tesztek"]
 ```
+
+## 9. Firebase es AI proxy komponens-architektura
+
+Beillesztendo abra:
+
+`docs/02_architecture/diagram_kepek/09_komponens_architektura_firebase_worker_openrouter.svg`
+
+Javasolt abracim:
+
+**Komponens-architektura abra.** A TDLWebshop komponens-architekturaja: Angular frontend, Firebase/Firestore biztonsagi reteg, valamint a Cloudflare Workerrel vedett OpenRouter kapcsolat.
+
+```mermaid
+flowchart LR
+  User["Felhasznalo / admin"] --> Browser["Bongeszo"]
+  Browser --> Hosting["Firebase Hosting"]
+  Hosting --> Angular["Angular frontend"]
+  Angular --> Pages["Oldalak es komponensek"]
+  Pages --> Services["Angular service reteg"]
+
+  Services --> Auth["Firebase Authentication"]
+  Services --> Rules["Firestore Rules"]
+  Rules --> Firestore["Cloud Firestore"]
+  Firestore --> Data["Products, Orders, Users, Coupons, Audit"]
+
+  Services --> Chat["ChatbotLlmService"]
+  Chat --> Worker["Cloudflare Worker proxy"]
+  Worker --> Secret["OPENROUTER_API_KEY secret"]
+  Worker --> OpenRouter["OpenRouter API"]
+  OpenRouter --> Worker
+  Worker --> Chat
+```
+
+Rovid magyarazat a dolgozatba:
+
+A rendszer kliensoldali resze Firebase Hostingrol kiszolgalt Angular alkalmazaskent fut. A felhasznaloi, vasarloi es adminisztracios muveleteket Angular komponensek es service-ek valositjak meg. Az adatbazis-hozzaferes kozvetlenul a Cloud Firestore fele tortenik, de minden ilyen muveletet a Firestore Rules reteg ellenoriz. Ez valasztja el egymastol az admin, dolgozoi, regisztralt vasarloi es vendeg jogosultsagokat.
+
+Az AI asszisztensnel az OpenRouter API kulcs nem kerul a frontendbe. A bongeszo az Angular `ChatbotLlmService`-en keresztul a Cloudflare Worker proxy vegpontot hivja meg, amely szerveroldali secretkent kezeli az OpenRouter kulcsot. Igy a webshop a sajat termekkatalogusabol vett kontextust is tud kuldeni az AI valaszhoz, mikozben az API kulcs nem lathato a kliensoldali kodban.
+
+## 10. Checkout szekvencia admin rendeleslistaval
+
+Beillesztendo abra:
+
+`docs/02_architecture/diagram_kepek/10_checkout_szekvencia_admin_rendeleslista.svg`
+
+Javasolt abracim:
+
+**Checkout szekvencia abra.** A vasarloi rendelesleadas folyamata az Angular checkout oldaltol az OrderService-en es Firestore-on keresztul az admin rendeleslista megjeleneseig.
+
+```mermaid
+sequenceDiagram
+  actor Customer as Vasarlo
+  participant Checkout as Angular checkout
+  participant OrderService as OrderService
+  participant Firestore as Cloud Firestore
+  participant Admin as Admin rendeleslista
+
+  Customer->>Checkout: Kosar es rendelesi adatok megadasa
+  Checkout->>Checkout: Email, telefonszam, kotelezo mezok es kosar validacio
+  Checkout->>OrderService: Validalt rendelesi adatok atadasa
+  OrderService->>Firestore: Rendeles dokumentum es tetelek mentese
+  Firestore-->>OrderService: Rendelesazonosito es sikeres mentes
+  OrderService-->>Checkout: Sikeres rendeles visszajelzese
+  Firestore-->>Admin: Uj rendeles megjelenik a listaban
+  Admin->>Firestore: Statuszmodositas es audit folyamat inditasa
+```
+
+Rovid magyarazat a dolgozatba:
+
+A checkout folyamatban a vasarlo eloszor a kosarat es a rendeleshez szukseges adatokat adja meg. Az Angular checkout oldal ellenorzi a kotelezo mezoket, az email- es telefonszam-formatumot, valamint azt, hogy a kosar tartalmaz-e rendelheto tetelet. Sikeres validacio utan az oldal az `OrderService` fele adja at a rendelesi adatokat.
+
+Az `OrderService` feladata a rendeles objektum osszeallitasa es Firestore-ba mentese. A sikeres mentes utan a vasarlo visszajelzest kap, az admin feluleten pedig a Firestore `orders` kollekciojabol betoltott rendeles megjelenik a rendeleslistaban. Innen indulhat a kesobbi adminisztracios folyamat, peldaul a statuszmodositas, audit naplozas vagy a teljesites kezelese.
+
+## 11. Celzott adatmodell: products, orders, users, savedCustomers, coupons es audit
+
+Beillesztendo abra:
+
+`docs/02_architecture/diagram_kepek/11_adatmodell_core_products_orders_users.svg`
+
+Javasolt abracim:
+
+**Adatmodell diagram.** A TDLWebshop fo Firestore collectionjei es kapcsolatai: products, orders, users, savedCustomers, coupons es audit.
+
+```mermaid
+erDiagram
+  USERS ||--o{ ORDERS : places
+  SAVED_CUSTOMERS ||--o{ ORDERS : selected_for_local_sale
+  ORDERS ||--o{ ORDER_ITEMS : contains
+  PRODUCTS ||--o{ ORDER_ITEMS : referenced_by
+  COUPONS ||--o{ ORDERS : applied_to
+  ORDERS ||--o{ ORDER_STATUS_AUDIT : has_status_history
+  USERS ||--o{ ORDER_STATUS_AUDIT : modifies_status
+
+  USERS {
+    string uid
+    string email
+    string role
+    boolean disabled
+    string name
+    string phone
+  }
+
+  PRODUCTS {
+    string id
+    string sku
+    string name
+    string category
+    number price
+    number stock
+    boolean active
+    boolean sale
+  }
+
+  ORDERS {
+    string id
+    string userId
+    string savedCustomerId
+    string customerEmail
+    string status
+    string channel
+    string paymentMethod
+    number total
+    timestamp createdAt
+  }
+
+  ORDER_ITEMS {
+    string productId
+    string sku
+    string name
+    number quantity
+    number unitPrice
+    number lineTotal
+  }
+
+  SAVED_CUSTOMERS {
+    string id
+    string name
+    string email
+    string phone
+    boolean companyCustomer
+    boolean disabled
+    number totalSpent
+    number discountPercent
+  }
+
+  COUPONS {
+    string code
+    string type
+    number value
+    boolean active
+    timestamp validUntil
+  }
+
+  ORDER_STATUS_AUDIT {
+    string orderId
+    string previousStatus
+    string newStatus
+    string actorUid
+    string actorRole
+    timestamp createdAt
+  }
+```
+
+Rovid magyarazat a dolgozatba:
+
+Az adatmodell a webshop fo uzleti folyamatai kore szervezodik. A `products` kollekcio tartalmazza a termekkatalogust, amelyre a rendelesi tetelek hivatkoznak. Az `orders` kollekcio a leadott webes es helyszini rendelesek fo adatait tarolja, mig az egyes tetelek termekazonositot, mennyiseget es aradatokat tartalmaznak.
+
+A `users` kollekcio a regisztralt felhasznalok profil- es jogosultsagi adatait kezeli. A helyszini ertekesiteshez az admin vagy dolgozo a `savedCustomers` kollekciobol valaszthat mentett vasarlot vagy ceget, amely a rendeleshez kapcsolodik. A `coupons` kollekcio a kedvezmenyeket irja le, amelyek opcionálisan rendeléshez rendelhetok. A statuszvaltasok kulon audit rekordokba kerulnek, igy visszakovetheto, hogy ki, mikor es milyen rendelesi allapotot modositott.
 
 ## Exportalas Wordhoz
 

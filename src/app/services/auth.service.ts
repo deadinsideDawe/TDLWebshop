@@ -62,20 +62,26 @@ export class AuthService {
   async register(email: string, password: string) {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
 
-    // Regisztracio utan azonnal letrehozzuk a user profilt.
-    if (credential.user.email) {
-      await this.userService.upsertUserProfile(credential.user.uid, credential.user.email);
-    }
+    try {
+      // Regisztracio utan azonnal letrehozzuk a user profilt.
+      // Ha ez elbukik, kijelentkeztetunk, hogy ne maradjon felig letrehozott munkamenet.
+      if (credential.user.email) {
+        await this.userService.upsertUserProfile(credential.user.uid, credential.user.email);
+      }
 
-    const profile = await this.userService.getUserProfile(credential.user.uid);
-    if (profile?.disabled) {
-      await signOut(auth);
-      const disabledError = new Error('user-disabled');
-      (disabledError as Error & { code?: string }).code = 'auth/user-disabled';
-      throw disabledError;
-    }
+      const profile = await this.userService.getUserProfile(credential.user.uid);
+      if (profile?.disabled) {
+        await signOut(auth);
+        const disabledError = new Error('user-disabled');
+        (disabledError as Error & { code?: string }).code = 'auth/user-disabled';
+        throw disabledError;
+      }
 
-    return credential;
+      return credential;
+    } catch (error) {
+      await signOut(auth).catch(() => undefined);
+      throw error;
+    }
   }
 
   logout() {

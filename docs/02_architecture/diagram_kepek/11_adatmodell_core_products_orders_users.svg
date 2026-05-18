@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050">
+  <defs>
+    <style>
+      .bg { fill: #0f172a; }
+      .panel { fill: #111827; stroke: #334155; stroke-width: 2; rx: 18; }
+      .primary { fill: #13213a; stroke: #3b82f6; stroke-width: 3; rx: 18; }
+      .accent { fill: #261a24; stroke: #ef4444; stroke-width: 3; rx: 18; }
+      .text { fill: #f9fafb; font-family: Arial, Helvetica, sans-serif; }
+      .muted { fill: #cbd5e1; font-family: Arial, Helvetica, sans-serif; }
+      .small { font-size: 21px; }
+      .body { font-size: 24px; }
+      .title { font-size: 30px; font-weight: 700; }
+      .main-title { font-size: 42px; font-weight: 800; }
+      .relation { fill: none; stroke: #94a3b8; stroke-width: 3; marker-end: url(#arrow); }
+      .relation-blue { fill: none; stroke: #3b82f6; stroke-width: 4; marker-end: url(#arrowBlue); }
+      .relation-red { fill: none; stroke: #ef4444; stroke-width: 4; marker-end: url(#arrowRed); }
+      .label-box { fill: #020617; stroke: #334155; stroke-width: 1.5; rx: 8; }
+      .label { fill: #e5e7eb; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 600; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1050"/>
+  <text class="text main-title" x="80" y="75">TDLWebshop adatmodell</text>
+  <text class="muted body" x="80" y="115">A fo Firestore collectionok es a rendelesi folyamat szempontjabol fontos kapcsolatok</text>
+
+  <!-- Users -->
+  <rect class="primary" x="80" y="170" width="360" height="230"/>
+  <text class="text title" x="110" y="215">users</text>
+  <text class="muted small" x="110" y="255">uid, email, role</text>
+  <text class="muted small" x="110" y="288">disabled, name, phone</text>
+  <text class="muted small" x="110" y="321">billingAddress, shippingAddress</text>
+  <text class="muted small" x="110" y="354">admin / employee / customer</text>
+
+  <!-- Saved customers -->
+  <rect class="panel" x="80" y="520" width="360" height="250"/>
+  <text class="text title" x="110" y="565">savedCustomers</text>
+  <text class="muted small" x="110" y="605">name, email, phone</text>
+  <text class="muted small" x="110" y="638">companyCustomer, taxNumber</text>
+  <text class="muted small" x="110" y="671">disabled, paymentTermsDays</text>
+  <text class="muted small" x="110" y="704">totalSpent, discountPercent</text>
+
+  <!-- Orders -->
+  <rect class="primary" x="620" y="330" width="380" height="290"/>
+  <text class="text title" x="650" y="375">orders</text>
+  <text class="muted small" x="650" y="415">userId, savedCustomerId</text>
+  <text class="muted small" x="650" y="448">customerEmail, customerName</text>
+  <text class="muted small" x="650" y="481">status, channel, paymentMethod</text>
+  <text class="muted small" x="650" y="514">subtotal, discount, total</text>
+  <text class="muted small" x="650" y="547">createdAt, invoiceNumber</text>
+  <text class="muted small" x="650" y="580">items[] vagy orderItems</text>
+
+  <!-- Products -->
+  <rect class="panel" x="1160" y="170" width="360" height="250"/>
+  <text class="text title" x="1190" y="215">products</text>
+  <text class="muted small" x="1190" y="255">sku, name, category</text>
+  <text class="muted small" x="1190" y="288">price, stock, reservedStock</text>
+  <text class="muted small" x="1190" y="321">images, description</text>
+  <text class="muted small" x="1190" y="354">active, sale, featured</text>
+
+  <!-- Coupons -->
+  <rect class="accent" x="1160" y="520" width="360" height="230"/>
+  <text class="text title" x="1190" y="565">coupons</text>
+  <text class="muted small" x="1190" y="605">code, type, value</text>
+  <text class="muted small" x="1190" y="638">active, validUntil</text>
+  <text class="muted small" x="1190" y="671">minOrderValue</text>
+  <text class="muted small" x="1190" y="704">usageLimit, usedCount</text>
+
+  <!-- Order items -->
+  <rect class="panel" x="620" y="760" width="380" height="190"/>
+  <text class="text title" x="650" y="805">orderItems</text>
+  <text class="muted small" x="650" y="845">productId, sku, name</text>
+  <text class="muted small" x="650" y="878">quantity, unitPrice</text>
+  <text class="muted small" x="650" y="911">lineTotal, discount</text>
+
+  <!-- Audit -->
+  <rect class="accent" x="80" y="825" width="360" height="170"/>
+  <text class="text title" x="110" y="870">orderStatusAudit</text>
+  <text class="muted small" x="110" y="910">orderId, previousStatus</text>
+  <text class="muted small" x="110" y="943">newStatus, actorUid, createdAt</text>
+
+  <!-- Relations -->
+  <path class="relation-blue" d="M 440 285 C 520 285, 560 365, 620 420"/>
+  <rect class="label-box" x="474" y="297" width="126" height="34"/>
+  <text class="label" x="489" y="320">places</text>
+
+  <path class="relation" d="M 440 625 C 510 600, 560 535, 620 500"/>
+  <rect class="label-box" x="454" y="566" width="156" height="34"/>
+  <text class="label" x="468" y="589">local sale</text>
+
+  <path class="relation-blue" d="M 1000 476 C 1080 438, 1105 330, 1160 290"/>
+  <rect class="label-box" x="1015" y="345" width="134" height="34"/>
+  <text class="label" x="1029" y="368">uses stock</text>
+
+  <path class="relation-red" d="M 1160 635 C 1090 625, 1045 585, 1000 545"/>
+  <rect class="label-box" x="1025" y="600" width="126" height="34"/>
+  <text class="label" x="1039" y="623">applied</text>
+
+  <path class="relation-blue" d="M 810 620 L 810 760"/>
+  <rect class="label-box" x="838" y="675" width="120" height="34"/>
+  <text class="label" x="852" y="698">contains</text>
+
+  <path class="relation" d="M 1160 300 C 1105 515, 1065 830, 1000 860"/>
+  <rect class="label-box" x="1028" y="810" width="132" height="34"/>
+  <text class="label" x="1041" y="833">productId</text>
+
+  <path class="relation-red" d="M 620 570 C 525 650, 470 830, 440 910"/>
+  <rect class="label-box" x="463" y="744" width="142" height="34"/>
+  <text class="label" x="477" y="767">audit log</text>
+
+  <path class="relation" d="M 260 400 C 250 560, 250 740, 260 825"/>
+  <rect class="label-box" x="285" y="636" width="132" height="34"/>
+  <text class="label" x="299" y="659">actorUid</text>
+
+  <!-- Notes -->
+  <rect class="panel" x="1080" y="850" width="440" height="130"/>
+  <text class="text body" x="1110" y="892">Biztonsagi megjegyzes</text>
+  <text class="muted small" x="1110" y="930">Az olvasasi es irasi jogokat Firestore Rules</text>
+  <text class="muted small" x="1110" y="960">korlatozza szerepkor, aktiv statusz es payload alapjan.</text>
+</svg>

@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">TDLWebshop checkout szekvencia</title>
+  <desc id="desc">Vasarlo, Angular checkout oldal, OrderService, Firestore es admin rendeleslista kozotti folyamat.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#dc2626"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.16"/>
+    </filter>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 800 42px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 22px Arial, sans-serif; fill: #475569; }
+      .actor { fill: #eff6ff; stroke: #2563eb; stroke-width: 2.5; rx: 18; filter: url(#shadow); }
+      .service { fill: #ecfdf5; stroke: #059669; stroke-width: 2.5; rx: 18; filter: url(#shadow); }
+      .data { fill: #fff7ed; stroke: #ea580c; stroke-width: 2.5; rx: 18; filter: url(#shadow); }
+      .admin { fill: #fff1f2; stroke: #dc2626; stroke-width: 2.5; rx: 18; filter: url(#shadow); }
+      .head { font: 700 22px Arial, sans-serif; fill: #111827; }
+      .small { font: 17px Arial, sans-serif; fill: #475569; }
+      .step { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.8; rx: 14; filter: url(#shadow); }
+      .step-title { font: 700 18px Arial, sans-serif; fill: #111827; }
+      .step-text { font: 15px Arial, sans-serif; fill: #475569; }
+      .line { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 8 8; }
+      .arrow { fill: none; stroke: #2563eb; stroke-width: 4; marker-end: url(#arrow); }
+      .arrow-red { fill: none; stroke: #dc2626; stroke-width: 4; marker-end: url(#arrowRed); }
+      .note { fill: #e0f2fe; stroke: #38bdf8; stroke-width: 2; rx: 16; }
+      .note-text { font: 18px Arial, sans-serif; fill: #075985; }
+      .badge { fill: #2563eb; }
+      .badge-red { fill: #dc2626; }
+      .badge-text { font: 700 16px Arial, sans-serif; fill: #ffffff; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="900"/>
+  <text x="70" y="70" class="title">Checkout szekvencia abra</text>
+  <text x="70" y="112" class="subtitle">Vasarlo -> Angular checkout -> OrderService -> Firestore -> admin rendeleslista folyamat</text>
+
+  <rect x="70" y="165" width="230" height="105" class="actor"/>
+  <text x="105" y="205" class="head">Vasarlo</text>
+  <text x="105" y="235" class="small">Kosar es adatok</text>
+
+  <rect x="385" y="165" width="260" height="105" class="actor"/>
+  <text x="420" y="205" class="head">Angular checkout</text>
+  <text x="420" y="235" class="small">Urlap, validacio, osszegzes</text>
+
+  <rect x="735" y="165" width="235" height="105" class="service"/>
+  <text x="770" y="205" class="head">OrderService</text>
+  <text x="770" y="235" class="small">Rendeles objektum keszitese</text>
+
+  <rect x="1060" y="165" width="220" height="105" class="data"/>
+  <text x="1095" y="205" class="head">Firestore</text>
+  <text x="1095" y="235" class="small">orders collection</text>
+
+  <rect x="1370" y="165" width="190" height="105" class="admin"/>
+  <text x="1395" y="205" class="head">Admin lista</text>
+  <text x="1395" y="235" class="small">Rendeleskezeles</text>
+
+  <line x1="185" y1="285" x2="185" y2="735" class="line"/>
+  <line x1="515" y1="285" x2="515" y2="735" class="line"/>
+  <line x1="852" y1="285" x2="852" y2="735" class="line"/>
+  <line x1="1170" y1="285" x2="1170" y2="735" class="line"/>
+  <line x1="1465" y1="285" x2="1465" y2="735" class="line"/>
+
+  <rect x="310" y="315" width="290" height="70" class="step"/>
+  <circle cx="335" cy="350" r="16" class="badge"/>
+  <text x="330" y="356" class="badge-text">1</text>
+  <text x="365" y="345" class="step-title">Adatok kitoltese</text>
+  <text x="365" y="369" class="step-text">Szallitas, szamlazas, fizetesi mod</text>
+  <path d="M185 350 L310 350" class="arrow"/>
+
+  <rect x="380" y="425" width="270" height="82" class="step"/>
+  <circle cx="405" cy="466" r="16" class="badge"/>
+  <text x="400" y="472" class="badge-text">2</text>
+  <text x="435" y="458" class="step-title">Kliensoldali validacio</text>
+  <text x="435" y="482" class="step-text">Email, telefonszam, kotelezo mezok, kosar</text>
+
+  <rect x="665" y="535" width="310" height="82" class="step"/>
+  <circle cx="690" cy="576" r="16" class="badge"/>
+  <text x="685" y="582" class="badge-text">3</text>
+  <text x="720" y="568" class="step-title">Rendeles letrehozasa</text>
+  <text x="720" y="592" class="step-text">Checkout atadja a validalt adatokat</text>
+  <path d="M515 495 C585 495, 585 576, 665 576" class="arrow"/>
+
+  <rect x="1010" y="535" width="320" height="82" class="step"/>
+  <circle cx="1035" cy="576" r="16" class="badge"/>
+  <text x="1030" y="582" class="badge-text">4</text>
+  <text x="1065" y="568" class="step-title">Mentes Firestore-ba</text>
+  <text x="1065" y="592" class="step-text">orders dokumentum es rendelesi tetelek</text>
+  <path d="M975 576 L1010 576" class="arrow"/>
+
+  <rect x="1000" y="655" width="340" height="72" class="step"/>
+  <circle cx="1025" cy="691" r="16" class="badge"/>
+  <text x="1020" y="697" class="badge-text">5</text>
+  <text x="1055" y="685" class="step-title">Sikeres visszajelzes</text>
+  <text x="1055" y="708" class="step-text">Rendelesazonosito visszakerul a checkout oldalra</text>
+  <path d="M1170 617 C1170 645, 890 690, 650 690" class="arrow"/>
+
+  <rect x="1345" y="420" width="220" height="86" class="step"/>
+  <circle cx="1370" cy="463" r="16" class="badge-red"/>
+  <text x="1365" y="469" class="badge-text">6</text>
+  <text x="1400" y="455" class="step-title">Admin listazas</text>
+  <text x="1400" y="479" class="step-text">Uj rendeles megjelenik</text>
+  <path d="M1280 576 C1375 576, 1345 463, 1345 463" class="arrow-red"/>
+
+  <rect x="1345" y="545" width="220" height="86" class="step"/>
+  <circle cx="1370" cy="588" r="16" class="badge-red"/>
+  <text x="1365" y="594" class="badge-text">7</text>
+  <text x="1400" y="580" class="step-title">Statuszkezeles</text>
+  <text x="1400" y="604" class="step-text">Feldolgozas, teljesites, audit</text>
+  <path d="M1465 506 L1465 545" class="arrow-red"/>
+
+  <rect x="70" y="795" width="1460" height="58" class="note"/>
+  <text x="100" y="831" class="note-text">
+    Lenyege: a checkout oldal validalt adatokat ad at az OrderService-nek, a rendeles Firestore-ba kerul, majd az admin felulet innen listazza es kezeli a rendelest.
+  </text>
+</svg>

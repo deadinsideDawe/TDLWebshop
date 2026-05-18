@@ -150,6 +150,10 @@ export class OrderService {
 
   private removeUndefinedDeep<T>(value: T): T {
     // Rekurziv undefined szures object/array szerkezetben.
+    if (typeof value === 'number') {
+      return (Number.isFinite(value) ? value : undefined) as T;
+    }
+
     if (Array.isArray(value)) {
       return value
         .map(item => this.removeUndefinedDeep(item))
@@ -164,7 +168,12 @@ export class OrderService {
           continue;
         }
 
-        result[key] = this.removeUndefinedDeep(nested);
+        const sanitized = this.removeUndefinedDeep(nested);
+        if (sanitized === undefined) {
+          continue;
+        }
+
+        result[key] = sanitized;
       }
 
       return result as T;
@@ -230,6 +239,7 @@ export class OrderService {
     // Helyszini vasarlas tranzakcioban:
     // 1) keszlet ellenorzes, 2) keszlet csokkentes, 3) rendeles mentes.
     const cleanOrder = this.removeUndefinedDeep(order);
+    this.assertValidLocalSaleOrder(cleanOrder);
 
     const orderId = await runTransaction(db, async transaction => {
       for (const item of cleanOrder.items) {
@@ -271,6 +281,33 @@ export class OrderService {
     });
 
     return { id: orderId };
+  }
+
+  private assertValidLocalSaleOrder(order: Order & { items: CartItem[] }): void {
+    if (!Array.isArray(order.items) || order.items.length === 0) {
+      throw new Error('missing-order-items');
+    }
+
+    if (!Number.isFinite(Number(order.total))) {
+      throw new Error('invalid-order-total');
+    }
+
+    for (const item of order.items) {
+      const quantity = Number(item.quantity);
+      const price = Number(item.price);
+
+      if (!item.firestoreId) {
+        throw new Error(`missing-product-id:${item.name}`);
+      }
+
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        throw new Error(`invalid-item-quantity:${item.name}`);
+      }
+
+      if (!Number.isFinite(price) || price < 0) {
+        throw new Error(`invalid-item-price:${item.name}`);
+      }
+    }
   }
 
   async ensureInvoiceForOrder(orderId: string): Promise<{ invoiceNumber: string; invoicedAt: number }> {

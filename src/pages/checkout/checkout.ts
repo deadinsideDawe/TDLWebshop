@@ -335,9 +335,17 @@ export class Checkout {
     this.registerError = '';
     this.registerMessage = '';
 
-    if (!this.registerEmail || !this.registerPassword || !this.registerConfirmPassword) {
+    const normalizedEmail = this.registerEmail.trim().toLowerCase();
+
+    if (!normalizedEmail || !this.registerPassword || !this.registerConfirmPassword) {
       this.registerError = 'Minden mezőt ki kell tölteni.';
       this.toastService.error('Hiányos adatok', this.registerError);
+      return;
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      this.registerError = 'Adj meg valós e-mail formátumot.';
+      this.toastService.error('Hibás e-mail cím', this.registerError);
       return;
     }
 
@@ -350,10 +358,11 @@ export class Checkout {
     this.registerLoading = true;
 
     try {
-      await this.authService.register(this.registerEmail, this.registerPassword);
+      await this.authService.register(normalizedEmail, this.registerPassword);
       this.registerMessage = 'Sikeres regisztráció.';
-      this.customerEmail = this.registerEmail;
-      this.authEmail = this.registerEmail;
+      this.registerEmail = normalizedEmail;
+      this.customerEmail = normalizedEmail;
+      this.authEmail = normalizedEmail;
       this.toastService.success('Sikeres regisztráció');
       this.closeRegisterModal();
     } catch {
@@ -497,7 +506,14 @@ export class Checkout {
       sessionStorage.setItem('lastOrderSummary', JSON.stringify(orderSummary));
 
       if (currentUser?.uid) {
-        await this.userService.attachOrderToUser(currentUser.uid, orderRef.id);
+        try {
+          await this.userService.attachOrderToUser(currentUser.uid, orderRef.id);
+        } catch (userOrderLinkError) {
+          this.monitoringService.capture('checkout-user-order-link', userOrderLinkError, {
+            orderId: orderRef.id,
+            uid: currentUser.uid
+          });
+        }
 
         try {
           await this.customerDirectoryService.upsertProfileForUser(

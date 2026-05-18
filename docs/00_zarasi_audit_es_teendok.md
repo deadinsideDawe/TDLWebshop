@@ -25,13 +25,14 @@ Szakdolgozati szempontbol a fo feladat mar nem uj funkciok hozzaadasa, hanem a m
 | Reprodukalhatosag | README es env minta megvan, vegso build utan frissitendo | `README.md`, `.env.example`, `docs/reprodukcios_README.md` |
 | MI hasznalat | Dokumentalt, sajat hangra atirando | `docs/07_ai/`, `docs/ai-asszisztens-openrouter.md` |
 
-## Legutobbi zarokori ellenorzes
+## Legutobbi zarokori ellenorzes (2026-05-18)
 
-- `npm test -- --watch=false`: sikeres futas, 14 tesztfajl es 41 teszt lefutott.
+- `npm test -- --watch=false`: sikeres futas, 14 tesztfajl es 41 teszt lefutott, 0 sikertelen teszt.
 - `npm run build`: sikeres production build, kimenet: `dist/webshop`.
+- Lokalis Node figyelmeztetes: a gepen Node v25.8.0 fut, ami nem LTS verzio. Ez nem akasztotta meg a buildet vagy a teszteket; a CI es a reprodukcios leiras Node 22 LTS-t hasznal.
 - OpenRouter kulcs a kodban: a working tree-ben nem talalhato valodi `sk-or-v1` kulcs, csak placeholder es dokumentacios emlites.
 - Git history ellenorzes `sk-or-v1` mintara: nem adott talalatot.
-- `functions/node_modules`: kikerult a kovetett fajlokbol, commit utan nem lesz a repoban.
+- `functions/node_modules`: kikerult a kovetett fajlokbol, nem resze a beadando reponak.
 - AI asszisztens: a modell nem allithato a feluleten, es pontos katalushiany eseten nem ad veletlen termekajanlast.
 
 ## Beadandoba keruljon

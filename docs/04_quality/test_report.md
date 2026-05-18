@@ -17,7 +17,7 @@
 npm run build
 ```
 
-Legutobb ellenorizve: 2026-05-11.
+Legutobb ellenorizve: 2026-05-18.
 
 Eredmeny: sikeres build. A kimenet a `dist/webshop` mappaba keszult. Lokalisan Node.js 25 kornyezetben figyelmeztetes jelent meg, mert ez nem LTS verzio; a CI es a javasolt reprodukcios kornyezet Node 22-t hasznal.
 
@@ -27,7 +27,7 @@ Eredmeny: sikeres build. A kimenet a `dist/webshop` mappaba keszult. Lokalisan N
 npm test -- --watch=false
 ```
 
-Legutobb ellenorizve: 2026-05-11.
+Legutobb ellenorizve: 2026-05-18.
 
 - 14 tesztfajl
 - 41 sikeres teszt
@@ -87,8 +87,8 @@ Eredmeny:
 - A Firestore es Auth valos integracioinak tobbsege manualis bizonyitassal validalhato.
 - A teljesitmenymeres csak alap szinten dokumentalt.
 - A vegleges szakdolgozatba meg kepernyokepekkel kell alatamasztani a fo felhasznaloi es admin folyamatokat.
-- A vegleges beadas elott a build/test/audit parancsokat meg egyszer erdemes frissen lefuttatni, hogy a dolgozatban szereplo bizonyitek a leadaskori allapotot mutassa.
+- A vegleges beadas elott az audit parancsokat meg egyszer erdemes frissen lefuttatni, hogy a dolgozatban szereplo biztonsagi bizonyitek is a leadaskori allapotot mutassa.
 
 ## Kovetkeztetes
 
-A projekt buildelheto, az automatizalt tesztek zoldek, es a fo kliensoldali logikakhoz van regresszios vedelem. A 2026-05-11-i ellenorzes alapjan a production audit sem jelzett ismert serulekenyseget. A beadas szempontjabol a legfontosabb maradek feladat a kezi tesztjegyzokonyv vegigpipalasa, a GitHub Actions zold futasanak kepernyokepes dokumentalasa, valamint a bizonyitekok beemelese a dolgozatba.
+A projekt buildelheto, az automatizalt tesztek zoldek, es a fo kliensoldali logikakhoz van regresszios vedelem. A 2026-05-18-i ellenorzes alapjan 14 tesztfajlban 41 teszt sikeresen lefutott. A 2026-05-11-i audit ellenorzes nem jelzett ismert production serulekenyseget, de a vegleges beadas elott ezt erdemes ujrafuttatni. A beadas szempontjabol a legfontosabb maradek feladat a kezi tesztjegyzokonyv vegigpipalasa, a GitHub Actions zold futasanak kepernyokepes dokumentalasa, valamint a bizonyitekok beemelese a dolgozatba.

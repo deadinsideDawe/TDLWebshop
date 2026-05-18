@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import { onAuthStateChanged } from 'firebase/auth';
 import { BehaviorSubject } from 'rxjs';
+import { auth } from '../firebase';
 
 export interface WishlistItem {
   id: number;
@@ -19,23 +21,24 @@ export interface WishlistItem {
   providedIn: 'root'
 })
 export class WishlistService {
-  private readonly storageKey = 'wishlist';
+  private readonly legacyStorageKey = 'wishlist';
+  private readonly guestStorageKey = 'wishlist:guest';
+  private activeStorageKey = this.guestStorageKey;
   private items: WishlistItem[] = [];
   private itemsSubject = new BehaviorSubject<WishlistItem[]>([]);
 
   wishlist$ = this.itemsSubject.asObservable();
 
   constructor() {
-    const saved = localStorage.getItem(this.storageKey);
-    if (saved) {
-      try {
-        this.items = JSON.parse(saved) as WishlistItem[];
-      } catch {
-        this.items = [];
-      }
+    this.loadFromStorage(this.activeStorageKey);
+    this.itemsSubject.next([...this.items]);
 
+    onAuthStateChanged(auth, user => {
+      this.persist();
+      this.activeStorageKey = user?.uid ? `wishlist:user:${user.uid}` : this.guestStorageKey;
+      this.loadFromStorage(this.activeStorageKey);
       this.itemsSubject.next([...this.items]);
-    }
+    });
   }
 
   getItems(): WishlistItem[] {
@@ -83,12 +86,33 @@ export class WishlistService {
 
   clearWishlist(): void {
     this.items = [];
-    this.sync();
+    localStorage.removeItem(this.activeStorageKey);
+    this.itemsSubject.next([...this.items]);
   }
 
   private sync(): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+    this.persist();
     this.itemsSubject.next([...this.items]);
+  }
+
+  private persist(): void {
+    localStorage.setItem(this.activeStorageKey, JSON.stringify(this.items));
+  }
+
+  private loadFromStorage(key: string): void {
+    const saved = localStorage.getItem(key)
+      || (key === this.guestStorageKey ? localStorage.getItem(this.legacyStorageKey) : null);
+
+    if (!saved) {
+      this.items = [];
+      return;
+    }
+
+    try {
+      this.items = JSON.parse(saved) as WishlistItem[];
+    } catch {
+      this.items = [];
+    }
   }
 
   private getItemKey(item: { id: number; key?: string; firestoreId?: string; sku?: string; name?: string }): string {
