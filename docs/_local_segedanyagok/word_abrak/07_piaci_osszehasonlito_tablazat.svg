@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+    <style>
+      .title{font-family:Arial,Helvetica,sans-serif;font-size:34px;font-weight:700;fill:#f9fafb}
+      .subtitle{font-family:Arial,Helvetica,sans-serif;font-size:18px;fill:#cbd5e1}
+      .head{font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;fill:#f9fafb}
+      .cell{font-family:Arial,Helvetica,sans-serif;font-size:15px;fill:#e5e7eb}
+      .muted{font-family:Arial,Helvetica,sans-serif;font-size:14px;fill:#94a3b8}
+      .check{font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;fill:#22c55e}
+      .warn{font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;fill:#f59e0b}
+      .accent{fill:#3b82f6}
+      .red{fill:#ef4444}
+    </style>
+  </defs>
+  <rect width="1400" height="820" rx="28" fill="url(#bg)"/>
+  <rect x="42" y="38" width="1316" height="744" rx="20" fill="#111827" stroke="#334155" stroke-width="2" filter="url(#shadow)"/>
+  <text x="78" y="92" class="title">Piaci osszehasonlitas: epuletegepeszeti webshopok es TDLWebshop</text>
+  <text x="78" y="125" class="subtitle">Sajat piackutatas alapjan keszitett osszefoglalo tablazat</text>
+  <line x1="78" y1="154" x2="1322" y2="154" stroke="#334155" stroke-width="2"/>
+
+  <rect x="78" y="178" width="1244" height="56" rx="10" fill="#1f2937" stroke="#475569"/>
+  <text x="102" y="213" class="head">Szempont</text>
+  <text x="406" y="204" class="head">Vizsgalt webshopok</text>
+  <text x="406" y="223" class="muted">gepesz.hu, epgep.hu, Ferenczi, Vrec-Co, Szerelvenybolt</text>
+  <text x="1006" y="213" class="head">TDLWebshop</text>
+
+  <g>
+    <rect x="78" y="250" width="1244" height="58" rx="10" fill="#0f172a" stroke="#253244"/>
+    <text x="102" y="285" class="cell">Termekek elerese</text>
+    <text x="406" y="276" class="cell">Kategoriak es kereso jellemzoen elerheto</text>
+    <text x="406" y="296" class="muted">Minoseg es atlathatosag oldaltol fuggo</text>
+    <text x="1006" y="276" class="cell">Kategoria, kereso, akcios es kiemelt termekek</text>
+    <text x="1268" y="286" class="check">✓</text>
+  </g>
+
+  <g>
+    <rect x="78" y="318" width="1244" height="58" rx="10" fill="#111827" stroke="#253244"/>
+    <text x="102" y="353" class="cell">Vasarloi folyamat</text>
+    <text x="406" y="344" class="cell">Kosar es checkout tobb oldalon mukodik</text>
+    <text x="406" y="364" class="muted">Felhasznaloi elmeny valtozo</text>
+    <text x="1006" y="344" class="cell">Kosar, checkout, profil es rendeleskovetes</text>
+    <text x="1268" y="354" class="check">✓</text>
+  </g>
+
+  <g>
+    <rect x="78" y="386" width="1244" height="58" rx="10" fill="#0f172a" stroke="#253244"/>
+    <text x="102" y="421" class="cell">Akcios termekek</text>
+    <text x="406" y="412" class="cell">Nem minden vizsgalt webshop kezeli kulon</text>
+    <text x="406" y="432" class="muted">Van ahol hianyzik onallo menupontkent</text>
+    <text x="1006" y="412" class="cell">Akcios oldal es kiemelt termekkartyak</text>
+    <text x="1268" y="422" class="check">✓</text>
+  </g>
+
+  <g>
+    <rect x="78" y="454" width="1244" height="58" rx="10" fill="#111827" stroke="#253244"/>
+    <text x="102" y="489" class="cell">Adminisztracio</text>
+    <text x="406" y="480" class="cell">Kulso felhasznalokent altalaban nem lathato</text>
+    <text x="406" y="500" class="muted">Ezert szakdolgozati szempontbol nehezen bizonyithato</text>
+    <text x="1006" y="480" class="cell">Termek, rendeles, keszlet, felhasznalo, CSV</text>
+    <text x="1268" y="490" class="check">✓</text>
+  </g>
+
+  <g>
+    <rect x="78" y="522" width="1244" height="58" rx="10" fill="#0f172a" stroke="#253244"/>
+    <text x="102" y="557" class="cell">Domain-specifikus funkcio</text>
+    <text x="406" y="548" class="cell">Tobbnyire altalanos webshop-logika</text>
+    <text x="406" y="568" class="muted">Epuletgepeszeti uzleti folyamat kevesbe lathato</text>
+    <text x="1006" y="548" class="cell">Helyszini vasarlas, mentett vasarlok, PDF</text>
+    <text x="1268" y="558" class="check">✓</text>
+  </g>
+
+  <g>
+    <rect x="78" y="590" width="1244" height="58" rx="10" fill="#111827" stroke="#253244"/>
+    <text x="102" y="625" class="cell">Modern megjelenes</text>
+    <text x="406" y="616" class="cell">Jo es kozepes megoldasok vegyesen</text>
+    <text x="406" y="636" class="muted">Nem minden oldal reszponziv/modern hatasu</text>
+    <text x="1006" y="616" class="cell">Dark/light design, ipari arculat, AI ablak</text>
+    <text x="1268" y="626" class="check">✓</text>
+  </g>
+
+  <g>
+    <rect x="78" y="674" width="1244" height="64" rx="12" fill="#172554" stroke="#3b82f6" stroke-width="2"/>
+    <text x="102" y="708" class="head">Kovetkeztetes</text>
+    <text x="310" y="700" class="cell">A TDLWebshop az alap webshop-funkciokon tul az adminisztracios es helyszini ertekesitesi</text>
+    <text x="310" y="722" class="cell">folyamatokat is bemutatja, ezert szakdolgozati MVP-kent tobbet bizonyit egy egyszeru webshopnal.</text>
+  </g>
+
+  <circle cx="1222" cy="91" r="8" class="accent"/>
+  <circle cx="1248" cy="91" r="8" class="red"/>
+  <circle cx="1274" cy="91" r="8" class="accent"/>
+</svg>

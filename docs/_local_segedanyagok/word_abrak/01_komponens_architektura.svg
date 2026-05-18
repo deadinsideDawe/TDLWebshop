@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#111827"/></linearGradient>
+    <linearGradient id="blue" x1="0" x2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>
+    <linearGradient id="red" x1="0" x2="1"><stop offset="0" stop-color="#dc2626"/><stop offset="1" stop-color="#fb7185"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#020617" flood-opacity="0.45"/></filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#60a5fa"/></marker>
+    <style>
+      .title{font-family:Segoe UI,Arial,sans-serif;font-size:38px;font-weight:800;fill:#f9fafb}.sub{font-family:Segoe UI,Arial,sans-serif;font-size:18px;fill:#cbd5e1}.box{fill:#1f2937;stroke:#334155;stroke-width:2;rx:16;filter:url(#shadow)}.box2{fill:#111827;stroke:#3b82f6;stroke-width:2;rx:16;filter:url(#shadow)}.accent{fill:url(#blue)}.danger{fill:url(#red)}.h{font-family:Segoe UI,Arial,sans-serif;font-size:21px;font-weight:700;fill:#f8fafc}.p{font-family:Segoe UI,Arial,sans-serif;font-size:16px;fill:#dbeafe}.small{font-family:Segoe UI,Arial,sans-serif;font-size:14px;fill:#cbd5e1}.line{stroke:#60a5fa;stroke-width:3;fill:none;marker-end:url(#arrow)}.line2{stroke:#fb7185;stroke-width:3;fill:none;marker-end:url(#arrow);stroke-dasharray:8 7}.badge{fill:#0b1220;stroke:#475569;stroke-width:1;rx:12}.num{font-family:Segoe UI,Arial,sans-serif;font-size:17px;font-weight:800;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="url(#bg)"/>
+  <rect x="28" y="28" width="1344" height="844" rx="24" fill="none" stroke="#1e3a8a" stroke-width="2" opacity="0.8"/>
+  <text x="60" y="78" class="title">Komponens-architektúra</text>
+  <text x="60" y="112" class="sub">A TDLWebshop fő technológiai egységei és kapcsolatai</text>
+  
+<rect x="70" y="170" width="300" height="150" rx="16" class="box2"/>
+<text x="92" y="206" class="h">Angular frontend</text><text x="92" y="238" class="p">Oldalak és komponensek</text><text x="92" y="262" class="p">Kosár, checkout, admin</text><text x="92" y="286" class="p">AI asszisztens UI</text>
+<rect x="530" y="170" width="300" height="150" rx="16" class="box"/>
+<text x="552" y="206" class="h">Firebase Auth</text><text x="552" y="238" class="p">Bejelentkezés</text><text x="552" y="262" class="p">Szerepkörök</text><text x="552" y="286" class="p">Tiltott felhasználók</text>
+<rect x="970" y="170" width="300" height="150" rx="16" class="box"/>
+<text x="992" y="206" class="h">Cloudflare Worker</text><text x="992" y="238" class="p">OpenRouter proxy</text><text x="992" y="262" class="p">CORS ellenőrzés</text><text x="992" y="286" class="p">API-kulcs szerveroldalon</text>
+<rect x="300" y="500" width="300" height="150" rx="16" class="box2"/>
+<text x="322" y="536" class="h">Firestore adatbázis</text><text x="322" y="568" class="p">Products, orders, users</text><text x="322" y="592" class="p">SavedCustomers, coupons</text><text x="322" y="616" class="p">Audit naplók</text>
+<rect x="760" y="500" width="300" height="150" rx="16" class="box"/>
+<text x="782" y="536" class="h">Firestore Rules</text><text x="782" y="568" class="p">Admin / dolgozó / vásárló</text><text x="782" y="592" class="p">Adatvalidáció</text><text x="782" y="616" class="p">Jogosultsági korlátok</text>
+<rect x="970" y="710" width="300" height="90" rx="16" class="box"/>
+<text x="992" y="746" class="h">OpenRouter</text><text x="992" y="778" class="p">LLM válasz generálása</text><text x="992" y="802" class="p">Termékkatalógus alapján</text>
+<path d="M370,245 C450,245 450,245 530,245" class="line"/><path d="M830,245 C900,245 900,245 970,245" class="line"/><path d="M220,320 C335,320 335,500 450,500" class="line"/><path d="M680,320 C790,320 790,500 900,500" class="line"/><path d="M600,575 C680,575 680,575 760,575" class="line"/><path d="M1120,320 C1120,320 1120,710 1120,710" class="line"/>
+<text x="396" y="232" class="small">auth / profil</text><text x="860" y="232" class="small">AI kérés</text><text x="382" y="466" class="small">adatlekérés, rendelés</text><text x="710" y="466" class="small">szabályellenőrzés</text>
+</svg>
