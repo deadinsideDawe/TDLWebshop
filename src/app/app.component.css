@@ -206,9 +206,9 @@ body.theme-light .topbar {
 body.theme-light .search-area,
 body.theme-light .theme-btn,
 body.theme-light .icon-link {
-  background: rgba(255, 255, 255, 0.94);
-  border-color: rgba(17, 24, 39, 0.12);
-  color: #111827;
+  background: #ffffff;
+  border-color: rgba(17, 24, 39, 0.2);
+  color: #0f172a;
 }
 
 body.theme-light .search-btn {
@@ -227,16 +227,26 @@ body.theme-light .search-input::placeholder {
 body.theme-light .nav-link,
 body.theme-light .category-button,
 body.theme-light .user-label {
-  color: #111827;
+  color: #0f172a;
+  text-shadow: none;
 }
 
 body.theme-light .category-button {
-  background: rgba(37, 99, 235, 0.12);
-  border-color: rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.14);
+  border-color: rgba(37, 99, 235, 0.32);
 }
 
 body.theme-light .nav-link:hover {
-  color: var(--primary);
+  color: #1d4ed8;
+}
+
+body.theme-light .logout-btn {
+  background: rgba(185, 28, 28, 0.1);
+  color: #991b1b;
+}
+
+body.theme-light .cart-badge {
+  color: #ffffff;
 }
 
 body.theme-light .topbar-nav {

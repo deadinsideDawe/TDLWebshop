@@ -24,6 +24,8 @@ describe('form validators', () => {
     expect(isValidPhone('0630123456a')).toBe(false);
     expect(isValidPhone('+36 00 123 4567')).toBe(false);
     expect(isValidPhone('+36 71 123 456')).toBe(false);
+    expect(isValidPhone('71345678')).toBe(false);
+    expect(isValidPhone('+44 20 1234 5678')).toBe(false);
   });
 
   it('allows empty optional phone numbers', () => {

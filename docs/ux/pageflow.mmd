@@ -1,32 +1,61 @@
-flowchart TD
-  %% VÁSÁRLÓI FLOW
-  S01["▶ S01 - Főoldal"] -->|"Fejléc keresés vagy Termékek"| S02["S02 - Terméklista"]
-  S01 -->|"Kategória kártya"| S02
-  S01 -->|"Akció / TOP / Újdonság blokk"| S02
-  S01 -->|"Belépés"| S08["🔒 S08 - Login"]
-  S01 -->|"Regisztráció"| S09["🔒 S09 - Register"]
-  S01 -->|"Kosár"| S05["S05 - Kosár"]
-  S01 -->|"Profilom"| S10["🔒 S10 - Profilom + rendeléseim"]
+flowchart LR
+  START(("Indulas"))
 
-  S02 -->|"Részletek"| S03["S03 - Termék részletek"]
-  S02 -->|"Kosárba"| S16["♦ S16 - Kosárba visszajelző modál"]
-  S03 -->|"Kosárba"| S16
-  S16 -->|"Vásárlás folytatása"| S02
-  S16 -->|"Ugrás a kosárra"| S05
+  subgraph VASARLOI_FLOW["Vasarloi flow"]
+    S01["▶ S01 - Kezdolap"]
+    S02{{"♦ S02 - Kategoriak dropdown"}}
+    S03["S03 - Termeklista"]
+    S04["S04 - Termekadatlap"]
+    S05["S05 - Kosar"]
+    S06["S06 - Checkout"]
+    S07["S07 - Checkout validacio"]
+    S08["S08 - Sikeres rendeles"]
+    S09["🔒 S09 - Profil es rendelesek"]
+    S10["🔒 S10 - Kivansaglista"]
+    S16{{"♦ S16 - AI asszisztens"}}
+    S17["S17 - Login / regisztracio"]
+    S19["S19 - Kapcsolat"]
+  end
 
-  S05 -->|"Rendelés véglegesítése"| S06["🔒 S06 - Checkout"]
-  S06 -->|"Sikeres rendelés"| S07["S07 - Rendelés sikeres"]
-  S07 -->|"Vissza a főoldalra"| S01
-  S08 -->|"Sikeres login"| S01
-  S09 -->|"Sikeres regisztráció"| S01
+  subgraph ADMIN_FLOW["Admin es dolgozoi flow"]
+    S11["🔒 S11 - Admin attekintes"]
+    S12["🔒 S12 - Termekkezeles es CSV import"]
+    S13["🔒 S13 - Rendeleskezeles"]
+    S14["🔒 S14 - Helyszini vasarlas"]
+    S15{{"♦ 🔒 S15 - PDF bizonylat"}}
+    S18["🔒 S18 - Felhasznalok es jogosultsagok"]
+  end
 
-  %% ADMIN FLOW
-  S08 -->|"Admin jogosultság"| S11["🔒 S11 - Admin áttekintés"]
-  S11 -->|"Termékek fül"| S12["🔒 S12 - Admin termékkezelés"]
-  S11 -->|"Készlet fül"| S13["🔒 S13 - Admin készletkezelés"]
-  S11 -->|"Rendelések fül"| S14["🔒 S14 - Admin rendeléskezelés"]
-  S11 -->|"Felhasználók fül"| S15["🔒 S15 - Admin felhasználókezelés"]
-  S14 -->|"Státuszváltás"| S17["♦ S17 - Státusz megerősítő modál"]
-  S17 -->|"Megerősítés"| S14
-  S15 -->|"Részletek"| S18["♦ S18 - Felhasználó részletek modál"]
-  S18 -->|"Mentés / Bezárás"| S15
+  START -->|"app megnyitasa"| S01
+  S01 -->|"Kereses / Termekek gomb"| S03
+  S01 -->|"Kategoriak gomb"| S02
+  S02 -->|"Kategoria valasztasa"| S03
+  S01 -->|"Kapcsolat nav link"| S19
+  S03 -->|"Reszletek gomb"| S04
+  S03 -->|"Kosarba gomb"| S05
+  S04 -->|"Kosarba gomb"| S05
+  S05 -->|"Tovabb a fizeteshez"| S06
+  S06 -->|"Hibas vagy hianyzo adat"| S07
+  S07 -->|"Adatok javitasa"| S06
+  S06 -->|"Rendeles leadasa"| S08
+  S01 -->|"Profil link"| S17
+  S17 -->|"Vasarloi belepes"| S09
+  S01 -->|"Kivansaglista link"| S10
+  S01 -->|"AI segito gomb"| S16
+  S03 -->|"AI segito gomb"| S16
+  S04 -->|"AI segito gomb"| S16
+
+  S17 -->|"Admin / dolgozo belepes"| S11
+  S11 -->|"Termekek ful"| S12
+  S11 -->|"Rendelesek ful"| S13
+  S13 -->|"Helyszini vasarlas rogzitese"| S14
+  S13 -->|"Szamla letoltese"| S15
+  S14 -->|"PDF generalas"| S15
+  S11 -->|"Felhasznalok ful"| S18
+
+  classDef entry fill:#1d4ed8,color:#ffffff,stroke:#60a5fa,stroke-width:2px;
+  classDef modal fill:#7f1d1d,color:#ffffff,stroke:#f87171,stroke-width:2px;
+  classDef auth fill:#064e3b,color:#ffffff,stroke:#34d399,stroke-width:2px;
+  class S01 entry;
+  class S02,S15,S16 modal;
+  class S09,S10,S11,S12,S13,S14,S15,S18 auth;

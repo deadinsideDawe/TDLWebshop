@@ -363,6 +363,7 @@ export class Checkout {
       this.registerEmail = normalizedEmail;
       this.customerEmail = normalizedEmail;
       this.authEmail = normalizedEmail;
+      await this.saveRegisteredCheckoutDataIfPossible();
       this.toastService.success('Sikeres regisztráció');
       this.closeRegisterModal();
     } catch {
@@ -370,6 +371,68 @@ export class Checkout {
       this.toastService.error('Regisztráció sikertelen', this.registerError);
     } finally {
       this.registerLoading = false;
+    }
+  }
+
+  private async saveRegisteredCheckoutDataIfPossible(): Promise<void> {
+    // Checkout kozbeni regisztracional a mar beirt vevoi adatokat rogton a profilhoz kotjuk.
+    const currentUser = this.authService.getUser();
+    const email = currentUser?.email?.trim().toLowerCase() || this.customerEmail.trim().toLowerCase();
+    if (!currentUser?.uid || !email) {
+      return;
+    }
+
+    const form = this.getSanitizedForm();
+    try {
+      await this.userService.upsertUserProfile(currentUser.uid, email);
+
+      const profilePatch: Record<string, unknown> = {};
+      if (form.customerName) {
+        profilePatch['displayName'] = form.customerName;
+      }
+      if (isValidPhone(form.customerPhone)) {
+        profilePatch['phone'] = form.customerPhone;
+      }
+      profilePatch['accountType'] = this.isBusinessBuyer ? 'company' : 'private';
+      if (this.isBusinessBuyer) {
+        profilePatch['companyName'] = form.businessCompanyName || form.customerName;
+        profilePatch['taxNumber'] = form.businessTaxNumber;
+      }
+      if (form.shippingZip && form.shippingCity && form.shippingAddress) {
+        profilePatch['shippingAddress'] = {
+          zip: form.shippingZip,
+          city: form.shippingCity,
+          address: form.shippingAddress
+        };
+      }
+      if (this.billingSameAsShipping || (form.billingName && form.billingZip && form.billingCity && form.billingAddress)) {
+        profilePatch['billingAddress'] = {
+          sameAsShipping: this.billingSameAsShipping,
+          name: this.billingSameAsShipping ? (form.customerName || '') : form.billingName,
+          zip: this.billingSameAsShipping ? form.shippingZip : form.billingZip,
+          city: this.billingSameAsShipping ? form.shippingCity : form.billingCity,
+          address: this.billingSameAsShipping ? form.shippingAddress : form.billingAddress
+        };
+      }
+
+      if (Object.keys(profilePatch).length > 0) {
+        await this.userService.updateUserProfile(currentUser.uid, profilePatch);
+      }
+
+      if (form.customerName && isValidPhone(form.customerPhone)) {
+        await this.customerDirectoryService.upsertProfileForUser(currentUser.uid, email, {
+          type: this.isBusinessBuyer ? 'company' : 'private',
+          name: form.customerName,
+          phone: form.customerPhone,
+          companyName: this.isBusinessBuyer ? (form.businessCompanyName || form.customerName) : '',
+          taxNumber: this.isBusinessBuyer ? form.businessTaxNumber : ''
+        });
+      }
+    } catch (error) {
+      this.monitoringService.capture('checkout-register-profile-sync', error, {
+        uid: currentUser.uid,
+        email
+      });
     }
   }
 

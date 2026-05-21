@@ -1,20 +1,24 @@
-# Önértékelés (1-5)
+# UX onertekeles
 
-| Szempont | Pontszám | Indoklás |
+| Szempont | Pontszam | Indoklas |
 |---|---:|---|
-| Vizuális konzisztencia (szín, tipográfia, spacing) | 4 | A fő oldalak egységes stílust követnek, kisebb finomhangolás még lehetséges. |
-| Információs hierarchia és olvashatóság | 4 | A fő funkciók jól elkülönülnek, a fontos CTA-k láthatók. |
-| Visszajelzések (loading, validáció, hiba, siker) | 5 | A kritikus folyamatokban vannak jól látható visszajelzések. |
-| Hibakezelés és üres állapotok | 4 | Az alap hiba- és üresállapot kezelés elkészült, néhány edge case még fejleszthető. |
-| Mobil / asztal lefedettség | 4 | A vásárlói oldalak jól működnek mobilon is, admin nézet még tömöríthető. |
-| Akadálymentesség (a11y) | 3 | Alap fókusz- és billentyűkezelés van, de ARIA bővíthető. |
-| Onboarding és új-user élmény | 4 | Kategóriák, keresés és checkout útvonal egyszerűen követhető. |
-| Teljesítményérzet (gyorsaság, animációk) | 4 | A felület gyors, de további optimalizálás még lehetséges. |
+| Vizualis konzisztencia | 4 | A dark/light tema, a kartyak, gombok es admin elemek nagyreszt egységes vizualis rendszert kovetnek. |
+| Informacios hierarchia es olvashatosag | 4 | A vasarloi es admin feluletekben a legfontosabb adatok, arak, statuszok es muveletek jol kiemelve jelennek meg. |
+| Visszajelzesek | 4 | A rendszer tobb helyen ad sikeres, hibas es validacios visszajelzest, kulonosen checkout, admin es import folyamatoknal. |
+| Hibakezeles es ures allapotok | 3 | A fo hibaagak kezelve vannak, de tovabb lehetne boviteni reszletesebb empty/error allapotokkal. |
+| Mobil / asztal lefedettseg | 3 | A vasarloi oldal reszponzivabb, az admin felulet mobilon tovabbi finomitast igenyelhet. |
+| Akadalymentesseg | 3 | A kontraszt es a feliratok jo alapot adnak, de a teljes ARIA es billentyuzet-navigacio meg fejlesztheto. |
+| Onboarding es uj-user elmeny | 3 | A regisztracio es belepes egyszeru, de tovabbi segitoszovegek javithatnak az elso hasznalaton. |
+| Teljesitmenyerzet | 4 | A felulet gyorsnak hat, a listak es kartyak jol scannelhetoek, a visszajelzesek csokkentik a bizonytalansagot. |
 
-## Rövid szöveges értékelés
-Erősségnek érzem, hogy a vásárlói és admin felület ugyanarra az adatmodellre épül, így a készlet- és rendeléskezelés konzisztens.  
-Külön előny, hogy a webes és helyszíni vásárlás folyamata egy rendszerben kezelhető.  
-További fejlesztési irányként az akadálymentesség és a mobil admin nézet finomhangolását emelném ki.
+## Mire vagyok buszke a UI/UX-ben?
 
-## Zaro ertekeles
-A projekt legerosebb resze, hogy a vasarloi oldal es az adminisztracios felulet ugyanarra a termek- es rendeleslogikara epul. Tovabbi fejleszteskent a valodi online fizetesi integracio, automatikus emailkuldes es NAV-kompatibilis szamlazo bekotese lenne a kovetkezo lepes.
+A TDLWebshop felulete nem csak egy alap CRUD admin vagy egyszeru termeklista, hanem egy osszefuggo webshop-elmeny. A sotet, ipari hangulat illeszkedik az epületgepeszeti temahoz, az admin felulet pedig olyan funkciokat is kezel, amelyek egy szakmai kereskedesben fontosak: helyszini vasarlas, mentett vasarlok, keszlet es PDF bizonylat.
+
+## Mit fejlesztenek tovabb ket het alatt?
+
+Elsokent az admin felulet mobilos megjeleneset es az akadalymentesseget erositenem. Emellett tobb kulon empty, loading es error allapotot keszitenek, hogy minden ritkabb helyzet is egyertelmuen kezelve legyen.
+
+## Mi nem valosult meg teljesen?
+
+A teljes design rendszer meg nem kulon token-fajlban el, hanem a komponensek es stiluslapok szintjen van megvalositva. A screen recording es a teljes screenshot csomag kezi lepeskent keszitendo el a vegso beadashoz.

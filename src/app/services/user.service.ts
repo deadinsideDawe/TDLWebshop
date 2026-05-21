@@ -28,21 +28,27 @@ export class UserService {
       return;
     }
 
-    const managedProfileQuery = query(this.usersCollection, where('email', '==', normalizedEmail), limit(1));
-    const managedProfileSnapshot = await getDocs(managedProfileQuery);
-    if (!managedProfileSnapshot.empty) {
-      const managedProfile = managedProfileSnapshot.docs[0].data() as UserProfile;
-      await setDoc(
-        userRef,
-        {
-          ...managedProfile,
-          email: normalizedEmail,
-          createdAt: managedProfile.createdAt || Date.now(),
-          lastLoginAt: Date.now()
-        },
-        { merge: true }
-      );
-      return;
+    try {
+      const managedProfileQuery = query(this.usersCollection, where('email', '==', normalizedEmail), limit(1));
+      const managedProfileSnapshot = await getDocs(managedProfileQuery);
+      if (!managedProfileSnapshot.empty) {
+        const managedProfile = managedProfileSnapshot.docs[0].data() as UserProfile;
+        await setDoc(
+          userRef,
+          {
+            ...managedProfile,
+            email: normalizedEmail,
+            createdAt: managedProfile.createdAt || Date.now(),
+            lastLoginAt: Date.now()
+          },
+          { merge: true }
+        );
+        return;
+      }
+    } catch (error) {
+      if ((error as { code?: string })?.code !== 'permission-denied') {
+        throw error;
+      }
     }
 
     await setDoc(userRef, {

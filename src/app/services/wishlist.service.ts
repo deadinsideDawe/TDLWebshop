@@ -35,6 +35,8 @@ export class WishlistService {
 
     onAuthStateChanged(auth, user => {
       this.persist();
+      this.items = [];
+      this.itemsSubject.next([]);
       this.activeStorageKey = user?.uid ? `wishlist:user:${user.uid}` : this.guestStorageKey;
       this.loadFromStorage(this.activeStorageKey);
       this.itemsSubject.next([...this.items]);

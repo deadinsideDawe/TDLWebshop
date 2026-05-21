@@ -1,10 +1,3 @@
-# Iparági inspirációk (opcionális)
+# Iparagi inspiracio
 
-Ide kerülhetnek benchmark alkalmazások rövid elemzéssel.
-
-Javasolt sablon:
-1. Termék neve + URL
-2. 1 db screenshot fájl ebben a mappában
-3. 2 mondat:
-   - mit emeltél át a saját designba
-   - mit csináltál másképp és miért
+A felulet kialakitasakor modern muszaki webshopok, termekkatalogusok es admin dashboardok szolgaltak inspiraciokent. A TDLWebshop ezektol abban ter el, hogy a vasarloi webshop mellett helyszini ertekesitesi, keszletkezelesi, PDF bizonylatolasi es AI-asszisztens funkciot is tartalmaz.

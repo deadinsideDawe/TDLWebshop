@@ -85,7 +85,7 @@ export function isValidPhone(value: string): boolean {
     return isValidHungarianNationalNumber(digits.slice(2));
   }
 
-  return digits.length >= 8 && digits.length <= 15;
+  return isValidHungarianNationalNumber(digits);
 }
 
 export function isValidOptionalPhone(value: string): boolean {

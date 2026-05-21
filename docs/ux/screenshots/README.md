@@ -1,31 +1,49 @@
-# Screenshot lista (feltöltendő)
+# Screenshot keszitesi lista
 
-Fájlnév-konvenció: `S<NN>_<rovid_nev>.png`  
-Reszponzív támogatásnál: `..._mobil.png`, `..._tablet.png`, `..._desktop.png`
+A screenshotokat te keszited el a vegleges, futtatott alkalmazasbol. Minden kepet a teljes viewporttal ments, ne vagd le a fejlécet vagy a lablecet. Webes beadashoz javasolt meret: 1440x900 desktop.
 
-## Kötelező minimum screenshot lista
-- `S01_fooldal_desktop.png`
-- `S02_termeklista_desktop.png`
-- `S03_termek_reszletek_desktop.png`
-- `S04_kategoriak_desktop.png`
-- `S05_kosar_desktop.png`
-- `S06_checkout_desktop.png`
-- `S07_rendeles_sikeres_desktop.png`
-- `S08_login_desktop.png`
-- `S09_register_desktop.png`
-- `S10_profilom_rendeleseim_desktop.png`
-- `S11_admin_attekintes_desktop.png`
-- `S12_admin_termekkezeles_desktop.png`
-- `S13_admin_keszletkezeles_desktop.png`
-- `S14_admin_rendeleskezeles_desktop.png`
-- `S15_admin_felhasznalokezeles_desktop.png`
-- `S16_kosarba_visszajelzo_modal_desktop.png`
-- `S17_statusz_megerosito_modal_desktop.png`
-- `S18_felhasznalo_reszletek_modal_desktop.png`
+## Kotelezo desktop screenshotok
 
-## Opcionális, de értékelt extra állapotok
-- `__loading`
-- `__empty`
-- `__error`
-- `__success`
-- `_dark`
+| Fajlnev | Kepernyo | Mit mutasson? |
+|---|---|---|
+| `S01_kezdolap_desktop.png` | Kezdolap | Header, kereso, kategoriak/CTA, fo ajanlat vagy kiemelt termekek |
+| `S02_termeklista_desktop.png` | Termeklista | Termekkartyak, szures/kereses, rendeles vagy reszletek gomb |
+| `S03_termekadatlap_desktop.png` | Termekadatlap | Termekkep, leiras, ar, keszlet, kosarba helyezes |
+| `S04_kosar_desktop.png` | Kosar | Legalabb egy termek, mennyiseg, kupon/osszegzes, tovabb checkout-ra |
+| `S05_checkout_desktop.png` | Checkout | Szallitasi/szamlazasi adatok, validacios mezok, rendelés osszegzese |
+| `S06_sikeres_rendeles_desktop.png` | Sikeres rendeles | Sikeres visszajelzes, rendeles utan lathato kovetkezo lepes |
+| `S07_profil_rendelesek_desktop.png` | Profil / rendelestortenet | Bejelentkezett vasarlo adatai, rendelesei, statuszok |
+| `S08_admin_belepes_desktop.png` | Admin belepes | Login vagy admin belepesi allapot |
+| `S09_admin_rendelesek_desktop.png` | Admin rendelesek | Rendeleslista, szuro, statuszkezeles |
+| `S10_statusz_valtas_desktop.png` | Statusz valtas | Uj -> feldolgozas alatt -> teljesitett jellegu statuszmodositas |
+| `S11_keszlet_modositas_desktop.png` | Keszletmodositas | Keszlet vagy termekadat szerkesztese admin feluleten |
+| `S12_pdf_bizonylat_desktop.png` | PDF bizonylat | Generalas/letoltes vagy megnyitott bizonylat |
+| `S13_helyszini_vasarlas_desktop.png` | Helyszini vasarlas | Mentett vevo, termekvalasztas, tetelek, PDF gomb |
+
+## Erdemes pluszban lementeni
+
+| Fajlnev | Allapot | Mikor hasznos? |
+|---|---|---|
+| `S05_checkout__error_desktop.png` | Checkout hiba | Hibas vagy hianyos urlapadatoknal |
+| `S02_termeklista__empty_desktop.png` | Ures lista | Ha nincs talalat egy keresesre |
+| `S09_admin_rendelesek__empty_desktop.png` | Ures admin lista | Ha nincs meg rendeles |
+| `S14_ai_asszisztens_desktop.png` | AI asszisztens | Ha a vegso beadashoz ezt is szeretned dokumentalni |
+
+## Mobil screenshotok, ha szeretned bizonyitani a reszponzivitast
+
+- `S01_kezdolap_mobile.png`
+- `S02_termeklista_mobile.png`
+- `S05_checkout_mobile.png`
+- `S07_profil_rendelesek_mobile.png`
+- `S13_helyszini_vasarlas_mobile.png`
+
+## Screen recording javaslat
+
+Az ajanlott `journey1.mp4` 30-90 masodpercben mutassa meg:
+
+1. Kezdolap megnyitasa.
+2. Termeklista megnyitasa kategoriabol vagy keresesbol.
+3. Termekadatlap megnyitasa.
+4. Kosarba helyezes.
+5. Checkout kitoltese.
+6. Sikeres rendeles visszajelzese.

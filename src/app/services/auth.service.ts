@@ -64,7 +64,6 @@ export class AuthService {
 
     try {
       // Regisztracio utan azonnal letrehozzuk a user profilt.
-      // Ha ez elbukik, kijelentkeztetunk, hogy ne maradjon felig letrehozott munkamenet.
       if (credential.user.email) {
         await this.userService.upsertUserProfile(credential.user.uid, credential.user.email);
       }
@@ -79,8 +78,12 @@ export class AuthService {
 
       return credential;
     } catch (error) {
-      await signOut(auth).catch(() => undefined);
-      throw error;
+      if ((error as Error & { code?: string })?.code === 'auth/user-disabled') {
+        throw error;
+      }
+
+      console.warn('A regisztráció sikerült, de a Firestore profil mentése később lesz pótolva.', error);
+      return credential;
     }
   }
 

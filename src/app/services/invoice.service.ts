@@ -27,7 +27,7 @@ export class InvoiceService {
       invoiceNumber,
       issueDate: new Date(issueDate).toLocaleDateString('hu-HU'),
       orderId: order.id,
-      salesChannel: order.salesChannel === 'local-admin' ? 'Helyszíni' : 'Webes',
+      salesChannel: order.salesChannel === 'local-admin' ? 'Helyszini' : 'Webes',
       buyerName: order.customerName,
       buyerEmail: order.customerEmail,
       buyerPhone: order.customerPhone,
@@ -85,7 +85,6 @@ export class InvoiceService {
     c.push('q 0.03 0.05 0.10 rg 36 760 523 66 re f Q');
     c.push('q 0.12 0.48 0.86 RG 1.4 w 36 760 523 66 re S Q');
     c.push('q 0.92 0.10 0.12 RG 1.3 w 392 768 146 0 m 538 768 l S Q');
-    c.push('q 0.05 0.45 0.82 RG 4 w 54 783 24 0 360 arc S Q');
     c.push('q 0.80 0.85 0.92 rg 55 788 32 14 re f Q');
     c.push('q 0.05 0.45 0.82 rg 96 787 4 18 re f Q');
     c.push(this.drawText(108, 797, 'F2', 22, 'TDL', '0.05 0.50 0.90 rg'));
@@ -130,7 +129,7 @@ export class InvoiceService {
     c.push(this.drawText(462, 465, 'F2', 10, 'Bruttó', '1 1 1 rg'));
 
     let y = 438;
-    const visibleItems = data.items.slice(0, 15);
+    const visibleItems = data.items.slice(0, 12);
     // A jelenlegi szakdolgozati PDF egyoldalas; hosszú rendelésnél jelzést teszünk,
     // hogy ne tűnjön úgy, mintha a fennmaradó tételek elvesztek volna.
     for (const item of visibleItems) {
@@ -203,7 +202,7 @@ export class InvoiceService {
 
   private stripDiacritics(text: string): string {
     // A beépített Helvetica font nem kezeli megbízhatóan a magyar ékezeteket nyers PDF-ben.
-    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7E]/g, '?');
   }
 }
 

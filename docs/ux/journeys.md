@@ -1,74 +1,57 @@
 # Top 3 user journey
 
-## 1) Vásárló rendelést ad le személyes átvétellel
-**Persona:** Olyan vásárló, aki gyorsan szeretné lefoglalni a szükséges termékeket, és személyesen venné át.
+## 1. Vasarlo termeket keres es rendelest ad le
 
-**Belépési pont:** `S01` (Főoldal)
+**Persona:** lakossagi vasarlo, aki gyorsan szeretne epületgepeszeti termeket keresni es rendelest leadni.
 
-1. **S01 - Főoldal**  
-   A felhasználó kategóriát választ vagy a terméklistára megy.  
-   Rendszerválasz: megnyílik a `S02` (Terméklista).  
-   Hibaág: ha nincs találat, üres állapot jelenik meg.
-2. **S02 - Terméklista**  
-   A felhasználó kiválaszt egy terméket és kosárba teszi.  
-   Rendszerválasz: `S16` (Kosárba visszajelző modál) megjelenik.
-3. **S16 - Kosárba modál**  
-   A felhasználó „Ugrás a kosárra” opciót választ.  
-   Rendszerválasz: `S05` (Kosár) oldal nyílik.
-4. **S05 - Kosár**  
-   A felhasználó ellenőrzi a tételeket és a tovább gombra kattint.  
-   Rendszerválasz: `S06` (Checkout) oldal nyílik.
-5. **S06 - Checkout**  
-   A felhasználó megadja az adatokat és leadja a rendelést.  
-   Rendszerválasz: `S07` (Rendelés sikeres).  
-   Hibaág: hibás mező vagy mentési hiba esetén hibaüzenet.
+**Belepesi pont:** S01 - Kezdolap.
 
-**Sikerkritérium:** létrejön a rendelés, és megjelenik a sikeroldal.  
-**Mért időtartam:** kb. 1-2 perc, 8-12 kattintás.
+| Lepes | Kepernyo | Felhasznaloi muvelet | Rendszervalasz | Hibaag |
+|---|---|---|---|---|
+| 1 | S01 | Keresoszot ir be vagy kategoriat valaszt. | A rendszer a termeklistara navigal. | Ha nincs talalat, ures allapot jelenik meg. |
+| 2 | S03 | Megnyit egy termeket. | Megjelenik a termekadatlap. | Ha a termek nem talalhato, hibaallapot jelenik meg. |
+| 3 | S04 | Mennyiseget valaszt es kosarba teszi. | A termek bekerul a kosarba. | Nem pozitiv mennyiseg nem engedett. |
+| 4 | S05 | Ellenorzi a kosarat es tovabbmegy. | Megnyilik a checkout. | Ures kosarnal nem indithato rendelés. |
+| 5 | S06 | Megadja az adatokat, fizetesi modot es elkuldi. | Siker eseten rendelés jon letre. | Hibas email, telefon vagy hianyzo adat eseten S07 validacios allapot. |
+| 6 | S08 | Megnezi a sikeres visszajelzest. | A rendelés az admin feluleten is megjelenik. | Ha a mentes sikertelen, hiba uzenet jelenik meg. |
 
----
+**Sikerkriterium:** a rendelés letrejon, a vasarlo visszajelzest kap, az admin rendeleslistaban megjelenik.
 
-## 2) Bejelentkezett felhasználó profiladatot frissít
-**Persona:** Visszatérő vásárló, aki módosítani szeretné a profil adatait.
+**Becsult ido:** 60-120 masodperc, kb. 8-12 kattintas.
 
-**Belépési pont:** `S10` (Profilom + rendeléseim)
+## 2. Admin rendelest kezel es PDF bizonylatot tolt le
 
-1. **S10 - Profilom**  
-   A felhasználó módosítja a szállítási/számlázási adatokat.  
-   Rendszerválasz: mentés után siker visszajelzés jelenik meg.  
-   Hibaág: hiányzó kötelező mező.
-2. **S10 - Rendeléseim szekció**  
-   A felhasználó átnézi a rendeléslista státuszait.  
-   Rendszerválasz: rendelések betöltődnek.  
-   Hibaág: üres állapot jelenik meg.
+**Persona:** adminisztrator, aki bejovo rendelest ellenoriz, statuszt modosit es bizonylatot general.
 
-**Sikerkritérium:** profil mentve, rendelések láthatók.  
-**Mért időtartam:** kb. 30-60 mp, 4-7 kattintás.
+**Belepesi pont:** S17 - Login / regisztracio.
 
----
+| Lepes | Kepernyo | Felhasznaloi muvelet | Rendszervalasz | Hibaag |
+|---|---|---|---|---|
+| 1 | S17 | Admin fiokkal bejelentkezik. | Megnyilik az admin attekintes. | Hibas jogosultsag eseten nincs admin hozzaferes. |
+| 2 | S11 | A rendelesek fulre lep. | Megjelenik a rendeleslista. | Ures lista eseten ures allapot latszik. |
+| 3 | S13 | Kivalaszt egy rendelest es statuszt modosit. | A rendszer statuszt, auditot es keszletvaltozast kezel. | Keszlethiany vagy jogosultsagi hiba eseten figyelmeztetes. |
+| 4 | S13 | Szamla / bizonylat letoltesere kattint. | PDF generalodik. | Hianyos adatnal PDF hiba jelenik meg. |
+| 5 | S15 | Megnyitja vagy lementi a PDF-et. | A bizonylat ellenorizheto es dokumentalhato. | Sikertelen generalasnal hiba uzenet. |
 
-## 3) Admin rendelést kezel és készletet figyel
-**Persona:** Az üzlet adminisztrátora, aki a napi rendeléseket állítja és készletet ellenőriz.
+**Sikerkriterium:** a rendelés allapota frissul, az audit/keszlet logika lefut, a PDF elerheto.
 
-**Belépési pont:** `S08` (Login), majd `S11` (Admin áttekintés)
+**Becsult ido:** 45-90 masodperc, kb. 6-9 kattintas.
 
-1. **S08 - Login**  
-   Az admin bejelentkezik.  
-   Rendszerválasz: `S11` admin oldal megnyílik.  
-   Hibaág: hibás belépési adat.
-2. **S11 - Admin áttekintés**  
-   Az admin ellenőrzi a statisztikákat és az alacsony készlet jelzéseket.
-3. **S14 - Admin rendeléskezelés**  
-   Az admin kiválaszt egy rendelést és státuszt vált.  
-   Rendszerválasz: `S17` megerősítő modál.
-4. **S17 - Státusz megerősítő modál**  
-   Az admin megerősíti a műveletet.  
-   Rendszerválasz: státusz frissül, készlet módosul.
+## 3. Admin helyszini vasarlast rogzit mentett vasarloval
 
-**Sikerkritérium:** a rendelés státusza frissül és az adat konzisztens marad.  
-**Mért időtartam:** kb. 40-90 mp, 5-9 kattintás.
+**Persona:** pultos/admin dolgozo, aki szemelyes vasarlast rogzit a webshop admin feluleten.
 
----
+**Belepesi pont:** S17 - Login / regisztracio.
 
-## Osszegzes
-A legerosebb felhasznaloi folyamat a termekkeresesbol indul, majd kosaron es checkouton keresztul jut el a rendelésig. Admin oldalon ezt a keszletkezeles, statuszvaltas es bizonylatletoltes egesziti ki, igy a rendszer nem csak vasarloi, hanem uzemeltetoi oldalrol is bemutathato.
+| Lepes | Kepernyo | Felhasznaloi muvelet | Rendszervalasz | Hibaag |
+|---|---|---|---|---|
+| 1 | S17 | Admin vagy dolgozoi fiokkal bejelentkezik. | Megnyilik az engedelyezett admin felulet. | Nem megfelelo szerepkornal vedett funkcio nem latszik. |
+| 2 | S11 | Helyszini vasarlas rogzitesehez navigal. | Megjelenik a helyszini vasarlas urlap. | Betoltesi hiba eseten figyelmeztetes. |
+| 3 | S14 | Mentett vasarlot valaszt vagy uj adatot ad meg. | Az urlap kitoltodik a vasarlo adataival. | Tiltott vasarlo eseten nem rogzithet rendelest. |
+| 4 | S14 | Termeket keres es tetelekhez adja. | A rendszer arat, mennyiseget es vegosszeget szamol. | Nincs termek vagy hibas mennyiseg eseten validacio. |
+| 5 | S14 | Elmenti a vasarlast es PDF-et ker. | Helyszini rendelés jon letre es bizonylat generalodik. | Mentesi hiba eseten hiba uzenet. |
+| 6 | S15 | Ellenorzi a PDF bizonylatot. | A dokumentum nyomtathato vagy mentheto. | PDF hiba eseten ujraprobalhato. |
+
+**Sikerkriterium:** a helyszini vasarlas mentodik, a keszlet frissul, a PDF bizonylat letoltheto.
+
+**Becsult ido:** 60-120 masodperc, kb. 8-12 kattintas.
