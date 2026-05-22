@@ -49,6 +49,7 @@ yarn-error.log
 /docs/vazlat_render*/
 /docs/tdlwebshop_szakdolgozat_render/
 /helyi_archivum_nem_git/
+/.chrome_screenshot_profile/
 ~$*.docx
 /kodreszlet-javaslatok_szakdolgozathoz.docx
 /kodreszlet_kepalairasok_utvonalakkal.docx
