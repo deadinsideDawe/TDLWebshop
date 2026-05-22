@@ -1,20 +1,20 @@
-# Vegleges szakdolgozat abra- es diagramellenorzes
+# Végleges szakdolgozat ábra- és diagramellenőrzés
 
-Ellenorzott fajl:
+Ellenőrzött fájl:
 
 - `docs/thesis/Toth_David_Laszlo_PTNRYG_szakdolgozata.docx`
 
-Forras:
+Forrás:
 
 - `C:\Users\Dell\OneDrive\Asztali gép\szakdoga\Toth_David_Laszlo_PTNRYG_szakdolgozata.docx`
 
-## Eredmeny
+## Eredmény
 
-A vegleges Word dokumentum bekerult a repoba a `docs/thesis/` mappaba. A DOCX-ben 62 beagyazott kep talalhato. A dolgozat fo szovegeben es az M3 mellekletben lathato diagramok, pageflow-k es kepernyokepek kulon exportkent is bekerultek a `docs/thesis/figures/` mappaba.
+A végleges Word dokumentum bekerült a repóba a `docs/thesis/` mappába. A DOCX-ben 62 beágyazott kép található. A dolgozat fő szövegében és az M3 mellékletben látható diagramok, pageflow-k és képernyőképek külön exportként is bekerültek a `docs/thesis/figures/` mappába.
 
-## Pontosan egyezo kepek
+## Pontosan egyező képek
 
-A mellekletben szereplo kodreszlet-kepek kozul 42 darab byte-szinten is egyezik a repoban talalhato kepekkel:
+A mellékletben szereplő kódrészlet-képek közül 42 darab byte-szinten is egyezik a repóban található képekkel:
 
 - `docs/code-snippet-images/M2_1_utvonalkezeles_es_lazy_loading.png`
 - `docs/code-snippet-images/M2_2_admin_route_guard.png`
@@ -59,18 +59,18 @@ A mellekletben szereplo kodreszlet-kepek kozul 42 darab byte-szinten is egyezik 
 - `docs/code-snippet-images/M2_15d_openrouter_api_hivas.png`
 - `docs/code-snippet-images/M2_15e_openrouter_valasz_parse.png`
 
-## Diagramok es abraforrasok
+## Diagramok és ábraforrások
 
-A Wordben hasznalt fo diagramokhoz a repoban elerhetok a forrasok es a Wordbol kinyert kepvaltozatok is:
+A Wordben használt fő diagramokhoz a repóban elérhetők a források és a Wordből kinyert képváltozatok is:
 
 - Use case diagram: `docs/02_architecture/diagram_kepek/01_use_case_attekintes.svg`
-- Pageflow: `docs/ux/pageflow.png` es `docs/ux/pageflow.mmd`
-- Komponens-architektura: `docs/02_architecture/diagram_kepek/02_komponens_architektura.svg`
-- Tovabbi architekturadiagramok: `docs/02_architecture/diagram_kepek/`
-- A dolgozatban lathato exportalt kepvaltozatok: `docs/thesis/figures/`
+- Pageflow: `docs/ux/pageflow.png` és `docs/ux/pageflow.mmd`
+- Komponens-architektúra: `docs/02_architecture/diagram_kepek/02_komponens_architektura.svg`
+- További architektúradiagramok: `docs/02_architecture/diagram_kepek/`
+- A dolgozatban látható exportált képváltozatok: `docs/thesis/figures/`
 
-Megjegyzes: a Wordbe illesztett SVG/PNG abrak nem minden esetben egyeznek byte-szinten a repoban tarolt forrasfajlokkal, mert a Word beilleszteskor atmeretezheti vagy ujratomoritheti oket. Emiatt a kodreszlet-kepeknel a hash-egyezes bizonyito ereju, a diagramoknal pedig a repoban levo SVG/Mermaid forras a mervado.
+Megjegyzés: a Wordbe illesztett SVG/PNG ábrák nem minden esetben egyeznek byte-szinten a repóban tárolt forrásfájlokkal, mert a Word beillesztéskor átméretezheti vagy újratömörítheti őket. Emiatt a kódrészlet-képeknél a hash-egyezés bizonyító erejű, a diagramoknál pedig a repóban lévő SVG/Mermaid forrás a mérvadó.
 
-## Kovetkeztetes
+## Következtetés
 
-A mellekleti kodreszlet-kepek egyeznek a repoban talalhato aktualis kepekkel. A pageflow es a fo diagramok forrasai megtalalhatok a repoban, a Wordben lathato exportalt kepvaltozatok pedig a `docs/thesis/figures/` mappaban vannak, ezert a dolgozatban szereplo abrak visszakereshetok es reprodukalhatok.
+A mellékleti kódrészlet-képek egyeznek a repóban található aktuális képekkel. A pageflow és a fő diagramok forrásai megtalálhatók a repóban, a Wordben látható exportált képváltozatok pedig a `docs/thesis/figures/` mappában vannak, ezért a dolgozatban szereplő ábrák visszakereshetők és reprodukálhatók.
