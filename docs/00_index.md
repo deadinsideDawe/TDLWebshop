@@ -61,7 +61,7 @@ Ez a dokumentacios csomag a TDL Webshop szakdolgozati projekt legfontosabb terme
 - [Konzulensi visszajelzes szerinti megfeleles](konzulensi-visszajelzes-megfeleles.md)
 - [Zarasi audit es heti teendok](00_zarasi_audit_es_teendok.md)
 - [Leadando checklist](leadando_checklist.md)
-- [Javitott szakdolgozati Word-alap](TDLWebshop_szakdolgozat_javitott_alap.docx)
+- [Vegleges szakdolgozati Word-dokumentum](thesis/TothDavidLaszlo_PTNRYG_szakdolgozat_vegleges.docx)
 
 ## 07 AI
 

@@ -48,6 +48,10 @@ yarn-error.log
 /docs/*_render/
 /docs/vazlat_render*/
 /docs/tdlwebshop_szakdolgozat_render/
+/docs/TDLWebshop_szakdolgozat_alap.docx
+/docs/TDLWebshop_szakdolgozat_javitott_alap.docx
+/docs/thesis/*draft*.doc
+/docs/thesis/*draft*.docx
 /helyi_archivum_nem_git/
 /.chrome_screenshot_profile/
 ~$*.docx

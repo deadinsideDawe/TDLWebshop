@@ -152,7 +152,7 @@ functions/
 ## Dokumentáció
 
 - Dokumentációs index: [docs/00_index.md](docs/00_index.md)
-- Javított szakdolgozati alap: [docs/TDLWebshop_szakdolgozat_javitott_alap.docx](docs/TDLWebshop_szakdolgozat_javitott_alap.docx)
+- Végleges szakdolgozati Word-dokumentum: [docs/thesis/TothDavidLaszlo_PTNRYG_szakdolgozat_vegleges.docx](docs/thesis/TothDavidLaszlo_PTNRYG_szakdolgozat_vegleges.docx)
 - Leadandó checklist: [docs/leadando_checklist.md](docs/leadando_checklist.md)
 - MVP brief: [docs/01_product/mvp_brief.md](docs/01_product/mvp_brief.md)
 - Piaci elemzés: [docs/01_product/piaci_elemzes.md](docs/01_product/piaci_elemzes.md)

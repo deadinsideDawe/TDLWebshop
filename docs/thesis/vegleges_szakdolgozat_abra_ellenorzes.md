@@ -63,9 +63,9 @@ A mellekletben szereplo kodreszlet-kepek kozul 42 darab byte-szinten is egyezik 
 
 A Wordben hasznalt fo diagramokhoz a repoban elerhetok a forrasok:
 
-- Use case diagram: `docs/_local_segedanyagok/word_abrak/08_use_case_diagram.svg`
+- Use case diagram: `docs/02_architecture/diagram_kepek/01_use_case_attekintes.svg`
 - Pageflow: `docs/ux/pageflow.png` es `docs/ux/pageflow.mmd`
-- Komponens-architektura: `docs/_local_segedanyagok/word_abrak/01_komponens_architektura.svg`
+- Komponens-architektura: `docs/02_architecture/diagram_kepek/02_komponens_architektura.svg`
 - Tovabbi architekturadiagramok: `docs/02_architecture/diagram_kepek/`
 
 Megjegyzes: a Wordbe illesztett SVG/PNG abrak nem minden esetben egyeznek byte-szinten a repoban tarolt forrasfajlokkal, mert a Word beilleszteskor atmeretezheti vagy ujratomoritheti oket. Emiatt a kodreszlet-kepeknel a hash-egyezes bizonyito ereju, a diagramoknal pedig a repoban levo SVG/Mermaid forras a mervado.
