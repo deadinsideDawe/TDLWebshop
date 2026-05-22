@@ -1,42 +1,42 @@
-# TDLWebshop GUI/UX dokumentacio
+# TDLWebshop GUI/UX dokumentáció
 
-Ez a mappa a TDLWebshop felhasznaloi feluletenek es felhasznaloi elmenyenek konzulensi kiiras szerinti dokumentaciojat tartalmazza. A cel az, hogy a vasarloi, adminisztratori es dolgozoi folyamatok kepernyo-szinten is kovethetoek legyenek.
+Ez a mappa a TDLWebshop felhasználói felületének és felhasználói élményének konzulensi kiírás szerinti dokumentációját tartalmazza. A cél az, hogy a vásárlói, adminisztrátori és dolgozói folyamatok képernyő-szinten is követhetőek legyenek.
 
 ## Tartalom
 
-| Kovetelmeny | Fajl / mappa | Allapot |
+| Követelmény | Fájl / mappa | Állapot |
 |---|---|---|
-| Pageflow / kepernyoterkep | `pageflow.png`, `pageflow.mmd` | kesz |
-| Kepernyokepek | `screenshots/` | desktop screenshot keszlet elkeszult, admin es PDF allapotokkal egyutt |
-| Kepernyokep-alairasok es vedesi jegyzetek | `screenshot_captions.md` | kesz |
-| Kepernyo-leiras tablazat | `screens.csv` | kesz |
-| Top 3 user journey | `journeys.md` | kesz |
-| Design rendszer | `design_system.md` | kesz |
-| UX onertekeles | `self_assessment.md` | kesz |
-| Screen recording | `journey1.mp4` | kesz |
-| Tervezesi artifactok | `mockups/` | opcionalis |
-| Benchmark / inspiracio | `inspirations/` | opcionalis |
+| Pageflow / képernyőtérkép | `pageflow.png`, `pageflow.mmd` | kész |
+| Képernyőképek | `screenshots/` | desktop screenshot készlet elkészült, admin és PDF állapotokkal együtt |
+| Képernyőkép-aláírások és védési jegyzetek | `screenshot_captions.md` | kész |
+| Képernyő-leírás táblázat | `screens.csv` | kész |
+| Top 3 user journey | `journeys.md` | kész |
+| Design rendszer | `design_system.md` | kész |
+| UX önértékelés | `self_assessment.md` | kész |
+| Screen recording | `journey1.mp4` | kész |
+| Tervezési artifactok | `mockups/` | opcionális |
+| Benchmark / inspiráció | `inspirations/` | opcionális |
 
 ## Lefedett folyamatok
 
-- vasarloi bongeszes, kereses, termekadatlap, kosar es checkout;
-- profil, rendeleskovetes es kivansaglista;
-- admin attekintes, rendeleskezeles, termekkezeles, CSV import es keszletfigyeles;
-- helyszini vasarlas mentett vasarloval es PDF bizonylattal;
-- dolgozoi korlatozott admin felulet;
-- AI asszisztens a sajat termekkatalogushoz kotott valaszokkal.
+- vásárlói böngészés, keresés, termékadatlap, kosár és checkout;
+- profil, rendeléskövetés és kívánságlista;
+- admin áttekintés, rendeléskezelés, termékkezelés, CSV import és készletfigyelés;
+- helyszíni vásárlás mentett vásárlóval és PDF bizonylattal;
+- dolgozói korlátozott admin felület;
+- AI asszisztens a saját termékkatalógushoz kötött válaszokkal.
 
-## Kepernyokepek
+## Képernyőképek
 
-A konkret screenshotokat a `screenshots/README.md` listaja alapjan kell elkesziteni. A fajlnevek egyeznek a `screens.csv` azonositoival, ezert a szakdolgozatban es a UX dokumentacioban is konzisztensen hivatkozhatoak.
+A konkrét screenshotokat a `screenshots/README.md` listája alapján kell elkészíteni. A fájlnevek egyeznek a `screens.csv` azonosítóival, ezért a szakdolgozatban és a UX dokumentációban is konzisztensen hivatkozhatóak.
 
-## PR-be masolhato checklist
+## PR-be másolható checklist
 
-- [x] `pageflow.png` + szerkesztheto `pageflow.mmd`
-- [x] minden fontos kepernyo screenshotja a `screenshots/` mappaban, `S##` fajlnev-konvencioval
-- [x] `screens.csv` minden kepernyore kitoltve
+- [x] `pageflow.png` + szerkeszthető `pageflow.mmd`
+- [x] minden fontos képernyő screenshotja a `screenshots/` mappában, `S##` fájlnév-konvencióval
+- [x] `screens.csv` minden képernyőre kitöltve
 - [x] `journeys.md` top 3 user journey
 - [x] `design_system.md`
 - [x] `self_assessment.md`
-- [x] ajanlott: `journey1.mp4` vagy GIF a fo vasarloi folyamatrol
-- [x] opcionalis mappak: `mockups/`, `inspirations/`
+- [x] ajánlott: `journey1.mp4` vagy GIF a fő vásárlói folyamatról
+- [x] opcionális mappák: `mockups/`, `inspirations/`

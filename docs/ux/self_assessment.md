@@ -1,24 +1,24 @@
-# UX onertekeles
+# UX önértékelés
 
-| Szempont | Pontszam | Indoklas |
+| Szempont | Pontszám | Indoklás |
 |---|---:|---|
-| Vizualis konzisztencia | 4 | A dark/light tema, a kartyak, gombok es admin elemek nagyreszt egységes vizualis rendszert kovetnek. |
-| Informacios hierarchia es olvashatosag | 4 | A vasarloi es admin feluletekben a legfontosabb adatok, arak, statuszok es muveletek jol kiemelve jelennek meg. |
-| Visszajelzesek | 4 | A rendszer tobb helyen ad sikeres, hibas es validacios visszajelzest, kulonosen checkout, admin es import folyamatoknal. |
-| Hibakezeles es ures allapotok | 3 | A fo hibaagak kezelve vannak, de tovabb lehetne boviteni reszletesebb empty/error allapotokkal. |
-| Mobil / asztal lefedettseg | 3 | A vasarloi oldal reszponzivabb, az admin felulet mobilon tovabbi finomitast igenyelhet. |
-| Akadalymentesseg | 3 | A kontraszt es a feliratok jo alapot adnak, de a teljes ARIA es billentyuzet-navigacio meg fejlesztheto. |
-| Onboarding es uj-user elmeny | 3 | A regisztracio es belepes egyszeru, de tovabbi segitoszovegek javithatnak az elso hasznalaton. |
-| Teljesitmenyerzet | 4 | A felulet gyorsnak hat, a listak es kartyak jol scannelhetoek, a visszajelzesek csokkentik a bizonytalansagot. |
+| Vizuális konzisztencia | 4 | A dark/light téma, a kártyák, gombok és admin elemek nagyrészt egységes vizuális rendszert követnek. |
+| Információs hierarchia és olvashatóság | 4 | A vásárlói és admin felületekben a legfontosabb adatok, árak, státuszok és műveletek jól kiemelve jelennek meg. |
+| Visszajelzések | 4 | A rendszer több helyen ad sikeres, hibás és validációs visszajelzést, különösen checkout, admin és import folyamatoknál. |
+| Hibakezelés és üres állapotok | 3 | A fő hibaágak kezelve vannak, de tovább lehetne bővíteni részletesebb empty/error állapotokkal. |
+| Mobil / asztal lefedettség | 3 | A vásárlói oldal reszponzívabb, az admin felület mobilon további finomítást igényelhet. |
+| Akadálymentesség | 3 | A kontraszt és a feliratok jó alapot adnak, de a teljes ARIA és billentyűzet-navigáció még fejleszthető. |
+| Onboarding és új-user élmény | 3 | A regisztráció és belépés egyszerű, de további segítőszövegek javíthatnak az első használaton. |
+| Teljesítményérzet | 4 | A felület gyorsnak hat, a listák és kártyák jól scannelhetőek, a visszajelzések csökkentik a bizonytalanságot. |
 
-## Mire vagyok buszke a UI/UX-ben?
+## Mire vagyok büszke a UI/UX-ben?
 
-A TDLWebshop felulete nem csak egy alap CRUD admin vagy egyszeru termeklista, hanem egy osszefuggo webshop-elmeny. A sotet, ipari hangulat illeszkedik az epületgepeszeti temahoz, az admin felulet pedig olyan funkciokat is kezel, amelyek egy szakmai kereskedesben fontosak: helyszini vasarlas, mentett vasarlok, keszlet es PDF bizonylat.
+A TDLWebshop felülete túlmutat egy alap CRUD admin megvalósításon: a webes vásárlási folyamatot és az admin funkciókat egy közös felületre építi. A sötét, ipari hangulat a célközönség elvárásaihoz igazodik, az admin felület pedig olyan funkciókat is kezel, amelyek egy szakmai kereskedésben fontosak: helyszíni vásárlás, mentett vásárlók, készletkövetés és PDF bizonylat.
 
-## Mit fejlesztenek tovabb ket het alatt?
+## Mit fejlesztenék tovább két hét alatt?
 
-Elsokent az admin felulet mobilos megjeleneset es az akadalymentesseget erositenem. Emellett tobb kulon empty, loading es error allapotot keszitenek, hogy minden ritkabb helyzet is egyertelmuen kezelve legyen.
+Elsőként az admin felület mobilos megjelenését és az akadálymentességet erősíteném. Emellett több külön empty, loading és error állapotot készítenék, hogy minden ritkább helyzet is egyértelműen kezelve legyen.
 
-## Mi nem valosult meg teljesen?
+## Mi nem valósult meg teljesen?
 
-A teljes design rendszer meg nem kulon token-fajlban el, hanem a komponensek es stiluslapok szintjen van megvalositva. A screen recording es a teljes screenshot csomag elkeszult, igy a UX dokumentacio a vegso beadashoz ellenorizheto allapotban van.
+A teljes design rendszer még nem külön token-fájlban él, hanem a komponensek és stíluslapok szintjén van megvalósítva. A screen recording és a teljes screenshot csomag elkészült, így a UX dokumentáció a végső beadáshoz ellenőrizhető állapotban van.

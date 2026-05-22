@@ -152,7 +152,8 @@ functions/
 ## Dokumentáció
 
 - Dokumentációs index: [docs/00_index.md](docs/00_index.md)
-- Végleges szakdolgozati Word-dokumentum: [docs/thesis/TothDavidLaszlo_PTNRYG_szakdolgozat_vegleges.docx](docs/thesis/TothDavidLaszlo_PTNRYG_szakdolgozat_vegleges.docx)
+- Végleges szakdolgozati Word-dokumentum: [docs/thesis/Toth_David_Laszlo_PTNRYG_szakdolgozata.docx](docs/thesis/Toth_David_Laszlo_PTNRYG_szakdolgozata.docx)
+- Szakdolgozatban szereplő ábrák külön exportálva: [docs/thesis/figures/README.md](docs/thesis/figures/README.md)
 - Leadandó checklist: [docs/leadando_checklist.md](docs/leadando_checklist.md)
 - MVP brief: [docs/01_product/mvp_brief.md](docs/01_product/mvp_brief.md)
 - Piaci elemzés: [docs/01_product/piaci_elemzes.md](docs/01_product/piaci_elemzes.md)

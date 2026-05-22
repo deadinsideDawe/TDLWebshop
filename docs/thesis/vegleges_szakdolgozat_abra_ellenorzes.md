@@ -2,15 +2,15 @@
 
 Ellenorzott fajl:
 
-- `docs/thesis/TothDavidLaszlo_PTNRYG_szakdolgozat_vegleges.docx`
+- `docs/thesis/Toth_David_Laszlo_PTNRYG_szakdolgozata.docx`
 
 Forras:
 
-- `C:\Users\Dell\OneDrive\Asztali gep\szakdoga\TothDavidLaszlo_PTNRYG_szakdolgozat_frissitett.docx`
+- `C:\Users\Dell\OneDrive\Asztali gép\szakdoga\Toth_David_Laszlo_PTNRYG_szakdolgozata.docx`
 
 ## Eredmeny
 
-A vegleges Word dokumentum bekerult a repoba a `docs/thesis/` mappaba. A DOCX-ben 62 beagyazott kep talalhato.
+A vegleges Word dokumentum bekerult a repoba a `docs/thesis/` mappaba. A DOCX-ben 62 beagyazott kep talalhato. A dolgozat fo szovegeben es az M3 mellekletben lathato diagramok, pageflow-k es kepernyokepek kulon exportkent is bekerultek a `docs/thesis/figures/` mappaba.
 
 ## Pontosan egyezo kepek
 
@@ -61,15 +61,16 @@ A mellekletben szereplo kodreszlet-kepek kozul 42 darab byte-szinten is egyezik 
 
 ## Diagramok es abraforrasok
 
-A Wordben hasznalt fo diagramokhoz a repoban elerhetok a forrasok:
+A Wordben hasznalt fo diagramokhoz a repoban elerhetok a forrasok es a Wordbol kinyert kepvaltozatok is:
 
 - Use case diagram: `docs/02_architecture/diagram_kepek/01_use_case_attekintes.svg`
 - Pageflow: `docs/ux/pageflow.png` es `docs/ux/pageflow.mmd`
 - Komponens-architektura: `docs/02_architecture/diagram_kepek/02_komponens_architektura.svg`
 - Tovabbi architekturadiagramok: `docs/02_architecture/diagram_kepek/`
+- A dolgozatban lathato exportalt kepvaltozatok: `docs/thesis/figures/`
 
 Megjegyzes: a Wordbe illesztett SVG/PNG abrak nem minden esetben egyeznek byte-szinten a repoban tarolt forrasfajlokkal, mert a Word beilleszteskor atmeretezheti vagy ujratomoritheti oket. Emiatt a kodreszlet-kepeknel a hash-egyezes bizonyito ereju, a diagramoknal pedig a repoban levo SVG/Mermaid forras a mervado.
 
 ## Kovetkeztetes
 
-A mellekleti kodreszlet-kepek egyeznek a repoban talalhato aktualis kepekkel. A pageflow es a fo diagramok forrasai megtalalhatok a repoban, ezert a dolgozatban szereplo abrak visszakereshetok es reprodukalhatok.
+A mellekleti kodreszlet-kepek egyeznek a repoban talalhato aktualis kepekkel. A pageflow es a fo diagramok forrasai megtalalhatok a repoban, a Wordben lathato exportalt kepvaltozatok pedig a `docs/thesis/figures/` mappaban vannak, ezert a dolgozatban szereplo abrak visszakereshetok es reprodukalhatok.
