@@ -86,7 +86,7 @@ export class InvoiceService {
 
     c.push('q 0.03 0.05 0.10 rg 36 760 523 66 re f Q');
     c.push('q 0.12 0.48 0.86 RG 1.4 w 36 760 523 66 re S Q');
-    c.push('q 0.92 0.10 0.12 RG 1.3 w 392 768 146 0 m 538 768 l S Q');
+    c.push('q 0.92 0.10 0.12 RG 1.3 w 392 768 m 538 768 l S Q');
     c.push('q 0.80 0.85 0.92 rg 55 788 32 14 re f Q');
     c.push('q 0.05 0.45 0.82 rg 96 787 4 18 re f Q');
     c.push(this.drawText(108, 797, 'F2', 22, 'TDL', '0.05 0.50 0.90 rg'));
@@ -149,7 +149,7 @@ export class InvoiceService {
       y -= 18;
     }
 
-    c.push('q 0.74 0.80 0.90 RG 0.8 w 36 118 523 0 m 559 118 l S Q');
+    c.push('q 0.74 0.80 0.90 RG 0.8 w 36 118 m 559 118 l S Q');
     c.push(this.drawText(36, 96, 'F2', 10, 'Megjegyzes'));
     c.push(this.drawText(36, 80, 'F1', 9, 'Koszonjuk a vasarlast! Ez a dokumentum webshop bizonylat.'));
     c.push(this.drawText(36, 48, 'F1', 8, 'A dokumentum szakdolgozati/demo rendszerben generalt bizonylat.'));
