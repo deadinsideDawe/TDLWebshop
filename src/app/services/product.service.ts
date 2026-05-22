@@ -162,10 +162,13 @@ export class ProductService {
       productsQuery,
       snapshot => {
         const products = snapshot.docs
-          .map(item => ({
-            id: item.id,
-            ...(item.data() as Omit<Product, 'id'>)
-          }))
+          .map(item => {
+            const data = item.data() as Omit<Product, 'id'> & { id?: unknown };
+            return {
+              ...data,
+              id: item.id
+            };
+          })
           .map(product => this.normalizeProductPayload(product));
 
         next(products);
@@ -187,8 +190,8 @@ export class ProductService {
     }
 
     return this.normalizeProductPayload({
-      id: snapshot.id,
-      ...(snapshot.data() as Omit<Product, 'id'>)
+      ...(snapshot.data() as Omit<Product, 'id'>),
+      id: snapshot.id
     });
   }
 

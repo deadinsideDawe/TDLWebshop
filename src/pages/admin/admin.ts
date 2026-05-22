@@ -2451,68 +2451,93 @@ export class Admin implements OnInit, OnDestroy {
         status: 'teljesitve'
       });
 
-      const invoiceData = await this.orderService.ensureInvoiceForOrder(orderRef.id);
-      this.invoiceService.downloadInvoicePdf({
-        id: orderRef.id,
-        customerName: this.localSaleCustomerName.trim() || 'Helyszíni vásárló',
-        customerEmail: this.getLocalSaleEmail(),
-        customerPhone: this.getLocalSalePhone(),
-        shipping: {
-          zip: '-',
-          city: 'Helyszíni vásárlás',
-          address: 'Ügyfélszolgálati pult'
-        },
-        shippingMethod: {
-          id: 'local-purchase',
-          label: 'Helyszíni vásárlás',
-          fee: 0,
-          eta: 'Azonnali átvétel'
-        },
-        billing: {
-          sameAsShipping: true,
-          name: this.localSaleCustomerName.trim() || 'Helyszíni vásárló',
-          zip: '-',
-          city: 'Helyszíni vásárlás',
-          address: 'Ügyfélszolgálati pult'
-        },
-        paymentMethod: {
-          id: this.localSalePaymentMethod,
-          label: paymentLabel,
-          fee: 0,
-          dueDays: this.localSalePaymentMethod === 'transfer' ? this.getLocalSalePaymentDeadlineDays() : undefined,
-          dueAt: paymentDueAt
-        },
-        business: {
-          isBusinessBuyer: this.localSaleIsBusinessBuyer,
-          companyName: this.localSaleIsBusinessBuyer
-            ? (this.localSaleCompanyName.trim() || this.localSaleCustomerName.trim())
-            : undefined,
-          taxNumber: this.localSaleIsBusinessBuyer ? this.localSaleTaxNumber.trim() : undefined
-        },
-        salesChannel: 'local-admin',
-        couponCode: '',
-        pricing: {
-          subtotal,
-          shippingFee: 0,
-          paymentFee: 0,
-          discount,
+      let invoiceError: unknown = null;
+      try {
+        const invoiceData = await this.orderService.ensureInvoiceForOrder(orderRef.id);
+        this.invoiceService.downloadInvoicePdf({
+          id: orderRef.id,
+          customerName: this.localSaleCustomerName.trim() || 'Helyszíni vásárló',
+          customerEmail: this.getLocalSaleEmail(),
+          customerPhone: this.getLocalSalePhone(),
+          shipping: {
+            zip: '-',
+            city: 'Helyszíni vásárlás',
+            address: 'Ügyfélszolgálati pult'
+          },
+          shippingMethod: {
+            id: 'local-purchase',
+            label: 'Helyszíni vásárlás',
+            fee: 0,
+            eta: 'Azonnali átvétel'
+          },
+          billing: {
+            sameAsShipping: true,
+            name: this.localSaleCustomerName.trim() || 'Helyszíni vásárló',
+            zip: '-',
+            city: 'Helyszíni vásárlás',
+            address: 'Ügyfélszolgálati pult'
+          },
+          paymentMethod: {
+            id: this.localSalePaymentMethod,
+            label: paymentLabel,
+            fee: 0,
+            dueDays: this.localSalePaymentMethod === 'transfer' ? this.getLocalSalePaymentDeadlineDays() : undefined,
+            dueAt: paymentDueAt
+          },
+          business: {
+            isBusinessBuyer: this.localSaleIsBusinessBuyer,
+            companyName: this.localSaleIsBusinessBuyer
+              ? (this.localSaleCompanyName.trim() || this.localSaleCustomerName.trim())
+              : undefined,
+            taxNumber: this.localSaleIsBusinessBuyer ? this.localSaleTaxNumber.trim() : undefined
+          },
+          salesChannel: 'local-admin',
+          couponCode: '',
+          pricing: {
+            subtotal,
+            shippingFee: 0,
+            paymentFee: 0,
+            discount,
+            total
+          },
+          comment: this.localSaleComment.trim() || this.getLocalSaleDiscountLabel() || 'Helyszíni admin rögzített vásárlás',
+          items,
+          total,
+          status: 'teljesitve',
+          invoiceNumber: invoiceData.invoiceNumber,
+          invoicedAt: invoiceData.invoicedAt
+        });
+      } catch (error) {
+        invoiceError = error;
+        this.monitoringService.capture('admin-local-sale-invoice', error, {
+          orderId: orderRef.id,
           total
-        },
-        comment: this.localSaleComment.trim() || this.getLocalSaleDiscountLabel() || 'Helyszíni admin rögzített vásárlás',
-        items,
-        total,
-        status: 'teljesitve',
-        invoiceNumber: invoiceData.invoiceNumber,
-        invoicedAt: invoiceData.invoicedAt
-      });
-      if (this.selectedLocalSaleProfileId) {
-        await this.customerDirectoryService.touchProfile(this.selectedLocalSaleProfileId);
+        });
       }
 
-      this.localSaleSuccess = this.localSaleSaveCustomerForLater
+      if (this.selectedLocalSaleProfileId) {
+        try {
+          await this.customerDirectoryService.touchProfile(this.selectedLocalSaleProfileId);
+        } catch (profileTouchError) {
+          this.monitoringService.capture('admin-local-sale-profile-touch', profileTouchError, {
+            profileId: this.selectedLocalSaleProfileId,
+            orderId: orderRef.id
+          });
+        }
+      }
+
+      const baseSuccess = this.localSaleSaveCustomerForLater
         ? `Helyszíni vásárlás sikeresen rögzítve, a vásárló mentve későbbre is (azonosító: ${orderRef.id}).`
         : `Helyszíni vásárlás sikeresen rögzítve (azonosító: ${orderRef.id}).`;
-      this.toastService.success('Helyszíni vásárlás mentve', orderRef.id);
+      this.localSaleSuccess = invoiceError
+        ? `${baseSuccess} A PDF automatikus letöltése nem sikerült, de a rendelés mentve van.`
+        : baseSuccess;
+      if (invoiceError) {
+        this.localSaleError = normalizeErrorMessage(invoiceError, 'A PDF generálása nem sikerült, de a helyszíni vásárlás mentve van.');
+        this.toastService.error('PDF generálás sikertelen', this.localSaleError);
+      } else {
+        this.toastService.success('Helyszíni vásárlás mentve', orderRef.id);
+      }
       this.localSaleLines = [];
       this.localSaleComment = '';
       this.localSaleSelectedProductId = '';

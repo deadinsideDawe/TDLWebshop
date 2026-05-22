@@ -52,5 +52,7 @@ describe('InvoiceService', () => {
     expect(pdfText).toContain('SZAMLA');
     expect(pdfText).toContain('INV-2026-0001');
     expect(pdfText).toContain('Radiator szelep');
+    expect(pdfText).toContain('1 575 Ft');
+    expect(pdfText).not.toContain('?');
   });
 });

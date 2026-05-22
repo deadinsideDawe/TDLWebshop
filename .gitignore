@@ -36,7 +36,9 @@ yarn-error.log
 /connect.lock
 /coverage
 /docs/tmp/
+/.docx_render_*/
 /.docx_render_tmp*/
+/.tmp_render/
 /render-temp/
 /render_temp_docx/
 /render_temp_docx_final/
