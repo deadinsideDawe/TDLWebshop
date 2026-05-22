@@ -36,6 +36,7 @@ yarn-error.log
 /connect.lock
 /coverage
 /docs/tmp/
+/.docx_tmp/
 /.docx_render_*/
 /.docx_render_tmp*/
 /.tmp_render/
@@ -48,6 +49,11 @@ yarn-error.log
 /docs/vazlat_render*/
 /docs/tdlwebshop_szakdolgozat_render/
 ~$*.docx
+/kodreszlet-javaslatok_szakdolgozathoz.docx
+/kodreszlet_kepalairasok_utvonalakkal.docx
+/kodreszlet_kepalairasok_utvonalakkal_frissitett.docx
+/szakdolgozat_megfeleles_ertekeles.docx
+/tools/create_thesis_assessment_doc.py
 /libpeerconnection.log
 testem.log
 /typings

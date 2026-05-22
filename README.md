@@ -159,6 +159,7 @@ functions/
 - Kovetelmenyek: [docs/01_product/kovetelmenyek_traceability.md](docs/01_product/kovetelmenyek_traceability.md)
 - Use case-ek: [docs/01_product/use_cases.md](docs/01_product/use_cases.md)
 - UX kepernyospecifikacio: [docs/ux/ux_screen_spec.md](docs/ux/ux_screen_spec.md)
+- Mellekleti kodreszlet-kepek: [docs/code-snippet-images/README.md](docs/code-snippet-images/README.md)
 - Modulok es interfeszek: [docs/02_architecture/modules_interfaces.md](docs/02_architecture/modules_interfaces.md)
 - Konzulensi visszajelzes szerinti allapot: [docs/konzulensi-visszajelzes-megfeleles.md](docs/konzulensi-visszajelzes-megfeleles.md)
 - Tesztelesi fejezet: [docs/testing-thesis-section.md](docs/testing-thesis-section.md)

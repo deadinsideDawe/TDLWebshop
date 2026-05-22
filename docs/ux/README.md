@@ -8,6 +8,7 @@ Ez a mappa a TDLWebshop felhasznaloi feluletenek es felhasznaloi elmenyenek konz
 |---|---|---|
 | Pageflow / kepernyoterkep | `pageflow.png`, `pageflow.mmd` | kesz |
 | Kepernyokepek | `screenshots/` | publikus desktop kepek elkeszultek, vedett/admin allapotok bejelentkezessel veglegesitendok |
+| Kepernyokep-alairasok es vedesi jegyzetek | `screenshot_captions.md` | kesz |
 | Kepernyo-leiras tablazat | `screens.csv` | kesz |
 | Top 3 user journey | `journeys.md` | kesz |
 | Design rendszer | `design_system.md` | kesz |
