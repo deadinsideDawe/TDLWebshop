@@ -259,6 +259,65 @@ body.theme-light .mega-menu {
   box-shadow: 0 18px 42px rgba(17, 24, 39, 0.24), 0 0 24px rgba(37, 99, 235, 0.12);
 }
 
+:host-context(.theme-light) .topbar {
+  background: rgba(15, 23, 42, 0.88);
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.2);
+}
+
+:host-context(.theme-light) .search-area,
+:host-context(.theme-light) .theme-btn,
+:host-context(.theme-light) .icon-link {
+  background: rgba(17, 24, 39, 0.9);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+:host-context(.theme-light) .theme-btn *,
+:host-context(.theme-light) .icon-link *,
+:host-context(.theme-light) .nav-link,
+:host-context(.theme-light) .category-button,
+:host-context(.theme-light) .user-label {
+  color: #ffffff;
+}
+
+:host-context(.theme-light) .search-btn {
+  background: rgba(31, 41, 55, 0.96);
+  color: #ffffff;
+}
+
+:host-context(.theme-light) .search-input {
+  color: #ffffff;
+}
+
+:host-context(.theme-light) .search-input::placeholder {
+  color: #cbd5e1;
+}
+
+:host-context(.theme-light) .category-button {
+  background: rgba(59, 130, 246, 0.24);
+  border-color: rgba(147, 197, 253, 0.32);
+}
+
+:host-context(.theme-light) .nav-link:hover {
+  color: #bfdbfe;
+}
+
+:host-context(.theme-light) .logout-btn {
+  background: rgba(185, 28, 28, 0.22);
+  color: #fecaca;
+}
+
+:host-context(.theme-light) .cart-badge {
+  color: #ffffff;
+}
+
+:host-context(.theme-light) .mega-menu {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 18px 42px rgba(17, 24, 39, 0.24), 0 0 24px rgba(37, 99, 235, 0.12);
+}
+
 .logout-btn {
   background: rgba(239, 68, 68, 0.12);
   color: var(--accent);
