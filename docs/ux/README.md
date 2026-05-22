@@ -7,7 +7,7 @@ Ez a mappa a TDLWebshop felhasznaloi feluletenek es felhasznaloi elmenyenek konz
 | Kovetelmeny | Fajl / mappa | Allapot |
 |---|---|---|
 | Pageflow / kepernyoterkep | `pageflow.png`, `pageflow.mmd` | kesz |
-| Kepernyokepek | `screenshots/` | publikus es vasarloi desktop kepek elkeszultek, admin/PDF allapotok bejelentkezessel potolandok |
+| Kepernyokepek | `screenshots/` | desktop screenshot keszlet elkeszult, admin es PDF allapotokkal egyutt |
 | Kepernyokep-alairasok es vedesi jegyzetek | `screenshot_captions.md` | kesz |
 | Kepernyo-leiras tablazat | `screens.csv` | kesz |
 | Top 3 user journey | `journeys.md` | kesz |
@@ -33,7 +33,7 @@ A konkret screenshotokat a `screenshots/README.md` listaja alapjan kell elkeszit
 ## PR-be masolhato checklist
 
 - [x] `pageflow.png` + szerkesztheto `pageflow.mmd`
-- [ ] minden fontos kepernyo screenshotja a `screenshots/` mappaban, `S##` fajlnev-konvencioval (publikus/vasarloi kepek keszek, admin/PDF kepek potolandok)
+- [x] minden fontos kepernyo screenshotja a `screenshots/` mappaban, `S##` fajlnev-konvencioval
 - [x] `screens.csv` minden kepernyore kitoltve
 - [x] `journeys.md` top 3 user journey
 - [x] `design_system.md`

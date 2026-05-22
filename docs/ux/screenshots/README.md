@@ -39,32 +39,34 @@ Az automatikus screenshotok ujrageneralasa:
 | S06 | Checkout | `S06_checkout_desktop.png` | kesz |
 | S07 | Checkout validacio | `S07_checkout_validacio_desktop.png` | kesz |
 | S08 | Sikeres rendeles | `S08_sikeres_rendeles_desktop.png` | kesz |
-| S09 | Profil es rendelesek | `S09_profil_rendelesek_desktop.png` | potolando |
+| S09 | Profil es rendelesek | `S09_profil_rendelesek_desktop.png` | kesz |
 | S10 | Kivansaglista | `S10_kivansaglista_desktop.png` | kesz |
-| S11 | Admin attekintes | `S11_admin_attekintes_desktop.png` | potolando |
-| S12 | Admin termekkezeles es CSV import | `S12_admin_termekkezeles_desktop.png` | potolando |
-| S13 | Admin rendelesek | `S13_admin_rendelesek_desktop.png` | potolando |
-| S14 | Helyszini vasarlas | `S14_helyszini_vasarlas_desktop.png` | potolando |
-| S15 | PDF bizonylat | `S15_pdf_bizonylat_desktop.png` | potolando |
+| S11 | Admin attekintes | `S11_admin_attekintes_desktop.png` | kesz |
+| S12 | Admin termekkezeles es CSV import | `S12_admin_termekkezeles_desktop.png` | kesz |
+| S13 | Admin rendelesek | `S13_admin_rendelesek_desktop.png` | kesz |
+| S14 | Helyszini vasarlas | `S14_helyszini_vasarlas_desktop.png` | kesz |
+| S15 | PDF bizonylat | `S15_pdf_bizonylat_desktop.png` | kesz |
 | S16 | AI asszisztens | `S16_ai_asszisztens_desktop.png` | kesz |
 | S17 | Login es regisztracio | `S17_login_regisztracio_desktop.png` | kesz |
-| S18 | Felhasznalok es jogosultsagok | `S18_felhasznalok_jogosultsagok_desktop.png` | potolando |
+| S18 | Felhasznalok es jogosultsagok | `S18_felhasznalok_jogosultsagok_desktop.png` | kesz |
 | S19 | Kapcsolat | `S19_kapcsolat_desktop.png` | kesz |
 
-## Meg potolando kepek
+## Extra admin allapotkepek
 
-Ezekhez admin vagy valodi bejelentkezett allapot kell, ezert ezeket kezzel erdemes potolni:
+Ezek nem kulon kepernyok, hanem a fo admin kepernyok tovabbi bizonyito allapotai:
 
-| Javasolt fajlnev | Kepernyo | Mit mutasson? |
+| Fajlnev | Kepernyo | Mit mutat? |
 |---|---|---|
-| `S09_profil_rendelesek_desktop.png` | Profil / rendelestortenet | Bejelentkezett vasarlo adatai, rendelesei, statuszok |
-| `S11_admin_attekintes_desktop.png` | Admin attekintes | Admin fo statisztikai/nezetvalaszto felulet |
-| `S12_admin_termekkezeles_desktop.png` | Admin termekkezeles es CSV import | Termekurlap, CSV import vagy termeklista |
-| `S13_admin_rendelesek_desktop.png` | Admin rendelesek | Rendeleslista, szuro, statuszkezeles |
-| `S14_helyszini_vasarlas_desktop.png` | Helyszini vasarlas | Mentett vevo, termekvalasztas, tetelek, PDF gomb |
-| `S15_pdf_bizonylat_desktop.png` | PDF bizonylat | Letoltott vagy megnyitott PDF bizonylat |
-| `S18_felhasznalok_jogosultsagok_desktop.png` | Felhasznalok es jogosultsagok | Szerepkorok, letiltas vagy felhasznaloi lista |
-| `journey1.mp4` | Fo vasarloi journey | 30-90 mp: kezdolap -> termek -> kosar -> checkout -> siker |
+| `S11_admin_attekintes__low_stock_desktop.png` | Admin attekintes | Alacsony keszlet figyelmeztetes modal |
+| `S12_admin_termekfelvitel_kepfeltoltes_desktop.png` | Admin termekkezeles | Uj termek urlap es kepfeltoltes |
+| `S12_admin_csv_import_desktop.png` | Admin termekkezeles | CSV csoportos termekimport |
+| `S14_helyszini_vasarlas__success_desktop.png` | Helyszini vasarlas | Sikeres helyszini vasarlas visszajelzes |
+
+## Meg potolando elem
+
+| Javasolt fajlnev | Mit mutasson? |
+|---|---|
+| `journey1.mp4` | 30-90 mp: kezdolap -> termek -> kosar -> checkout -> siker |
 
 ## Opcionalis plusz kepek
 
