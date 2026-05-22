@@ -13,7 +13,7 @@ Ez a mappa a TDLWebshop felhasznaloi feluletenek es felhasznaloi elmenyenek konz
 | Top 3 user journey | `journeys.md` | kesz |
 | Design rendszer | `design_system.md` | kesz |
 | UX onertekeles | `self_assessment.md` | kesz |
-| Screen recording | `journey1.mp4` | erosen ajanlott, kezzel potolando |
+| Screen recording | `journey1.mp4` | kesz |
 | Tervezesi artifactok | `mockups/` | opcionalis |
 | Benchmark / inspiracio | `inspirations/` | opcionalis |
 
@@ -38,5 +38,5 @@ A konkret screenshotokat a `screenshots/README.md` listaja alapjan kell elkeszit
 - [x] `journeys.md` top 3 user journey
 - [x] `design_system.md`
 - [x] `self_assessment.md`
-- [ ] ajanlott: `journey1.mp4` vagy GIF a fo vasarloi folyamatrol
+- [x] ajanlott: `journey1.mp4` vagy GIF a fo vasarloi folyamatrol
 - [x] opcionalis mappak: `mockups/`, `inspirations/`
