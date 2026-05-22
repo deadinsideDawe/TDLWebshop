@@ -29,9 +29,9 @@ Ez a dokumentum a TDLWebshop beadashoz hasznalhato tesztelesi bizonyitekait fogl
 | AI asszisztens | Domainhez kotott valasz, katalogus-alapu ajanlas, nem relevans kerdes elutasitasa | Automata teszt es kezi ellenorzes |
 | Biztonsag | Firestore rules, szerepkorok, tiltott felhasznalo, secret hygiene | Szabalyfajl, dokumentacio, repo ellenorzes |
 
-## 3. Kezi tesztelesi javaslat
+## 3. Kezi tesztelesi bizonyitek
 
-A dolgozat veglegesitese elott erdemes a `docs/manual-site-test-checklist.md` vagy a `docs/final-manual-checklist.md` fajlt vegigpipalni. A kezi tesztelesnel a kovetkezo folyamatokrol keszuljon kepernyokep:
+A dolgozat veglegesitesehez a kitoltott kezi tesztjegyzokonyv az M1 mellekletben szerepel: `docs/testing/manual-test-log.md`. A kezi tesztelesnel a kovetkezo folyamatokrol keszult vagy keszulhet kepernyokep:
 
 - Kezdolap dark mode-ban, kategoriak lenyiloval.
 - Termeklista keresessel es szuresi allapottal.

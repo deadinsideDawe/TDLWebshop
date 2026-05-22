@@ -8,7 +8,6 @@ Ez a mappa a TDLWebshop felhasználói felületének és felhasználói élmény
 |---|---|---|
 | Pageflow / képernyőtérkép | `pageflow.png`, `pageflow.mmd` | kész |
 | Képernyőképek | `screenshots/` | desktop screenshot készlet elkészült, admin és PDF állapotokkal együtt |
-| Képernyőkép-aláírások és védési jegyzetek | `screenshot_captions.md` | kész |
 | Képernyő-leírás táblázat | `screens.csv` | kész |
 | Top 3 user journey | `journeys.md` | kész |
 | Design rendszer | `design_system.md` | kész |

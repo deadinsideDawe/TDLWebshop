@@ -45,8 +45,6 @@ Ez a dokumentációs csomag a TDL Webshop szakdolgozati projekt legfontosabb ter
 - [Teszt riport](04_quality/test_report.md)
 - [Regressziós ellenőrző lista](testing/regression-checklist.md)
 - [M1 kézi tesztjegyzőkönyv](testing/manual-test-log.md)
-- [Manuális oldalteszt checklist](manual-site-test-checklist.md)
-- [Beadás előtti teszt checklist](beadas-elotti-teszt-checklist.md)
 
 ## 05 Security és üzemeltetés
 
