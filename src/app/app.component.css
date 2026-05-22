@@ -165,7 +165,7 @@
 }
 
 body.theme-light .nav-link:first-child {
-  color: var(--primary);
+  color: #ffffff;
 }
 
 .utility-only {
@@ -198,51 +198,51 @@ body.theme-dark .theme-btn {
 }
 
 body.theme-light .topbar {
-  background: rgba(248, 250, 252, 0.92);
-  border-bottom-color: rgba(17, 24, 39, 0.1);
-  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.1);
+  background: rgba(15, 23, 42, 0.82);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.2);
 }
 
 body.theme-light .search-area,
 body.theme-light .theme-btn,
 body.theme-light .icon-link {
-  background: #ffffff;
-  border-color: rgba(17, 24, 39, 0.2);
-  color: #0f172a;
+  background: rgba(17, 24, 39, 0.76);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
 }
 
 body.theme-light .search-btn {
-  background: #111827;
+  background: rgba(31, 41, 55, 0.94);
   color: #ffffff;
 }
 
 body.theme-light .search-input {
-  color: #111827;
+  color: #ffffff;
 }
 
 body.theme-light .search-input::placeholder {
-  color: #6b7280;
+  color: #cbd5e1;
 }
 
 body.theme-light .nav-link,
 body.theme-light .category-button,
 body.theme-light .user-label {
-  color: #0f172a;
+  color: #ffffff;
   text-shadow: none;
 }
 
 body.theme-light .category-button {
-  background: rgba(37, 99, 235, 0.14);
-  border-color: rgba(37, 99, 235, 0.32);
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(96, 165, 250, 0.28);
 }
 
 body.theme-light .nav-link:hover {
-  color: #1d4ed8;
+  color: #93c5fd;
 }
 
 body.theme-light .logout-btn {
   background: rgba(185, 28, 28, 0.1);
-  color: #991b1b;
+  color: #fecaca;
 }
 
 body.theme-light .cart-badge {
@@ -250,13 +250,13 @@ body.theme-light .cart-badge {
 }
 
 body.theme-light .topbar-nav {
-  border-top-color: rgba(17, 24, 39, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 body.theme-light .mega-menu {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(17, 24, 39, 0.1);
-  box-shadow: 0 18px 42px rgba(17, 24, 39, 0.14), 0 0 24px rgba(37, 99, 235, 0.08);
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 42px rgba(17, 24, 39, 0.24), 0 0 24px rgba(37, 99, 235, 0.12);
 }
 
 .logout-btn {
