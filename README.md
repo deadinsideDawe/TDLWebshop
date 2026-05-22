@@ -1,53 +1,53 @@
-# TDL Epuletgepeszeti Webshop
+# TDL Épületgépészeti Webshop
 
-Szakdolgozati projektkent keszult epuletgepeszeti webshop es adminisztracios rendszer. A cel egy olyan termekszeru MVP megvalositasa volt, amelyben a vasarloi rendelesi folyamat es a belso admin/dolgozoi folyamatok egyutt mukodnek.
+Szakdolgozati projektként készült épületgépészeti webshop és adminisztrációs rendszer. A cél egy olyan termékszerű MVP megvalósítása volt, amelyben a vásárlói rendelési folyamat és a belső admin/dolgozói folyamatok együtt működnek.
 
-## Rovid leiras
+## Rövid leírás
 
-A TDLWebshop epuletgepeszeti termekeket kezelo webaruhaz. A vasarlok termekeket bongeszhetnek, kosarba helyezhetik azokat, rendelest adhatnak le, majd profiljukban kovethetik a korabbi rendeleseiket. Az admin es dolgozoi oldal termekkezelest, keszletfigyelest, rendeleskezelest, vasarlokezelest, helyszini ertekesitest, kuponokat es PDF bizonylat/szamla generalast tamogat.
+A TDLWebshop épületgépészeti termékeket kezelő webáruház. A vásárlók termékeket böngészhetnek, kosárba helyezhetik azokat, rendelést adhatnak le, majd profiljukban követhetik a korábbi rendeléseiket. Az admin és dolgozói oldal termékkezelést, készletfigyelést, rendeléskezelést, vásárlókezelést, helyszíni értékesítést, kuponokat és PDF bizonylat/számla generálást támogat.
 
-## Fo funkciok
+## Fő funkciók
 
-- Vasarloi felulet: kezdolap, kategoriak, termeklista, termekadatlap, kosar, checkout.
-- Regisztracio es bejelentkezes Firebase Auth segitsegevel.
-- Profil oldal korabbi rendelesekhez es felhasznaloi adatokhoz.
-- Admin felulet termekekhez, keszlethez, rendelesekhez, vasarlokhoz, kuponokhoz es hirekhez.
-- Dolgozoi jogosultsag: helyszini rendeles, keszlet es termekkezeles korlatozott admin jogokkal.
-- Helyszini vasarlas rogzitese mentett vasarlokkal es PDF bizonylattal.
-- Kuponlogika es akcios termekek kezelese.
-- Keszletfigyeles es alacsony keszlet jelzese.
-- Vasarloi AI asszisztens sajat termekkatalogus-kontextussal, OpenRouter proxyval.
-- Vilagos/sotet mod es reszponziv felulet.
+- Vásárlói felület: kezdőlap, kategóriák, terméklista, termékadatlap, kosár, checkout.
+- Regisztráció és bejelentkezés Firebase Auth segítségével.
+- Profil oldal korábbi rendelésekhez és felhasználói adatokhoz.
+- Admin felület termékekhez, készlethez, rendelésekhez, vásárlókhoz, kuponokhoz és hírekhez.
+- Dolgozói jogosultság: helyszíni rendelés, készlet és termékkezelés korlátozott admin jogokkal.
+- Helyszíni vásárlás rögzítése mentett vásárlókkal és PDF bizonylattal.
+- Kuponlogika és akciós termékek kezelése.
+- Készletfigyelés és alacsony készlet jelzése.
+- Vásárlói AI asszisztens saját termékkatalógus-kontextussal, OpenRouter proxyval.
+- Világos/sötét mód és reszponzív felület.
 
-## Technologiai stack
+## Technológiai stack
 
 - Frontend: Angular standalone komponensek, TypeScript, HTML, CSS.
-- Adattarolas es auth: Firebase Auth, Firestore, Firebase Hosting.
-- PDF generalas: kliensoldali bizonylat/szamla generalas.
+- Adattárolás és auth: Firebase Auth, Firestore, Firebase Hosting.
+- PDF generálás: kliensoldali bizonylat/számla generálás.
 - AI proxy: Cloudflare Worker + OpenRouter.
-- CI: GitHub Actions build ellenorzes.
+- CI: GitHub Actions build ellenőrzés.
 
-## Lokalis futtatas
+## Lokális futtatás
 
-### Elofeltetelek
+### Előfeltételek
 
 - Node.js: javasolt `20.x` vagy `22.x` LTS.
 - npm.
-- Firebase projekt, ha sajat adatbazissal szeretned futtatni.
+- Firebase projekt, ha saját adatbázissal szeretnéd futtatni.
 
-### Telepites
+### Telepítés
 
 ```bash
 npm install
 ```
 
-### Fejlesztoi inditas
+### Fejlesztői indítás
 
 ```bash
 npm start
 ```
 
-Alapertelmezett cim:
+Alapértelmezett cím:
 
 ```text
 http://localhost:4200
@@ -73,49 +73,49 @@ Hosting deploy:
 firebase deploy --only hosting
 ```
 
-Firestore szabalyok deploy:
+Firestore szabályok deploy:
 
 ```bash
 firebase deploy --only firestore:rules
 ```
 
-Az alap projekt Firebase Spark kompatibilis mukodesre keszult. A `functions/` mappa opcion is tovabbfejlesztesi irany, de a fo deploy folyamat nem igenyel Cloud Functions hasznalatot.
+Az alap projekt Firebase Spark kompatibilis működésre készült. A `functions/` mappa opcionálisan továbbfejlesztési irány, de a fő deploy folyamat nem igényel Cloud Functions használatot.
 
-## AI asszisztens es OpenRouter proxy
+## AI asszisztens és OpenRouter proxy
 
-Az AI asszisztens nem tarol OpenRouter API kulcsot a frontend kodban. A bongeszo egy Cloudflare Worker proxyt hiv, a Worker pedig szerveroldali secretkent eri el az OpenRouter kulcsot.
+Az AI asszisztens nem tárol OpenRouter API kulcsot a frontend kódban. A böngésző egy Cloudflare Worker proxyt hív, a Worker pedig szerveroldali secretként éri el az OpenRouter kulcsot.
 
 Fontos:
 
-- OpenRouter API kulcsot tilos Angular kornyezeti fajlba vagy frontend kodba irni.
-- A kulcsot Cloudflare Worker secretkent kell beallitani.
+- OpenRouter API kulcsot tilos Angular környezeti fájlba vagy frontend kódba írni.
+- A kulcsot Cloudflare Worker secretként kell beállítani.
 - A frontendben csak a Worker publikus URL-je szerepelhet.
-- A modellvalasztas nem allithato a vasarloi feluleten.
+- A modellválasztás nem állítható a vásárlói felületen.
 
-Reszletes leiras:
+Részletes leírás:
 
 - [docs/ai-asszisztens-openrouter.md](docs/ai-asszisztens-openrouter.md)
 - [workers/openrouter-proxy/README.md](workers/openrouter-proxy/README.md)
 
-## Kornyezeti valtozok es titkok
+## Környezeti változók és titkok
 
-A repoban nem szerepelhet valodi jelszo, token vagy privat API kulcs. A szukseges mintak az `.env.example` fajlban talalhatok.
+A repóban nem szerepelhet valódi jelszó, token vagy privát API kulcs. A szükséges minták az `.env.example` fájlban találhatók.
 
-Megjegyzesek:
+Megjegyzések:
 
-- A Firebase web app config onmagaban nem klasszikus titok, de a Firestore szabalyoknak vedeniuk kell az adatokat.
-- Demo belepesi adatokat nem erdemes a repoba commitolni.
-- Valodi `.env` fajl, API kulcs, token, `node_modules`, build mappa es lokalis cache nem kerulhet a vegleges repoba.
+- A Firebase web app config önmagában nem klasszikus titok, de a Firestore szabályoknak védeniük kell az adatokat.
+- Demo belépési adatokat nem érdemes a repóba commitolni.
+- Valódi `.env` fájl, API kulcs, token, `node_modules`, build mappa és lokális cache nem kerülhet a végleges repóba.
 
-## Demo szerepkorok
+## Demo szerepkörök
 
-A demo belepesi adatok nem szerepelnek a kodban. A beadashoz es bemutatohoz kulon, privat csatornan erdemes megadni:
+A demo belépési adatok nem szerepelnek a kódban. A beadáshoz és bemutatóhoz külön, privát csatornán érdemes megadni:
 
-- admin felhasznalo,
-- dolgozoi felhasznalo,
-- vasarloi felhasznalo.
+- admin felhasználó,
+- dolgozói felhasználó,
+- vásárlói felhasználó.
 
-## Projektstruktura
+## Projektstruktúra
 
 ```text
 src/
@@ -149,24 +149,24 @@ scripts/
 functions/
 ```
 
-## Dokumentacio
+## Dokumentáció
 
-- Dokumentacios index: [docs/00_index.md](docs/00_index.md)
-- Javitott szakdolgozati alap: [docs/TDLWebshop_szakdolgozat_javitott_alap.docx](docs/TDLWebshop_szakdolgozat_javitott_alap.docx)
-- Leadando checklist: [docs/leadando_checklist.md](docs/leadando_checklist.md)
+- Dokumentációs index: [docs/00_index.md](docs/00_index.md)
+- Javított szakdolgozati alap: [docs/TDLWebshop_szakdolgozat_javitott_alap.docx](docs/TDLWebshop_szakdolgozat_javitott_alap.docx)
+- Leadandó checklist: [docs/leadando_checklist.md](docs/leadando_checklist.md)
 - MVP brief: [docs/01_product/mvp_brief.md](docs/01_product/mvp_brief.md)
-- Piaci elemzes: [docs/01_product/piaci_elemzes.md](docs/01_product/piaci_elemzes.md)
-- Kovetelmenyek: [docs/01_product/kovetelmenyek_traceability.md](docs/01_product/kovetelmenyek_traceability.md)
+- Piaci elemzés: [docs/01_product/piaci_elemzes.md](docs/01_product/piaci_elemzes.md)
+- Követelmények: [docs/01_product/kovetelmenyek_traceability.md](docs/01_product/kovetelmenyek_traceability.md)
 - Use case-ek: [docs/01_product/use_cases.md](docs/01_product/use_cases.md)
-- UX kepernyospecifikacio: [docs/ux/ux_screen_spec.md](docs/ux/ux_screen_spec.md)
-- Mellekleti kodreszlet-kepek: [docs/code-snippet-images/README.md](docs/code-snippet-images/README.md)
-- Modulok es interfeszek: [docs/02_architecture/modules_interfaces.md](docs/02_architecture/modules_interfaces.md)
-- Konzulensi visszajelzes szerinti allapot: [docs/konzulensi-visszajelzes-megfeleles.md](docs/konzulensi-visszajelzes-megfeleles.md)
-- Tesztelesi fejezet: [docs/testing-thesis-section.md](docs/testing-thesis-section.md)
-- Reprodukcios README: [docs/reprodukcios_README.md](docs/reprodukcios_README.md)
-- AI hasznalat: [docs/07_ai/ai-usage-thesis-section.md](docs/07_ai/ai-usage-thesis-section.md)
+- UX képernyőspecifikáció: [docs/ux/ux_screen_spec.md](docs/ux/ux_screen_spec.md)
+- Mellékleti kódrészlet-képek: [docs/code-snippet-images/README.md](docs/code-snippet-images/README.md)
+- Modulok és interfészek: [docs/02_architecture/modules_interfaces.md](docs/02_architecture/modules_interfaces.md)
+- Konzulensi visszajelzés szerinti állapot: [docs/konzulensi-visszajelzes-megfeleles.md](docs/konzulensi-visszajelzes-megfeleles.md)
+- Tesztelési fejezet: [docs/testing-thesis-section.md](docs/testing-thesis-section.md)
+- Reprodukciós README: [docs/reprodukcios_README.md](docs/reprodukcios_README.md)
+- AI használat: [docs/07_ai/ai-usage-thesis-section.md](docs/07_ai/ai-usage-thesis-section.md)
 
-## Elo verzio
+## Élő verzió
 
 Firebase Hosting:
 
