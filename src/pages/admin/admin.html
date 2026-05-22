@@ -39,8 +39,30 @@
         <option *ngFor="let category of productCategoryOptions" [value]="category">{{ category }}</option>
       </select>
 
-      <label>Kép URL</label>
-      <input [(ngModel)]="productImage" placeholder="https://...">
+      <label>Termékkép feltöltése</label>
+      <div class="product-image-upload">
+        <label class="upload-dropzone" for="productImageFile">
+          <input
+            id="productImageFile"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            (change)="onProductImageSelected($event)"
+          >
+          <span>{{ productImageFileName || 'Kép kiválasztása vagy fotó készítése' }}</span>
+          <small>JPG, PNG, WebP vagy GIF, maximum 5 MB.</small>
+        </label>
+
+        <div class="product-image-preview" *ngIf="productImagePreview || productImage">
+          <img [src]="productImagePreview || productImage" [alt]="productName || 'Termékkép előnézet'">
+          <button class="btn cancel-btn" type="button" *ngIf="productImageFile" (click)="clearSelectedProductImage()">
+            Kiválasztott kép törlése
+          </button>
+        </div>
+      </div>
+
+      <label>Kép URL (opcionális, ha nem töltesz fel fájlt)</label>
+      <input [(ngModel)]="productImage" placeholder="https://... vagy products/termek.jpg">
 
       <label>Márka</label>
       <input [(ngModel)]="productBrand" placeholder="pl. FlowTech">

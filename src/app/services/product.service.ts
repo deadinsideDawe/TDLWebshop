@@ -13,7 +13,8 @@ import {
   updateDoc,
   writeBatch
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { db, storage } from '../firebase';
 import { Product } from '../models/product.model';
 
 @Injectable({
@@ -37,6 +38,24 @@ export class ProductService {
     const productRef = doc(db, 'products', productId);
     const normalizedProduct = this.normalizeProductPayload(product);
     return updateDoc(productRef, normalizedProduct);
+  }
+
+  async uploadProductImage(file: File, productKey: string): Promise<string> {
+    const safeKey = this.slugify(productKey || 'termek');
+    const extension = this.getFileExtension(file.name, file.type);
+    const uniqueId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const imageRef = ref(storage, `product-images/${safeKey}/${uniqueId}.${extension}`);
+
+    await uploadBytes(imageRef, file, {
+      contentType: file.type || `image/${extension}`,
+      customMetadata: {
+        productKey: safeKey
+      }
+    });
+
+    return getDownloadURL(imageRef);
   }
 
   deleteProduct(productId: string) {
@@ -360,5 +379,37 @@ export class ProductService {
     }
 
     return replacement;
+  }
+
+  private slugify(value: string): string {
+    const slug = value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return slug || 'termek';
+  }
+
+  private getFileExtension(fileName: string, contentType: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    if (extension && ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(extension)) {
+      return extension === 'jpeg' ? 'jpg' : extension;
+    }
+
+    if (contentType.includes('png')) {
+      return 'png';
+    }
+
+    if (contentType.includes('webp')) {
+      return 'webp';
+    }
+
+    if (contentType.includes('gif')) {
+      return 'gif';
+    }
+
+    return 'jpg';
   }
 }

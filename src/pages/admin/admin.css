@@ -67,6 +67,54 @@
   color: var(--text);
 }
 
+.product-image-upload {
+  display: grid;
+  gap: 12px;
+}
+
+.upload-dropzone {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 60%, var(--border));
+  border-radius: 10px;
+  background: var(--background-soft);
+  cursor: pointer;
+}
+
+.upload-dropzone input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upload-dropzone span {
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.upload-dropzone small {
+  color: var(--muted);
+}
+
+.product-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.product-image-preview img {
+  width: 128px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--background-soft);
+}
+
 .auth-note,
 .info-text,
 .success-box,

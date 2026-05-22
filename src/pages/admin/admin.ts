@@ -132,6 +132,9 @@ export class Admin implements OnInit, OnDestroy {
     'Lakossági megoldások'
   ];
   productImage = '';
+  productImageFile: File | null = null;
+  productImagePreview = '';
+  productImageFileName = '';
   productStock = 'Keszleten';
   productBrand = '';
   productSku = '';
@@ -791,7 +794,7 @@ export class Admin implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.productName || !this.productPrice || !this.productCategory || !this.productImage || this.productStockQuantity === null) {
+    if (!this.productName || !this.productPrice || !this.productCategory || (!this.productImage && !this.productImageFile) || this.productStockQuantity === null) {
       this.errorMessage = 'Minden mező kitöltése kötelező.';
       return;
     }
@@ -813,11 +816,13 @@ export class Admin implements OnInit, OnDestroy {
     this.loading = true;
 
     try {
+      const imageUrl = await this.resolveProductImageUrl();
+
       const payload = {
         name: this.productName,
         price: this.productPrice,
         category: this.productCategory,
-        image: this.productImage,
+        image: imageUrl,
         stock: this.productStock,
         stockQuantity: this.productStockQuantity,
         brand: this.productBrand,
@@ -829,7 +834,7 @@ export class Admin implements OnInit, OnDestroy {
         salePercent: normalizedSalePercent ?? 0,
         saleStartsAt: saleStartsAt ?? 0,
         saleEndsAt: saleEndsAt ?? 0,
-        images: [this.productImage]
+        images: [imageUrl]
       };
 
       if (this.editingProductId) {
@@ -853,6 +858,100 @@ export class Admin implements OnInit, OnDestroy {
     } finally {
       this.loading = false;
     }
+  }
+
+  onProductImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      this.errorMessage = 'Csak képfájlt lehet feltölteni.';
+      input.value = '';
+      return;
+    }
+
+    const maxSizeInBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+      this.errorMessage = 'A kép legfeljebb 5 MB lehet.';
+      input.value = '';
+      return;
+    }
+
+    this.clearProductImagePreview();
+    this.productImageFile = file;
+    this.productImageFileName = file.name;
+    this.productImagePreview = URL.createObjectURL(file);
+    this.errorMessage = '';
+  }
+
+  clearSelectedProductImage(): void {
+    this.productImageFile = null;
+    this.productImageFileName = '';
+    this.clearProductImagePreview();
+  }
+
+  private async resolveProductImageUrl(): Promise<string> {
+    if (!this.productImageFile) {
+      return this.productImage;
+    }
+
+    try {
+      return await this.productService.uploadProductImage(
+        this.productImageFile,
+        this.productSku || this.productName
+      );
+    } catch (error) {
+      this.monitoringService.capture('admin-product-image-storage-upload', error, {
+        fileName: this.productImageFile.name,
+        fileSize: this.productImageFile.size
+      });
+
+      return this.createCompressedProductImageDataUrl(this.productImageFile);
+    }
+  }
+
+  private createCompressedProductImageDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onerror = () => reject(new Error('image-read-failed'));
+      reader.onload = () => {
+        const image = new Image();
+
+        image.onerror = () => reject(new Error('image-load-failed'));
+        image.onload = () => {
+          const maxSize = 1200;
+          const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+
+          const context = canvas.getContext('2d');
+          if (!context) {
+            reject(new Error('image-canvas-unavailable'));
+            return;
+          }
+
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+          if (dataUrl.length > 900000) {
+            reject(new Error('compressed-image-too-large'));
+            return;
+          }
+
+          resolve(dataUrl);
+        };
+
+        image.src = String(reader.result || '');
+      };
+
+      reader.readAsDataURL(file);
+    });
   }
 
   async saveNews(): Promise<void> {
@@ -2734,6 +2833,8 @@ export class Admin implements OnInit, OnDestroy {
     this.productPrice = Number(product.price) || null;
     this.productCategory = this.normalizeProductCategoryForForm(product.category);
     this.productImage = product.image;
+    this.clearSelectedProductImage();
+    this.productImagePreview = product.image || '';
     this.productStock = product.stock || 'Keszleten';
     this.productStockQuantity = Number(product.stockQuantity) || 0;
     this.productBrand = product.brand || '';
@@ -3252,6 +3353,9 @@ export class Admin implements OnInit, OnDestroy {
     this.productPrice = null;
     this.productCategory = '';
     this.productImage = '';
+    this.productImageFile = null;
+    this.productImageFileName = '';
+    this.clearProductImagePreview();
     this.productStock = 'Keszleten';
     this.productBrand = '';
     this.productSku = '';
@@ -3263,6 +3367,14 @@ export class Admin implements OnInit, OnDestroy {
     this.productSalePercent = null;
     this.productSaleStartsAt = '';
     this.productSaleEndsAt = '';
+  }
+
+  private clearProductImagePreview(): void {
+    if (this.productImagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(this.productImagePreview);
+    }
+
+    this.productImagePreview = '';
   }
 
   private normalizeProductCategoryForForm(category: string): string {
