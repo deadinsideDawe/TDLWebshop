@@ -21,4 +21,4 @@ Elsokent az admin felulet mobilos megjeleneset es az akadalymentesseget erositen
 
 ## Mi nem valosult meg teljesen?
 
-A teljes design rendszer meg nem kulon token-fajlban el, hanem a komponensek es stiluslapok szintjen van megvalositva. A screen recording es a teljes screenshot csomag kezi lepeskent keszitendo el a vegso beadashoz.
+A teljes design rendszer meg nem kulon token-fajlban el, hanem a komponensek es stiluslapok szintjen van megvalositva. A screen recording es a teljes screenshot csomag elkeszult, igy a UX dokumentacio a vegso beadashoz ellenorizheto allapotban van.

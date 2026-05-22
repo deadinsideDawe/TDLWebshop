@@ -62,11 +62,11 @@ Ezek nem kulon kepernyok, hanem a fo admin kepernyok tovabbi bizonyito allapotai
 | `S12_admin_csv_import_desktop.png` | Admin termekkezeles | CSV csoportos termekimport |
 | `S14_helyszini_vasarlas__success_desktop.png` | Helyszini vasarlas | Sikeres helyszini vasarlas visszajelzes |
 
-## Meg potolando elem
+## Screen recording
 
-| Javasolt fajlnev | Mit mutasson? |
+| Fajlnev | Mit mutat? |
 |---|---|
-| `journey1.mp4` | 30-90 mp: kezdolap -> termek -> kosar -> checkout -> siker |
+| `journey1.mp4` | A fo vasarloi folyamatot: kezdolap -> termek -> kosar -> checkout -> siker |
 
 ## Opcionalis plusz kepek
 
@@ -83,9 +83,9 @@ Ezek nem kulon kepernyok, hanem a fo admin kepernyok tovabbi bizonyito allapotai
 - `S09_profil_rendelesek_mobile.png`
 - `S14_helyszini_vasarlas_mobile.png`
 
-## Screen recording javaslat
+## Screen recording tartalma
 
-Az ajanlott `journey1.mp4` 30-90 masodpercben mutassa meg:
+Az ajanlott `journey1.mp4` a fo vasarloi folyamatot mutatja meg:
 
 1. Kezdolap megnyitasa.
 2. Termeklista megnyitasa kategoriabol vagy keresesbol.
