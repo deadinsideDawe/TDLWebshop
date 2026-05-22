@@ -242,6 +242,12 @@ export class OrderService {
     this.assertValidLocalSaleOrder(cleanOrder);
 
     const orderId = await runTransaction(db, async transaction => {
+      const stockUpdates: Array<{
+        ref: ReturnType<typeof doc>;
+        nextQty: number;
+        nextStock: string;
+      }> = [];
+
       for (const item of cleanOrder.items) {
         if (!item.firestoreId) {
           throw new Error(`missing-product-id:${item.name}`);
@@ -265,9 +271,17 @@ export class OrderService {
         const previousStock = data.stock || 'Keszleten';
         const nextStock = this.resolveStockLabel(nextQty, previousStock);
 
-        transaction.update(productRef, {
-          stockQuantity: nextQty,
-          stock: nextStock
+        stockUpdates.push({
+          ref: productRef,
+          nextQty,
+          nextStock
+        });
+      }
+
+      for (const update of stockUpdates) {
+        transaction.update(update.ref, {
+          stockQuantity: update.nextQty,
+          stock: update.nextStock
         });
       }
 
