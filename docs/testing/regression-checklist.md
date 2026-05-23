@@ -1,96 +1,96 @@
-# TDL Webshop - regresszios ellenorzolista
+# TDL Webshop – regressziós ellenőrzőlista
 
-Ez a lista a szakdolgozati bemutato elotti gyors, kezi ellenorzeshez keszult. A cel az, hogy a fontosabb vasarloi, admin es Spark-kompatibilis folyamatok vegig legyenek kattintva.
+Ez a lista a szakdolgozati bemutató előtti gyors, kézi ellenőrzéshez készült. A cél az, hogy a fontosabb vásárlói, admin és Spark-kompatibilis folyamatok végig legyenek kattintva.
 
-## 1. Nyito oldal es navigacio
-- [ ] A fooldal betolt, a hero blokk es a kategoriak latszanak.
-- [ ] A felso kereso mukodik.
-- [ ] A kategoria gombok a megfelelo termeklistara visznek.
-- [ ] A light/dark mod valtas mukodik.
-- [ ] Mobil nezetben nincs kilogo vagy egymasra csuszo szoveg.
+## 1. Nyitó oldal és navigáció
+- [ ] A főoldal betölt, a hero blokk és a kategóriák látszanak.
+- [ ] A felső kereső működik.
+- [ ] A kategória gombok a megfelelő terméklistára visznek.
+- [ ] A light/dark mód váltás működik.
+- [ ] Mobil nézetben nincs kilógó vagy egymásra csúszó szöveg.
 
-## 2. Termeklista es termekreszletek
-- [ ] A `/products` oldal betolt termekeket.
-- [ ] Kategoria szures legalabb ket kategoriaval mukodik.
-- [ ] Ar es keszlet szures mukodik.
-- [ ] Termekreszletek oldal megnyilik.
-- [ ] Keszleten levo termek kosarba teheto.
-- [ ] Nincs keszleten termeknel a kosar gomb tiltott.
+## 2. Terméklista és termékrészletek
+- [ ] A `/products` oldal betölt termékeket.
+- [ ] Kategória szűrés legalább két kategóriával működik.
+- [ ] Ár és készlet szűrés működik.
+- [ ] Termékrészletek oldal megnyílik.
+- [ ] Készleten lévő termék kosárba tehető.
+- [ ] Nincs készleten terméknél a kosár gomb tiltott.
 
-## 3. Szereloi/profi csomagajanlo
-- [ ] A szereloi/profi mod megjelenik a termeklistan.
-- [ ] Futes, viz, szellozes es hutes/klima csomag valaszthato.
-- [ ] A csomag tetelei termekekhez kapcsolodnak.
-- [ ] Hianyzo csomagelem eseten a felulet jelzi a hianyt.
-- [ ] `Teljes csomag kosarba` gomb a megfelelo mennyisegekkel adja hozza a tetelekeket.
+## 3. Szerelői/profi csomagajánló
+- [ ] A szerelői/profi mód megjelenik a terméklistán.
+- [ ] Fűtés, víz, szellőzés és hűtés/klíma csomag választható.
+- [ ] A csomag tételei termékekhez kapcsolódnak.
+- [ ] Hiányzó csomagelem esetén a felület jelzi a hiányt.
+- [ ] `Teljes csomag kosárba` gomb a megfelelő mennyiségekkel adja hozzá a tételeket.
 
-## 4. Kosar es checkout
-- [ ] Kosarba rakt termek megjelenik a kosar oldalon.
-- [ ] Mennyiseg modositas es tetel torles mukodik.
-- [ ] Checkout oldalon kotelezo mezok validacioja mukodik.
-- [ ] Iranyitoszam alapjan a varos automatikusan kitoltheto.
-- [ ] Szemelyes atvetel valaszthato, idopont megadhato.
-- [ ] Ceges/szereloi vasarlas adoszammal mentheto.
-- [ ] Ervenyes es ervenytelen kuponkod kezelese mukodik.
+## 4. Kosár és checkout
+- [ ] Kosárba rakott termék megjelenik a kosár oldalon.
+- [ ] Mennyiség módosítás és tétel törlés működik.
+- [ ] Checkout oldalon kötelező mezők validációja működik.
+- [ ] Irányítószám alapján a város automatikusan kitölthető.
+- [ ] Személyes átvétel választható, időpont megadható.
+- [ ] Céges/szerelői vásárlás adószámmal menthető.
+- [ ] Érvényes és érvénytelen kuponkód kezelése működik.
 
-## 5. Rendeles leadasa
-- [ ] Rendeles mentodik Firestore `orders` kollekcioba.
-- [ ] Sikeres rendeles utan a kosar kiurul.
-- [ ] Sikeres rendeles oldalon megjelenik az osszegzes.
-- [ ] Email sablon megnyithato Spark csomagon, Functions nelkul.
-- [ ] Bejelentkezett usernel a rendeles a profil oldalon megjelenik.
+## 5. Rendelés leadása
+- [ ] Rendelés mentődik Firestore `orders` kollekcióba.
+- [ ] Sikeres rendelés után a kosár kiürül.
+- [ ] Sikeres rendelés oldalon megjelenik az összegzés.
+- [ ] Email sablon megnyitható Spark csomagon, Functions nélkül.
+- [ ] Bejelentkezett usernél a rendelés a profil oldalon megjelenik.
 
-## 6. Admin hozzaferes
-- [ ] Nem admin user nem eri el az admin oldalt.
-- [ ] Admin userrel az admin attekintes betolt.
-- [ ] Vezetoi riport mutat osszes bevetelt, havi bevetelt es atlagos kosarerteket.
-- [ ] Top termek lista teljesitett rendelesekbol szamol.
-- [ ] Role alapu admin user is bejut, nem csak hardcoded email.
-- [ ] Tiltott felhasznalo nem tud vedett adatot kezelni.
+## 6. Admin hozzáférés
+- [ ] Nem admin user nem éri el az admin oldalt.
+- [ ] Admin userrel az admin áttekintés betölt.
+- [ ] Vezetői riport mutat összes bevételt, havi bevételt és átlagos kosárértéket.
+- [ ] Top termék lista teljesített rendelésekből számol.
+- [ ] Role alapú admin user is bejut, nem csak hardcoded email.
+- [ ] Tiltott felhasználó nem tud védett adatot kezelni.
 
-## 7. Admin termekkezeles
-- [ ] Uj termek rogzitese mukodik.
-- [ ] Kategoria legordulo listabol valaszthato.
-- [ ] Termek szerkesztese mukodik.
-- [ ] CSV minta letoltheto.
-- [ ] CSV import elonezetet es hibakat mutat.
-- [ ] SKU alapu frissites/import mod mukodik.
+## 7. Admin termékkezelés
+- [ ] Új termék rögzítése működik.
+- [ ] Kategória legördülő listából választható.
+- [ ] Termék szerkesztése működik.
+- [ ] CSV minta letölthető.
+- [ ] CSV import előnézetet és hibákat mutat.
+- [ ] SKU alapú frissítés/import mód működik.
 
-## 8. Keszletkezeles
-- [ ] Keszlet nezetben szabad es foglalt keszlet latszik.
-- [ ] Kategoria szerinti keszletszures mukodik.
-- [ ] Alacsony keszlet jelzes megjelenik.
-- [ ] Okos keszletfigyeles utanrendelesi javaslatot ad.
-- [ ] Utanrendelesi CSV export letoltheto.
-- [ ] Webes oldalon a friss keszlet latszik.
+## 8. Készletkezelés
+- [ ] Készlet nézetben szabad és foglalt készlet látszik.
+- [ ] Kategória szerinti készletszűrés működik.
+- [ ] Alacsony készlet jelzés megjelenik.
+- [ ] Okos készletfigyelés utánrendelési javaslatot ad.
+- [ ] Utánrendelési CSV export letölthető.
+- [ ] Webes oldalon a friss készlet látszik.
 
-## 9. Rendeleskezeles es helyszini vasarlas
-- [ ] Rendelestipus szerinti tabok mukodnek: aktiv, teljesitett, helyszini.
-- [ ] Rendeles statusz modositas mukodik.
-- [ ] Statuszvaltas utan audit es keszlet konzisztens.
-- [ ] Rendeles reszletei modal megnyilik.
-- [ ] Admin rendeleskartyan `Szamla letoltese` mukodik.
-- [ ] Admin rendeleskartyan `Email sablon` mukodik.
-- [ ] Helyszini vasarlasnal mentett vasarlo/ceg profil kivalaszthato.
-- [ ] Helyszini tetel hozzaadas mennyiseg ellenorzessel mukodik.
-- [ ] Helyszini vasarlas mentese utan keszlet csokken.
+## 9. Rendeléskezelés és helyszíni vásárlás
+- [ ] Rendeléstípus szerinti tabok működnek: aktív, teljesített, helyszíni.
+- [ ] Rendelés státusz módosítás működik.
+- [ ] Státuszváltás után audit és készlet konzisztens.
+- [ ] Rendelés részletei modal megnyílik.
+- [ ] Admin rendeléskártyán `Számla letöltése` működik.
+- [ ] Admin rendeléskártyán `Email sablon` működik.
+- [ ] Helyszíni vásárlásnál mentett vásárló/cég profil kiválasztható.
+- [ ] Helyszíni tétel hozzáadás mennyiség ellenőrzéssel működik.
+- [ ] Helyszíni vásárlás mentése után készlet csökken.
 
-## 10. Szamla/PDF
-- [ ] Szamlaszam generalodik `INV-YYYY-XXXX` formatumban.
-- [ ] Ujra letoltesnel ugyanaz a szamlaszam marad.
-- [ ] PDF-ben latszik a vevo, rendeles, tetelek es osszesito.
-- [ ] Bemutaton elhangzik: ez demo/PDF bizonylat, eles NAV-kompatibilis integracio tovabbfejlesztes.
+## 10. Számla/PDF
+- [ ] Számlaszám generálódik `INV-YYYY-XXXX` formátumban.
+- [ ] Újra letöltésnél ugyanaz a számlaszám marad.
+- [ ] PDF-ben látszik a vevő, rendelés, tételek és összesítő.
+- [ ] Bemutatón elhangzik: ez demó/PDF bizonylat, éles NAV-kompatibilis integráció továbbfejlesztés.
 
-## 11. Firestore es Spark deploy
+## 11. Firestore és Spark deploy
 - [ ] `npm run build` sikeres.
 - [ ] `npm test -- --watch=false` sikeres.
 - [ ] `npm run deploy:spark` csak build + hosting deployt futtat.
-- [ ] Firestore szabaly modositasakor `npm run deploy:rules` kulon futtathato.
-- [ ] Functions deploy nincs bekotve az alap projektbe.
-- [ ] Hosting URL mukodik: https://tdlwebshop.web.app
+- [ ] Firestore szabály módosításakor `npm run deploy:rules` külön futtatható.
+- [ ] Functions deploy nincs bekötve az alap projektbe.
+- [ ] Hosting URL működik: https://tdlwebshop.web.app
 
-## Eredmeny osszegzes
-- Teszt datum:
-- Tesztelo:
-- Talalt hibak:
-- Javitas utan ujratesztelve: Igen / Nem
+## Eredmény összegzés
+- Teszt dátum:
+- Tesztelő:
+- Talált hibák:
+- Javítás után újratesztelve: Igen / Nem

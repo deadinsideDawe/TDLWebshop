@@ -71,7 +71,7 @@ Megjegyzés: a tesztelés célja nem teljes körű hibamentességi bizonyítás 
 |---|---|---|
 | Hibás e-mail cím checkoutnál | Rendelés nem adható le, validációs hiba jelenik meg | Megfelelt |
 | Hibás telefonszám checkoutnál | Rendelés nem adható le, a telefonszám hibája látszik | Megfelelt |
-| Kötelező mezők üresen | A mentés/leadas tiltott vagy hibaüzenetet ad | Megfelelt |
+| Kötelező mezők üresen | A mentés/leadás tiltott vagy hibaüzenetet ad | Megfelelt |
 | Nem admin felhasználó admin útvonalon | Nincs jogosultság a védett műveletekhez | Megfelelt |
 | Hibás/hiányos CSV adat | A rendszer nem menti sikeresként a hibás sort | Megfelelt |
 | Irreleváns AI-kérdés | Az asszisztens nem ad általános, webshopon kívüli választ | Megfelelt |
